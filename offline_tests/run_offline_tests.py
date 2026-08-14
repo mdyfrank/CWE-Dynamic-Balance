@@ -655,8 +655,12 @@ def T18_no_secret_in_the_package():
             (_re.compile(r"(?i)(api[-_]?key|password|secret|token)\s*[:=]\s*[\"'][^\"'{$<]{16,}"),
              "assigned credential")]
     hits = []
+    # `.git` is skipped: its packfiles are compressed blobs of the same files scanned below, and a
+    # chance byte sequence inside one would fail this test without meaning anything. What is in the
+    # objects is exactly what is in the working tree, and the working tree is what gets scanned.
+    skip = {"results", ".git", "__pycache__"}
     for p in sorted(PKG.rglob("*")):
-        if not p.is_file() or "results" in p.parts or p.suffix in (".gz", ".tar"):
+        if not p.is_file() or skip & set(p.parts) or p.suffix in (".gz", ".tar", ".pack", ".idx"):
             continue
         try:
             txt = p.read_text(encoding="utf-8")
