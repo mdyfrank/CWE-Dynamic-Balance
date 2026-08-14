@@ -1,0 +1,1111 @@
+{
+ "purpose": "Numerical verification of the propositions in theory/HIDDEN_ACTION_THEORY.md.",
+ "generated": "2026-08-15T01:14:46",
+ "spec": {
+  "m": 4,
+  "alpha": 3.0,
+  "beta": 1.5,
+  "gamma": 1.0,
+  "Q0": 1.0,
+  "eta_r": 0.2,
+  "cs": 0.6,
+  "N_obs": 40,
+  "Nf": 21,
+  "R": 31,
+  "omega": 0.5,
+  "lam": 1.0,
+  "w0": 1.0,
+  "margin_frac": 0.5,
+  "phi_refund": 0.5,
+  "N_audit": 5,
+  "psi0": 0.02,
+  "psi1": 0.25,
+  "erosion": "exp",
+  "appeal": "linear",
+  "b_grid": [
+   0.01,
+   0.019999999999999997,
+   0.03,
+   0.039999999999999994,
+   0.049999999999999996,
+   0.05999999999999999,
+   0.06999999999999999,
+   0.07999999999999999,
+   0.08999999999999998,
+   0.09999999999999998,
+   0.10999999999999997,
+   0.11999999999999998,
+   0.12999999999999998,
+   0.13999999999999999,
+   0.15
+  ],
+  "policies": {
+   "P_GMV": [
+    0.5,
+    0.2
+   ],
+   "P_robust": [
+    4.0,
+    0.3
+   ]
+  },
+  "policy_class_size": 64
+ },
+ "seeds_used": {
+  "existence": [
+   70000,
+   70059
+  ],
+  "per_profile_sweeps": [
+   70000,
+   70019
+  ]
+ },
+ "n_checks": 12,
+ "n_pass": 12,
+ "n_fail": 0,
+ "checks": [
+  {
+   "check": "P1_existence",
+   "statement": "Every (seed, policy) pair in the frozen design has at least one pure-strategy Nash equilibrium of the restricted stationary hidden-action game.",
+   "verdict": "PASS",
+   "detail": {
+    "seed_policy_pairs": 3840,
+    "pairs_with_zero_pure_nash": 0,
+    "pairs_with_multiple_pure_nash": 0,
+    "uniqueness_holds": true,
+    "note": "Uniqueness is an empirical property of this parameterisation, not a theorem. It is reported so that equilibrium selection can be ruled out as an explanation for anything downstream."
+   },
+   "would_falsify": "one pair with no pure equilibrium"
+  },
+  {
+   "check": "P2_exact_ic",
+   "statement": "log s_i(d) - log s_i(f*) <= lam (f_d - f*_i)/m characterises unprofitability of the deviation exactly; the margin and base traffic cancel.",
+   "verdict": "PASS",
+   "detail": {
+    "deviations_tested": 3360,
+    "characterisation_mismatches": 0,
+    "max_abs_identity_residual": 5.551115123125783e-16
+   },
+   "would_falsify": "one deviation where the exact profit test and the characterisation disagree"
+  },
+  {
+   "check": "P3a_deviation_identity",
+   "statement": "V_i(f')/V_i(f) = exp(-lam(f'-f_i)/m) * x/(s_i x + 1 - s_i) with x = exp(Delta u_i).",
+   "verdict": "PASS",
+   "detail": {
+    "deviations_tested": 32000,
+    "max_relative_error": 1.3546110646835245e-15
+   },
+   "would_falsify": "a relative error above 1e-9 on any deviation"
+  },
+  {
+   "check": "P3b_sufficient_condition_upward",
+   "statement": "If beta[rbar_i(f_i)-rbar_i(f')] >= (alpha(1-q_i)-lam/m)(f'-f_i) for every f' > f_i, merchant i has no profitable upward deviation.",
+   "verdict": "PASS",
+   "detail": {
+    "merchant_cases_certified": 18787,
+    "unsound_cases": 0,
+    "equilibria_total": 40,
+    "equilibria_with_SC_up_at_every_merchant": 25,
+    "certified_fraction": 0.625,
+    "note": "SC-up certifies only a fraction of true equilibria: the bound x/(sx+1-s) <= x is slack by exactly the share a merchant already holds. SC-up is a design tool, not a characterisation of equilibrium."
+   },
+   "would_falsify": "one merchant that satisfies SC-up yet gains by fabricating more"
+  },
+  {
+   "check": "P4_robust_implementation",
+   "statement": "A policy whose worst-case-over-types reputational bite covers the worst-case appeal gain deters upward deviation from the target for every type in the support, using only the type SUPPORT and never an individual merchant's type.",
+   "verdict": "PASS",
+   "detail": {
+    "q_min_in_pool": 0.2,
+    "robustly_implementable_pairs": 66,
+    "best": {
+     "kappa": 0.5,
+     "tau": 0.4,
+     "target_f": 0.9,
+     "mean_GMV": 0.37316365271795926
+    },
+    "top": [
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "target_f": 0.9,
+      "mean_GMV": 0.37316365271795926
+     },
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "target_f": 0.9500000000000001,
+      "mean_GMV": 0.35418651019172837
+     },
+     {
+      "kappa": 0.0,
+      "tau": 0.02,
+      "target_f": 1.0,
+      "mean_GMV": 0.344173777026508
+     },
+     {
+      "kappa": 0.0,
+      "tau": 0.05,
+      "target_f": 1.0,
+      "mean_GMV": 0.344173777026508
+     },
+     {
+      "kappa": 0.0,
+      "tau": 0.1,
+      "target_f": 1.0,
+      "mean_GMV": 0.344173777026508
+     },
+     {
+      "kappa": 0.0,
+      "tau": 0.15,
+      "target_f": 1.0,
+      "mean_GMV": 0.344173777026508
+     },
+     {
+      "kappa": 0.0,
+      "tau": 0.2,
+      "target_f": 1.0,
+      "mean_GMV": 0.344173777026508
+     },
+     {
+      "kappa": 0.0,
+      "tau": 0.25,
+      "target_f": 1.0,
+      "mean_GMV": 0.344173777026508
+     }
+    ],
+    "note": "This is a guarantee, so it is conservative: it must hold for the most tempted type the platform could face. The value it certifies is a lower bound on the policy-class second best, not an estimate of it."
+   },
+   "would_falsify": "no (policy, target) pair in the class satisfying the worst-case condition"
+  },
+  {
+   "check": "P5_overpunishment_reversal",
+   "statement": "Mean equilibrium fabrication is not monotone decreasing in kappa: past some kappa the stationary reputation floors out over a range of f, marginal deterrence collapses there, and fabrication rises again.",
+   "verdict": "PASS",
+   "detail": {
+    "scan": {
+     "tau=0.02": [
+      {
+       "kappa": 0.0,
+       "mean_equilibrium_f": 1.0,
+       "rbar_spread_over_f": -9.547918011776346e-15
+      },
+      {
+       "kappa": 0.25,
+       "mean_equilibrium_f": 0.7762500000000001,
+       "rbar_spread_over_f": 0.7295410741753348
+      },
+      {
+       "kappa": 0.5,
+       "mean_equilibrium_f": 0.5349999999999999,
+       "rbar_spread_over_f": 0.8344951179977178
+      },
+      {
+       "kappa": 1.0,
+       "mean_equilibrium_f": 0.625,
+       "rbar_spread_over_f": 0.6786221202417442
+      },
+      {
+       "kappa": 2.0,
+       "mean_equilibrium_f": 0.725,
+       "rbar_spread_over_f": 0.4338910564379725
+      },
+      {
+       "kappa": 4.0,
+       "mean_equilibrium_f": 0.8125,
+       "rbar_spread_over_f": 0.2609210691343174
+      },
+      {
+       "kappa": 8.0,
+       "mean_equilibrium_f": 0.9125,
+       "rbar_spread_over_f": 0.1710279107844583
+      },
+      {
+       "kappa": 16.0,
+       "mean_equilibrium_f": 0.9625,
+       "rbar_spread_over_f": 0.1204981894841645
+      },
+      {
+       "kappa": 32.0,
+       "mean_equilibrium_f": 0.9875,
+       "rbar_spread_over_f": 0.08462049863075809
+      },
+      {
+       "kappa": 64.0,
+       "mean_equilibrium_f": 1.0,
+       "rbar_spread_over_f": 0.05574353777372329
+      }
+     ],
+     "tau=0.15": [
+      {
+       "kappa": 0.0,
+       "mean_equilibrium_f": 1.0,
+       "rbar_spread_over_f": -9.547918011776346e-15
+      },
+      {
+       "kappa": 0.25,
+       "mean_equilibrium_f": 0.8324999999999999,
+       "rbar_spread_over_f": 0.5986581200523547
+      },
+      {
+       "kappa": 0.5,
+       "mean_equilibrium_f": 0.44625000000000004,
+       "rbar_spread_over_f": 0.9315824191253371
+      },
+      {
+       "kappa": 1.0,
+       "mean_equilibrium_f": 0.49437499999999995,
+       "rbar_spread_over_f": 0.9256181815892754
+      },
+      {
+       "kappa": 2.0,
+       "mean_equilibrium_f": 0.49750000000000005,
+       "rbar_spread_over_f": 0.9039328965426283
+      },
+      {
+       "kappa": 4.0,
+       "mean_equilibrium_f": 0.520625,
+       "rbar_spread_over_f": 0.8570982523874515
+      },
+      {
+       "kappa": 8.0,
+       "mean_equilibrium_f": 0.524375,
+       "rbar_spread_over_f": 0.7889175597201178
+      },
+      {
+       "kappa": 16.0,
+       "mean_equilibrium_f": 0.5512499999999999,
+       "rbar_spread_over_f": 0.7329896121983093
+      },
+      {
+       "kappa": 32.0,
+       "mean_equilibrium_f": 0.5599999999999999,
+       "rbar_spread_over_f": 0.7020274810202795
+      },
+      {
+       "kappa": 64.0,
+       "mean_equilibrium_f": 0.559375,
+       "rbar_spread_over_f": 0.6985429083478212
+      }
+     ],
+     "tau=0.3": [
+      {
+       "kappa": 0.0,
+       "mean_equilibrium_f": 1.0,
+       "rbar_spread_over_f": -9.547918011776346e-15
+      },
+      {
+       "kappa": 0.25,
+       "mean_equilibrium_f": 0.8975,
+       "rbar_spread_over_f": 0.41055843342884235
+      },
+      {
+       "kappa": 0.5,
+       "mean_equilibrium_f": 0.5,
+       "rbar_spread_over_f": 0.8495119781076423
+      },
+      {
+       "kappa": 1.0,
+       "mean_equilibrium_f": 0.425,
+       "rbar_spread_over_f": 0.9355472255820373
+      },
+      {
+       "kappa": 2.0,
+       "mean_equilibrium_f": 0.37875000000000003,
+       "rbar_spread_over_f": 0.9360931451955713
+      },
+      {
+       "kappa": 4.0,
+       "mean_equilibrium_f": 0.416875,
+       "rbar_spread_over_f": 0.9359656410125233
+      },
+      {
+       "kappa": 8.0,
+       "mean_equilibrium_f": 0.43374999999999997,
+       "rbar_spread_over_f": 0.9356502950484975
+      },
+      {
+       "kappa": 16.0,
+       "mean_equilibrium_f": 0.45999999999999996,
+       "rbar_spread_over_f": 0.9349812963963312
+      },
+      {
+       "kappa": 32.0,
+       "mean_equilibrium_f": 0.48812500000000003,
+       "rbar_spread_over_f": 0.9341548949571735
+      },
+      {
+       "kappa": 64.0,
+       "mean_equilibrium_f": 0.4875,
+       "rbar_spread_over_f": 0.933979080337783
+      }
+     ]
+    },
+    "summary": {
+     "tau=0.02": {
+      "argmin_kappa": 0.5,
+      "min_mean_f": 0.5349999999999999,
+      "mean_f_at_max_kappa": 1.0,
+      "rises_after_minimum": true
+     },
+     "tau=0.15": {
+      "argmin_kappa": 0.5,
+      "min_mean_f": 0.44625000000000004,
+      "mean_f_at_max_kappa": 0.559375,
+      "rises_after_minimum": true
+     },
+     "tau=0.3": {
+      "argmin_kappa": 2.0,
+      "min_mean_f": 0.37875000000000003,
+      "mean_f_at_max_kappa": 0.4875,
+      "rises_after_minimum": true
+     }
+    },
+    "note": "This is the mechanism behind the earlier P_sep finding (kappa=8, tau=0.02 raised fabrication and cut GMV). It is a property of the instrument, not an artefact of any particular run."
+   },
+   "would_falsify": "mean equilibrium fabrication decreasing in kappa at every tau"
+  },
+  {
+   "check": "P5b_large_kappa_limit",
+   "statement": "As kappa -> infinity the reputation chain becomes reset-on-penalty and its stationary mean has the closed form eta*p0/(1-(1-eta)p0); the honest merchant's reputation is then bounded strictly below 1, so an unbounded penalty compresses the very spread that does the deterring.",
+   "verdict": "PASS",
+   "detail": {
+    "criterion": "beta*(rbar(f=0) - rbar(f=1)) is strictly decreasing in kappa at tau=0.02 (a threshold below the honest complaint rate) and flat within 5% at tau=0.20 (a threshold above it)",
+    "kappa_values": [
+     0.5,
+     2.0,
+     8.0,
+     1000000000.0
+    ],
+    "deterrent_spread_by_tau": {
+     "tau=0.02": [
+      1.2776257843333287,
+      0.5948244774356592,
+      0.056214673601024535,
+      0.011007758358386186
+     ],
+     "tau=0.2": [
+      1.3992731744399332,
+      1.401088137385636,
+      1.3969237075415726,
+      1.3804805949422918
+     ]
+    },
+    "spread_collapses_at_tight_threshold": true,
+    "spread_survives_at_loose_threshold": true,
+    "collapse_factor_at_tau_0p02": 116.06593665457584,
+    "closed_form_diagnostic": {
+     "formula": "rbar_inf = ceiling * eta*p0 / (1 - (1-eta)*p0), p0 = P(d <= floor(tau*N))",
+     "max_abs_error": 0.03235193673310621,
+     "max_abs_error_before_ceiling_correction": 0.06344086016885353,
+     "rbar_ceiling_measured": 0.9365591397830784,
+     "grid_half_spacing": 0.016666666666666666,
+     "within_half_spacing": false,
+     "why_not_exact": "equilibrium._stationary_mean snaps r to the nearest of 31 grid points with np.round, which is not mean preserving. The snapping is frozen Balance-9 code and is kept byte-identical, so the residual is a property of the corpus's discretisation, not of the proposition. It is reported, not tuned away.",
+     "rows": [
+      {
+       "tau": 0.02,
+       "b": 0.01,
+       "f": 0.0,
+       "p0_no_penalty": 0.6689717585696803,
+       "rbar_numeric": 0.29046122624662646,
+       "rbar_closed_form": 0.26957881307234627,
+       "rbar_closed_form_uncorrected": 0.2878396052328152,
+       "abs_error": 0.02088241317428019
+      },
+      {
+       "tau": 0.02,
+       "b": 0.01,
+       "f": 0.5,
+       "p0_no_penalty": 3.5806644914476996e-07,
+       "rbar_numeric": 7.161331119712685e-08,
+       "rbar_closed_form": 6.707010033168357e-08,
+       "rbar_closed_form_uncorrected": 7.1613310342813e-08,
+       "abs_error": 4.543210865443285e-09
+      },
+      {
+       "tau": 0.02,
+       "b": 0.01,
+       "f": 1.0,
+       "p0_no_penalty": 4.391210751020771e-17,
+       "rbar_numeric": 8.782421501990231e-18,
+       "rbar_closed_form": 8.225257127164438e-18,
+       "rbar_closed_form_uncorrected": 8.782421502041543e-18,
+       "abs_error": 5.571643748257933e-19
+      },
+      {
+       "tau": 0.02,
+       "b": 0.07999999999999999,
+       "f": 0.0,
+       "p0_no_penalty": 0.035605172470539556,
+       "rbar_numeric": 0.007338505572257458,
+       "rbar_closed_form": 0.006864808080720294,
+       "rbar_closed_form_uncorrected": 0.007329818042574749,
+       "abs_error": 0.00047369749153716376
+      },
+      {
+       "tau": 0.02,
+       "b": 0.07999999999999999,
+       "f": 0.5,
+       "p0_no_penalty": 4.9621236245936774e-09,
+       "rbar_numeric": 9.924247290169797e-10,
+       "rbar_closed_form": 9.294644503590431e-10,
+       "rbar_closed_form_uncorrected": 9.92424728858363e-10,
+       "abs_error": 6.296027865793664e-11
+      },
+      {
+       "tau": 0.02,
+       "b": 0.07999999999999999,
+       "f": 1.0,
+       "p0_no_penalty": 1.606938044259002e-20,
+       "rbar_numeric": 3.2138760885005075e-21,
+       "rbar_closed_form": 3.0099850248318265e-21,
+       "rbar_closed_form_uncorrected": 3.213876088518004e-21,
+       "abs_error": 2.0389106366868098e-22
+      },
+      {
+       "tau": 0.02,
+       "b": 0.15,
+       "f": 0.0,
+       "p0_no_penalty": 0.0015023012498914334,
+       "rbar_numeric": 0.00030083685406818555,
+       "rbar_closed_form": 0.000281737396813372,
+       "rbar_closed_form_uncorrected": 0.0003008217899391028,
+       "abs_error": 1.9099457254813563e-05
+      },
+      {
+       "tau": 0.02,
+       "b": 0.15,
+       "f": 0.5,
+       "p0_no_penalty": 4.116305314544292e-11,
+       "rbar_numeric": 8.232610629319333e-12,
+       "rbar_closed_form": 7.710326729202138e-12,
+       "rbar_closed_form_uncorrected": 8.232610629359688e-12,
+       "abs_error": 5.22283900117195e-13
+      },
+      {
+       "tau": 0.02,
+       "b": 0.15,
+       "f": 1.0,
+       "p0_no_penalty": 8.271806125530277e-25,
+       "rbar_numeric": 1.6543612250986418e-25,
+       "rbar_closed_form": 1.549407125875807e-25,
+       "rbar_closed_form_uncorrected": 1.6543612251060554e-25,
+       "abs_error": 1.0495409922283479e-26
+      },
+      {
+       "tau": 0.1,
+       "b": 0.01,
+       "f": 0.0,
+       "p0_no_penalty": 0.9999508456129594,
+       "rbar_numeric": 0.9363251556474464,
+       "rbar_closed_form": 0.9363290050793837,
+       "rbar_closed_form_uncorrected": 0.9997542763783737,
+       "abs_error": 3.849431937208436e-06
+      },
+      {
+       "tau": 0.1,
+       "b": 0.01,
+       "f": 0.5,
+       "p0_no_penalty": 0.0017172386846967453,
+       "rbar_numeric": 0.0003439398977885818,
+       "rbar_closed_form": 0.0003221016173545415,
+       "rbar_closed_form_uncorrected": 0.00034392021141253846,
+       "abs_error": 2.183828043404029e-05
+      },
+      {
+       "tau": 0.1,
+       "b": 0.01,
+       "f": 1.0,
+       "p0_no_penalty": 2.5765083488044688e-11,
+       "rbar_numeric": 5.153016697689643e-12,
+       "rbar_closed_form": 4.826104885699942e-12,
+       "rbar_closed_form_uncorrected": 5.153016697715152e-12,
+       "abs_error": 3.2691181198970075e-13
+      },
+      {
+       "tau": 0.1,
+       "b": 0.07999999999999999,
+       "f": 0.0,
+       "p0_no_penalty": 0.7867922332159676,
+       "rbar_numeric": 0.4263140473065357,
+       "rbar_closed_form": 0.3977035306665736,
+       "rbar_closed_form_uncorrected": 0.4246432646620564,
+       "abs_error": 0.028610516639962114
+      },
+      {
+       "tau": 0.1,
+       "b": 0.07999999999999999,
+       "f": 0.5,
+       "p0_no_penalty": 7.686132562039235e-05,
+       "rbar_numeric": 1.5373249795101775e-05,
+       "rbar_closed_form": 1.439792071574226e-05,
+       "rbar_closed_form_uncorrected": 1.5373210408343292e-05,
+       "abs_error": 9.753290793595146e-07
+      },
+      {
+       "tau": 0.1,
+       "b": 0.07999999999999999,
+       "f": 1.0,
+       "p0_no_penalty": 3.152708417921496e-14,
+       "rbar_numeric": 6.305416835808831e-15,
+       "rbar_closed_form": 5.905395767751001e-15,
+       "rbar_closed_form_uncorrected": 6.305416835843151e-15,
+       "abs_error": 4.000210680578303e-16
+      },
+      {
+       "tau": 0.1,
+       "b": 0.15,
+       "f": 0.0,
+       "p0_no_penalty": 0.26331994768889216,
+       "rbar_numeric": 0.06724889191237599,
+       "rbar_closed_form": 0.062485985988463694,
+       "rbar_closed_form_uncorrected": 0.06671867619906674,
+       "abs_error": 0.004762905923912292
+      },
+      {
+       "tau": 0.1,
+       "b": 0.15,
+       "f": 0.5,
+       "p0_no_penalty": 1.931427726485968e-06,
+       "rbar_numeric": 3.862861670312421e-07,
+       "rbar_closed_form": 3.617798170154326e-07,
+       "rbar_closed_form_uncorrected": 3.862861421642059e-07,
+       "abs_error": 2.4506350015809493e-08
+      },
+      {
+       "tau": 0.1,
+       "b": 0.15,
+       "f": 1.0,
+       "p0_no_penalty": 6.3498445276376545e-18,
+       "rbar_numeric": 1.26996890552184e-18,
+       "rbar_closed_form": 1.189400985712122e-18,
+       "rbar_closed_form_uncorrected": 1.2699689055275309e-18,
+       "abs_error": 8.056791980971806e-20
+      },
+      {
+       "tau": 0.2,
+       "b": 0.01,
+       "f": 0.0,
+       "p0_no_penalty": 0.999999999793306,
+       "rbar_numeric": 0.9365591387976769,
+       "rbar_closed_form": 0.936559138815173,
+       "rbar_closed_form_uncorrected": 0.9999999989665305,
+       "abs_error": 1.7496115667370304e-11
+      },
+      {
+       "tau": 0.2,
+       "b": 0.01,
+       "f": 0.5,
+       "p0_no_penalty": 0.0877084649726637,
+       "rbar_numeric": 0.018920082045582147,
+       "rbar_closed_form": 0.017668580134793853,
+       "rbar_closed_form_uncorrected": 0.018865418513652185,
+       "abs_error": 0.001251501910788294
+      },
+      {
+       "tau": 0.2,
+       "b": 0.01,
+       "f": 1.0,
+       "p0_no_penalty": 1.4247753420497625e-07,
+       "rbar_numeric": 2.8495510224138045e-08,
+       "rbar_closed_form": 2.6687730416606955e-08,
+       "rbar_closed_form_uncorrected": 2.849551008897126e-08,
+       "abs_error": 1.8077798075310904e-09
+      },
+      {
+       "tau": 0.2,
+       "b": 0.07999999999999999,
+       "f": 0.0,
+       "p0_no_penalty": 0.9962639980270243,
+       "rbar_numeric": 0.9203203967439192,
+       "rbar_closed_form": 0.919321800743531,
+       "rbar_closed_form_uncorrected": 0.9815950340909173,
+       "abs_error": 0.0009985960003882077
+      },
+      {
+       "tau": 0.2,
+       "b": 0.07999999999999999,
+       "f": 0.5,
+       "p0_no_penalty": 0.011973543483340995,
+       "rbar_numeric": 0.0024188339386872373,
+       "rbar_closed_form": 0.002264477371603373,
+       "rbar_closed_form_uncorrected": 0.002417869064977425,
+       "abs_error": 0.00015435656708386427
+      },
+      {
+       "tau": 0.2,
+       "b": 0.07999999999999999,
+       "f": 1.0,
+       "p0_no_penalty": 5.7862302930459e-10,
+       "rbar_numeric": 1.1572460591609262e-10,
+       "rbar_closed_form": 1.0838293736700744e-10,
+       "rbar_closed_form_uncorrected": 1.1572460591448673e-10,
+       "abs_error": 7.341668549085183e-12
+      },
+      {
+       "tau": 0.2,
+       "b": 0.15,
+       "f": 0.0,
+       "p0_no_penalty": 0.8645979648707459,
+       "rbar_numeric": 0.5576132563613079,
+       "rbar_closed_form": 0.5252613196282017,
+       "rbar_closed_form_uncorrected": 0.5608415927155015,
+       "abs_error": 0.03235193673310621
+      },
+      {
+       "tau": 0.2,
+       "b": 0.15,
+       "f": 0.5,
+       "p0_no_penalty": 0.0008833280910347011,
+       "rbar_numeric": 0.00017679575491723047,
+       "rbar_closed_form": 0.0001655748049182192,
+       "rbar_closed_form_uncorrected": 0.00017679054945378983,
+       "abs_error": 1.1220949999011278e-05
+      },
+      {
+       "tau": 0.2,
+       "b": 0.15,
+       "f": 1.0,
+       "p0_no_penalty": 4.535521092888772e-13,
+       "rbar_numeric": 9.071042185740622e-14,
+       "rbar_closed_form": 8.495567466450915e-14,
+       "rbar_closed_form_uncorrected": 9.071042185780836e-14,
+       "abs_error": 5.7547471928970755e-15
+      }
+     ]
+    },
+    "spread_comparison": {
+     "kappa=0.5,tau=0.02": {
+      "rbar_at_f0": 0.851752933381303,
+      "rbar_at_f1": 2.4104924171687586e-06,
+      "beta_times_spread": 1.2776257843333287
+     },
+     "kappa=0.5,tau=0.2": {
+      "rbar_at_f0": 0.9359611519060697,
+      "rbar_at_f1": 0.0031123689461141743,
+      "beta_times_spread": 1.3992731744399332
+     },
+     "kappa=2,tau=0.02": {
+      "rbar_at_f0": 0.396549651623774,
+      "rbar_at_f1": 1.158357497567624e-15,
+      "beta_times_spread": 0.5948244774356592
+     },
+     "kappa=2,tau=0.2": {
+      "rbar_at_f0": 0.9340587665179154,
+      "rbar_at_f1": 8.260824671641755e-09,
+      "beta_times_spread": 1.401088137385636
+     },
+     "kappa=1e+09,tau=0.02": {
+      "rbar_at_f0": 0.007338505572257458,
+      "rbar_at_f1": 3.2138760885005075e-21,
+      "beta_times_spread": 0.011007758358386186
+     },
+     "kappa=1e+09,tau=0.2": {
+      "rbar_at_f0": 0.9203203967439192,
+      "rbar_at_f1": 1.1572460591609262e-10,
+      "beta_times_spread": 1.3804805949422918
+     }
+    },
+    "note": "Read the spread table downward: at tau=0.02 the deterrent beta*spread FALLS as kappa grows, because the penalty catches the honest merchant too. At tau=0.20 it does not. That contrast is the mechanism of the P5 reversal, and it is why 'punish harder' is not a policy direction."
+   },
+   "would_falsify": "the deterrent spread failing to collapse at a threshold below the honest complaint rate, or collapsing at one above it"
+  },
+  {
+   "check": "P6_impossibility_uninformative_signal",
+   "statement": "If the signal distribution does not depend on the hidden action, then for every policy in the class the equilibrium action profile is the same; the platform cannot move fabrication at all.",
+   "verdict": "PASS",
+   "detail": {
+    "seeds": 20,
+    "seed_policy_pairs": 1280,
+    "seeds_where_equilibrium_profile_varies_across_class": 0,
+    "max_rbar_variation_over_f": 0.0,
+    "equilibrium_profile_example": [
+     [
+      20,
+      20,
+      20,
+      20
+     ]
+    ],
+    "equilibrium_is_full_fabrication_everywhere": true,
+    "residual_gmv_spread_across_class": {
+     "mean": 0.01993973865810405,
+     "max": 0.034582704228273364,
+     "interpretation": "pure demand reallocation between merchants at different prices; NOT incentive provision"
+    }
+   },
+   "would_falsify": "one seed where two policies in the class induce different equilibrium profiles"
+  },
+  {
+   "check": "P7_refunds_are_a_garbling",
+   "statement": "Refunds are a thinning of complaints with an f-independent rate, so the pair (complaints, refunds) is Blackwell-equivalent to complaints alone.",
+   "verdict": "PASS",
+   "detail": {
+    "max_relative_fisher_difference": 1.831867990448011e-15,
+    "rows": [
+     {
+      "b": 0.01,
+      "f": 0.1,
+      "I_complaints": 221.1981576893636,
+      "I_complaints_and_refunds": 221.19815768936363,
+      "relative_difference": 1.2848981079814245e-16
+     },
+     {
+      "b": 0.01,
+      "f": 0.3,
+      "I_complaints": 93.5672515131622,
+      "I_complaints_and_refunds": 93.56725151316218,
+      "relative_difference": 3.037570193713117e-16
+     },
+     {
+      "b": 0.01,
+      "f": 0.5,
+      "I_complaints": 67.32117813274007,
+      "I_complaints_and_refunds": 67.3211781327401,
+      "relative_difference": 4.22180808754768e-16
+     },
+     {
+      "b": 0.01,
+      "f": 0.7,
+      "I_complaints": 58.751529992575996,
+      "I_complaints_and_refunds": 58.751529992576025,
+      "relative_difference": 4.837611792236807e-16
+     },
+     {
+      "b": 0.01,
+      "f": 0.9,
+      "I_complaints": 58.18181818764623,
+      "I_complaints_and_refunds": 58.181818187646336,
+      "relative_difference": 1.831867990448011e-15
+     },
+     {
+      "b": 0.05,
+      "f": 0.1,
+      "I_complaints": 147.08886644996954,
+      "I_complaints_and_refunds": 147.08886644996954,
+      "relative_difference": 0.0
+     },
+     {
+      "b": 0.05,
+      "f": 0.3,
+      "I_complaints": 81.30999438233255,
+      "I_complaints_and_refunds": 81.30999438233253,
+      "relative_difference": 1.7477377563673538e-16
+     },
+     {
+      "b": 0.05,
+      "f": 0.5,
+      "I_complaints": 63.29670330591889,
+      "I_complaints_and_refunds": 63.2967033059189,
+      "relative_difference": 2.2451176716928865e-16
+     },
+     {
+      "b": 0.05,
+      "f": 0.7,
+      "I_complaints": 57.80810919835441,
+      "I_complaints_and_refunds": 57.80810919835447,
+      "relative_difference": 1.1062262216358637e-15
+     },
+     {
+      "b": 0.05,
+      "f": 0.9,
+      "I_complaints": 59.528730887180835,
+      "I_complaints_and_refunds": 59.528730887180885,
+      "relative_difference": 8.35529176616762e-16
+     },
+     {
+      "b": 0.1,
+      "f": 0.1,
+      "I_complaints": 107.14285722794443,
+      "I_complaints_and_refunds": 107.14285722794436,
+      "relative_difference": 6.631732195161025e-16
+     },
+     {
+      "b": 0.1,
+      "f": 0.3,
+      "I_complaints": 71.4285714450632,
+      "I_complaints_and_refunds": 71.42857144506321,
+      "relative_difference": 1.9895196596689308e-16
+     },
+     {
+      "b": 0.1,
+      "f": 0.5,
+      "I_complaints": 60.00000000712519,
+      "I_complaints_and_refunds": 60.000000007125244,
+      "relative_difference": 9.473903142342947e-16
+     },
+     {
+      "b": 0.1,
+      "f": 0.7,
+      "I_complaints": 57.69230769810455,
+      "I_complaints_and_refunds": 57.69230769810465,
+      "relative_difference": 1.7242503719379257e-15
+     },
+     {
+      "b": 0.1,
+      "f": 0.9,
+      "I_complaints": 62.50000000874728,
+      "I_complaints_and_refunds": 62.50000000874729,
+      "relative_difference": 2.2737367541140966e-16
+     },
+     {
+      "b": 0.15,
+      "f": 0.1,
+      "I_complaints": 86.79927671057203,
+      "I_complaints_and_refunds": 86.79927671057202,
+      "relative_difference": 1.6372088862661157e-16
+     },
+     {
+      "b": 0.15,
+      "f": 0.3,
+      "I_complaints": 65.12890096036236,
+      "I_complaints_and_refunds": 65.12890096036237,
+      "relative_difference": 2.1819583173759945e-16
+     },
+     {
+      "b": 0.15,
+      "f": 0.5,
+      "I_complaints": 58.18181818710855,
+      "I_complaints_and_refunds": 58.18181818710861,
+      "relative_difference": 1.099120794278964e-15
+     },
+     {
+      "b": 0.15,
+      "f": 0.7,
+      "I_complaints": 58.751529992973765,
+      "I_complaints_and_refunds": 58.751529992973836,
+      "relative_difference": 1.2094029480510136e-15
+     },
+     {
+      "b": 0.15,
+      "f": 0.9,
+      "I_complaints": 67.32117813330508,
+      "I_complaints_and_refunds": 67.32117813330511,
+      "relative_difference": 4.2218080875122475e-16
+     }
+    ],
+    "note": "A second observable is not a second instrument unless its distribution moves with the hidden action. Audit flags do; refunds do not."
+   },
+   "would_falsify": "a positive information gain from adding refunds"
+  },
+  {
+   "check": "P8b_oracle_reduction",
+   "statement": "Displayed-argmax play is best response to last round's rivals, so its fixed points are exactly the pure equilibria of the restricted stationary game.",
+   "verdict": "PASS",
+   "detail": {
+    "cases": 120,
+    "best_response_fixed_points_inside_enumerated_equilibrium_set": 120,
+    "note": "The consequence for the paper: convergence under the earlier U/H/R/G interfaces is not evidence that a language model inferred an equilibrium. The interface computed the best response and printed it. Only an environment that withholds that table can test the inference."
+   },
+   "would_falsify": "a best-response fixed point outside the enumerated equilibrium set"
+  },
+  {
+   "check": "P9_dead_zone",
+   "statement": "When tau exceeds the complaint rate reachable at fabrication f, the marginal reputational bite over [0, f] is negligible next to the appeal gain, and no target strictly inside that interval is implementable by that policy.",
+   "verdict": "PASS",
+   "detail": {
+    "criterion": "marginal beta*drbar per grid step < 1% of the appeal gain alpha*(1-q_median)*step",
+    "q_median_in_pool": 0.45,
+    "appeal_gain_per_step": 0.08250000000000002,
+    "n_dead_zones_found": 62,
+    "widest": [
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "b": 0.01,
+      "dead_zone_upper_f": 0.35000000000000003,
+      "grid_steps": 7,
+      "marginal_bite_at_upper": 0.0008040433936716274,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.22000000000000003
+     },
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "b": 0.019999999999999997,
+      "dead_zone_upper_f": 0.30000000000000004,
+      "grid_steps": 6,
+      "marginal_bite_at_upper": 0.00026729402899733357,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.2
+     },
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "b": 0.03,
+      "dead_zone_upper_f": 0.30000000000000004,
+      "grid_steps": 6,
+      "marginal_bite_at_upper": 0.0004788245289333304,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.21000000000000002
+     },
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "b": 0.039999999999999994,
+      "dead_zone_upper_f": 0.30000000000000004,
+      "grid_steps": 6,
+      "marginal_bite_at_upper": 0.0008040433948906522,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.22000000000000003
+     },
+     {
+      "kappa": 2.0,
+      "tau": 0.4,
+      "b": 0.01,
+      "dead_zone_upper_f": 0.30000000000000004,
+      "grid_steps": 6,
+      "marginal_bite_at_upper": 0.0005636959995875546,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.19000000000000003
+     },
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "b": 0.049999999999999996,
+      "dead_zone_upper_f": 0.25,
+      "grid_steps": 5,
+      "marginal_bite_at_upper": 0.0002672940296992721,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.19999999999999998
+     },
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "b": 0.05999999999999999,
+      "dead_zone_upper_f": 0.25,
+      "grid_steps": 5,
+      "marginal_bite_at_upper": 0.0004788245289333304,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.21
+     },
+     {
+      "kappa": 0.5,
+      "tau": 0.4,
+      "b": 0.06999999999999999,
+      "dead_zone_upper_f": 0.25,
+      "grid_steps": 5,
+      "marginal_bite_at_upper": 0.0008040433966687299,
+      "appeal_gain_per_step": 0.08250000000000002,
+      "theta_at_upper": 0.21999999999999997
+     }
+    ],
+    "max_dead_zone_upper_f_by_tau": {
+     "tau=0.3": 0.2,
+     "tau=0.4": 0.35000000000000003
+    },
+    "note": "Dead zones are why the second-best search must range over tau as well as kappa, and why an implementation claim must name the policy it holds under. They also bound from below how much fabrication any policy in this class must tolerate."
+   },
+   "would_falsify": "no policy in the class exhibiting an economically dead region"
+  },
+  {
+   "check": "P10_implementation_floor",
+   "statement": "Reputation is bounded in [0,1], so the deterrent budget is bounded by beta*rbar_max. Targets far enough below full fabrication are therefore unimplementable by ANY policy acting through reputation, no matter how informative the signal, and every equilibrium action respects the resulting per-merchant floor.",
+   "verdict": "PASS",
+   "detail": {
+    "merchant_equilibrium_cases": 160,
+    "rbar_max": 0.9365591397830786,
+    "deterrent_budget_beta_times_rbar_max": 1.404838709674618,
+    "violations_exact_share_bound": 0,
+    "violations_usable_share_bound": 0,
+    "sbar_usable": 0.5,
+    "mean_floor_exact": 0.1171875,
+    "mean_floor_usable": 0.059375,
+    "max_floor_exact": 0.35000000000000003,
+    "floor_at_lowest_quality_in_pool": {
+     "q_min": 0.2,
+     "floor_usable": 0.25,
+     "floor_at_zero_share": 0.35000000000000003
+    },
+    "examples": [
+     {
+      "seed": 70000,
+      "policy": "P_GMV",
+      "merchant": 0,
+      "q": 0.5998,
+      "share": 0.30460324348590034,
+      "f_equilibrium": 0.30000000000000004,
+      "floor_exact": 0.0,
+      "floor_usable": 0.0
+     },
+     {
+      "seed": 70000,
+      "policy": "P_GMV",
+      "merchant": 1,
+      "q": 0.3433,
+      "share": 0.15206999629767748,
+      "f_equilibrium": 0.35000000000000003,
+      "floor_exact": 0.2,
+      "floor_usable": 0.0
+     },
+     {
+      "seed": 70000,
+      "policy": "P_GMV",
+      "merchant": 2,
+      "q": 0.4876,
+      "share": 0.254435842584315,
+      "f_equilibrium": 0.30000000000000004,
+      "floor_exact": 0.0,
+      "floor_usable": 0.0
+     },
+     {
+      "seed": 70000,
+      "policy": "P_GMV",
+      "merchant": 3,
+      "q": 0.2621,
+      "share": 0.22523962789075133,
+      "f_equilibrium": 0.4,
+      "floor_exact": 0.30000000000000004,
+      "floor_usable": 0.15000000000000002
+     },
+     {
+      "seed": 70000,
+      "policy": "P_robust",
+      "merchant": 0,
+      "q": 0.5998,
+      "share": 0.3104978772664848,
+      "f_equilibrium": 0.30000000000000004,
+      "floor_exact": 0.0,
+      "floor_usable": 0.0
+     },
+     {
+      "seed": 70000,
+      "policy": "P_robust",
+      "merchant": 1,
+      "q": 0.3433,
+      "share": 0.14956921383044963,
+      "f_equilibrium": 0.30000000000000004,
+      "floor_exact": 0.2,
+      "floor_usable": 0.0
+     },
+     {
+      "seed": 70000,
+      "policy": "P_robust",
+      "merchant": 2,
+      "q": 0.4876,
+      "share": 0.25549152899080485,
+      "f_equilibrium": 0.30000000000000004,
+      "floor_exact": 0.0,
+      "floor_usable": 0.0
+     },
+     {
+      "seed": 70000,
+      "policy": "P_robust",
+      "merchant": 3,
+      "q": 0.2621,
+      "share": 0.21874519066796794,
+      "f_equilibrium": 0.35000000000000003,
+      "floor_exact": 0.30000000000000004,
+      "floor_usable": 0.15000000000000002
+     }
+    ],
+    "note": "This is the constraint that caps implementation power, not signal informativeness: the floor contains no signal parameter. It explains why the monitoring continuum saturates well below 1 (P8a) and why tightening tau eventually RAISES equilibrium fabrication (P5) -- past the floor, compliance is worth less than abandonment, and merchants switch."
+   },
+   "would_falsify": "an equilibrium action more than one grid step below the floor"
+  }
+ ],
+ "runtime_seconds": 74.8
+}

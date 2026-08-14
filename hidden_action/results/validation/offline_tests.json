@@ -1,0 +1,198 @@
+{
+  "schema_version": "ha-offline-tests-1",
+  "utc": "2026-08-14T18:15:03Z",
+  "n_tests": 14,
+  "n_pass": 14,
+  "all_pass": true,
+  "seconds": 134.9,
+  "git": {
+    "commit": "2f22899bc588b1d8ea4144f12ef80c6bb561ba44",
+    "branch": "exp/hidden-action-handoff-20260815",
+    "dirty": true
+  },
+  "code_sha256_prefix": {
+    "ha_model.py": "a93958515477ad94",
+    "ha_infoclass.py": "b12b62b2513aea29",
+    "ha_prompts.py": "f18458f1645f2ad5",
+    "ha_transport.py": "dfcba28f41843ab8",
+    "ha_runner.py": "ba991753bccb33ec",
+    "to_run.py": "bc16ee0781df7992"
+  },
+  "results": [
+    {
+      "pass": true,
+      "manifest_id": "HA-M1",
+      "sha256": "65ad45f6e378814a",
+      "problems": [],
+      "test": "manifest_matches_code",
+      "seconds": 0.0
+    },
+    {
+      "pass": true,
+      "n_registered": 59,
+      "n_fields_seen_in_views": 19,
+      "unclassified": [],
+      "evaluator_only_in_view": [],
+      "test": "registry_total",
+      "seconds": 0.01
+    },
+    {
+      "pass": true,
+      "n_pass": 10,
+      "n_gates": 10,
+      "failed": [],
+      "test": "prompt_gates",
+      "seconds": 0.04
+    },
+    {
+      "pass": true,
+      "checks": {
+        "routing": true,
+        "redaction": true,
+        "model_identity": true,
+        "mock_roundtrip": true,
+        "retry_path": true
+      },
+      "test": "transport_selftest",
+      "seconds": 3.71
+    },
+    {
+      "pass": true,
+      "checks": {
+        "crn_shared_across_arms": true,
+        "crn_monotone_in_f": true,
+        "signal_distribution_matches_spec": true,
+        "crn_horizon_prefix": true
+      },
+      "test": "runner_invariants",
+      "seconds": 0.05
+    },
+    {
+      "pass": true,
+      "invariant_by_arm": {
+        "A0_oracle": false,
+        "A1_policy": true,
+        "A2_history": true,
+        "A3_assist": true
+      },
+      "expected": "A0_oracle False (it is built to leak), all others True",
+      "test": "oracle_positive_control",
+      "seconds": 0.0
+    },
+    {
+      "pass": true,
+      "files_scanned": "package excluding results/",
+      "allowlisted_fixtures": [
+        "https://x.inference.ai.azure.com",
+        "https://x.openai.azure.com",
+        "https://x.services.ai.azure.com",
+        "sk-0123456789abcdefghij"
+      ],
+      "hits": [],
+      "test": "no_credentials_in_repo",
+      "seconds": 0.01
+    },
+    {
+      "pass": true,
+      "cells_completed": 32,
+      "cells_failed": 0,
+      "files": 32,
+      "api_calls": 768,
+      "transport_retries": 54,
+      "test": "mock_smoke",
+      "seconds": 54.65
+    },
+    {
+      "pass": true,
+      "second_run_api_calls": 0,
+      "second_run_skipped": 8,
+      "test": "resume_idempotence",
+      "seconds": 0.11
+    },
+    {
+      "pass": true,
+      "complete_file_done": true,
+      "truncated_file_done": false,
+      "short_round_count_done": false,
+      "test": "truncated_cell_is_not_done",
+      "seconds": 0.05
+    },
+    {
+      "pass": true,
+      "identical": 24,
+      "differing": [],
+      "note": "arms differ in what the merchant is shown, never in what the harness does",
+      "test": "harness_neutrality",
+      "seconds": 0.73
+    },
+    {
+      "pass": true,
+      "prompts_scanned": 36,
+      "leaks": [],
+      "test": "raw_prompt_leakage",
+      "seconds": 0.67
+    },
+    {
+      "pass": true,
+      "checks": {
+        "http_failures_raise_only_transport": true,
+        "bad_json_raises_only_schema_repairs": true,
+        "economic_retry_is_arm_a3_only": true,
+        "decisions_exclude_repairs": true
+      },
+      "baseline": {
+        "schema_repairs": 0,
+        "economic_retries": 0,
+        "transport_attempts": 192,
+        "decisions": 192
+      },
+      "http_30pct": {
+        "schema_repairs": 0,
+        "economic_retries": 0,
+        "transport_attempts": 255,
+        "decisions": 192
+      },
+      "malformed": {
+        "schema_repairs": 96,
+        "economic_retries": 0,
+        "transport_attempts": 288,
+        "decisions": 192
+      },
+      "a3": {
+        "schema_repairs": 0,
+        "economic_retries": 128,
+        "transport_attempts": 320,
+        "decisions": 320
+      },
+      "test": "retry_counters_separate",
+      "seconds": 74.1
+    },
+    {
+      "pass": true,
+      "mutations": 8,
+      "checks_that_failed_as_intended": [
+        "V10_counter_separation",
+        "V1_cell_integrity",
+        "V2_accounting_identity",
+        "V3_reputation_recursion",
+        "V4_signal_bounds",
+        "V5_action_grid",
+        "V6_crn_reproducible",
+        "V9_manifest_conformance"
+      ],
+      "mutations_not_caught": [],
+      "verdicts": {
+        "V1_cell_integrity": false,
+        "V2_accounting_identity": false,
+        "V3_reputation_recursion": false,
+        "V4_signal_bounds": false,
+        "V5_action_grid": false,
+        "V6_crn_reproducible": false,
+        "V9_manifest_conformance": false,
+        "V10_counter_separation": false
+      },
+      "test": "validator_catches_corruption",
+      "seconds": 0.74
+    }
+  ]
+}

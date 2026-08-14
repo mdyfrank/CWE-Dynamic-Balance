@@ -1,0 +1,22 @@
+policy class: 640 settings (64 complaint x 10 audit), 60 seeds
+reputation tables: 570 distinct, 124.9s
+  seed 70000 (1/60)  G_FB=0.8221  G_NP=0.3173  G_SB=0.6447  [135s]
+  seed 70009 (10/60)  G_FB=0.7633  G_NP=0.2917  G_SB=0.6189  [226s]
+  seed 70019 (20/60)  G_FB=0.9511  G_NP=0.3800  G_SB=0.7668  [327s]
+  seed 70029 (30/60)  G_FB=0.9532  G_NP=0.3640  G_SB=0.9336  [428s]
+  seed 70039 (40/60)  G_FB=1.0080  G_NP=0.3812  G_SB=0.9258  [529s]
+  seed 70049 (50/60)  G_FB=0.7914  G_NP=0.3284  G_SB=0.6374  [630s]
+  seed 70059 (60/60)  G_FB=0.8831  G_NP=0.2956  G_SB=0.6323  [732s]
+
+wrote D:\CWE\cwe-dynamic-balance\hidden_action\results\solver\ha_benchmarks_extended.json  (15856888 bytes, 732.7s)
+  G_FB              mean 0.8978
+  G_NP              mean 0.3491   (38.9% of first best)
+  G_SB_P optimistic mean 0.7084   (78.7% of first best)
+  G_SB_P pessimist. mean 0.7084   (78.7% of first best)
+  G_SB uniform      mean 0.6366   (70.9% of first best)  at kappa=2 tau=0.3
+    per-seed tuning premium 0.0717 (10.1% of the per-seed SB); 24 distinct per-seed optima over 60 seeds
+    gap to first best 0.2612 = instrument cost 0.0211 (8%) + incentive gap 0.2401 (92%)
+  penalty raises attainable GMV with no incentive problem on 21/60 seeds (max 3.87% of G_FB)
+  (seed, policy) pairs with multiple pure equilibria: 0 of 38400
+  P_GMV     eq GMV 0.6140  mean f 0.4106  of FB 68.2%  of SB/seed 86.8%  of SB/uniform 96.4%  rank 66/640  multi-eq seeds 0
+  P_robust  eq GMV 0.6154  mean f 0.4069  of FB 68.4%  of SB/seed 87.0%  of SB/uniform 96.7%  rank 59/640  multi-eq seeds 0

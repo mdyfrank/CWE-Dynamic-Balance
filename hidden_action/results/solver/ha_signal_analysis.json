@@ -1,0 +1,809 @@
+{
+ "purpose": "Signal informativeness, detector error rates, posterior calibration, and the monitoring continuum linking the oracle interfaces to the uninformative-signal impossibility result.",
+ "generated": "2026-08-15T00:34:53",
+ "spec": {
+  "m": 4,
+  "alpha": 3.0,
+  "beta": 1.5,
+  "gamma": 1.0,
+  "Q0": 1.0,
+  "eta_r": 0.2,
+  "cs": 0.6,
+  "N_obs": 40,
+  "Nf": 21,
+  "R": 31,
+  "omega": 0.5,
+  "lam": 1.0,
+  "w0": 1.0,
+  "margin_frac": 0.5,
+  "phi_refund": 0.5,
+  "N_audit": 5,
+  "psi0": 0.02,
+  "psi1": 0.25,
+  "erosion": "exp",
+  "appeal": "linear",
+  "b_grid": [
+   0.01,
+   0.019999999999999997,
+   0.03,
+   0.039999999999999994,
+   0.049999999999999996,
+   0.05999999999999999,
+   0.06999999999999999,
+   0.07999999999999999,
+   0.08999999999999998,
+   0.09999999999999998,
+   0.10999999999999997,
+   0.11999999999999998,
+   0.12999999999999998,
+   0.13999999999999999,
+   0.15
+  ],
+  "policies": {
+   "P_GMV": [
+    0.5,
+    0.2
+   ],
+   "P_robust": [
+    4.0,
+    0.3
+   ]
+  },
+  "policy_class_size": 64
+ },
+ "equilibrium_action_distribution": {
+  "source": "results/solver/ha_benchmarks.json, named policies, best equilibrium",
+  "counts": [
+   0,
+   0,
+   1,
+   6,
+   31,
+   95,
+   163,
+   89,
+   12,
+   2,
+   3,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   78
+  ],
+  "mean_f": 0.40875000000000006
+ },
+ "informativeness": {
+  "rows": [
+   {
+    "b": 0.01,
+    "f": 0.0,
+    "fisher_complaints": 363.42051729178405,
+    "fisher_audit": 3.98548136708734,
+    "kl_complaints_next_step": 0.6640399387554935,
+    "kl_audit_next_step": 0.01435123754916513
+   },
+   {
+    "b": 0.01,
+    "f": 0.2,
+    "fisher_complaints": 127.32095506568214,
+    "fisher_audit": 4.800307223504858,
+    "kl_complaints_next_step": 0.1414532325853268,
+    "kl_audit_next_step": 0.005417760964432889
+   },
+   {
+    "b": 0.01,
+    "f": 0.4,
+    "fisher_complaints": 76.80000002336085,
+    "fisher_audit": 2.9592803037695994,
+    "kl_complaints_next_step": 0.09137298253762217,
+    "kl_audit_next_step": 0.0034935992789084376
+   },
+   {
+    "b": 0.01,
+    "f": 0.6,
+    "fisher_complaints": 61.77606178405676,
+    "fisher_audit": 2.2147413184609777,
+    "kl_complaints_next_step": 0.07568132331795054,
+    "kl_audit_next_step": 0.0026664362033845105
+   },
+   {
+    "b": 0.01,
+    "f": 0.8,
+    "fisher_complaints": 57.62304922434237,
+    "fisher_audit": 1.8210955712031265,
+    "kl_complaints_next_step": 0.07204324382757171,
+    "kl_audit_next_step": 0.0022172703243581436
+   },
+   {
+    "b": 0.01,
+    "f": 1.0,
+    "fisher_complaints": 15.132324636788388,
+    "fisher_audit": 0.3963747125181505,
+    "kl_complaints_next_step": 0.0,
+    "kl_audit_next_step": 0.0
+   },
+   {
+    "b": 0.05,
+    "f": 0.0,
+    "fisher_complaints": 75.78085912781647,
+    "fisher_audit": 3.98548136708734,
+    "kl_complaints_next_step": 0.27934869446554356,
+    "kl_audit_next_step": 0.01435123754916513
+   },
+   {
+    "b": 0.05,
+    "f": 0.2,
+    "fisher_complaints": 102.0552800145547,
+    "fisher_audit": 4.800307223504858,
+    "kl_complaints_next_step": 0.11709518708930858,
+    "kl_audit_next_step": 0.005417760964432889
+   },
+   {
+    "b": 0.05,
+    "f": 0.4,
+    "fisher_complaints": 69.93686257000402,
+    "fisher_audit": 2.9592803037695994,
+    "kl_complaints_next_step": 0.0841848363381978,
+    "kl_audit_next_step": 0.0034935992789084376
+   },
+   {
+    "b": 0.05,
+    "f": 0.6,
+    "fisher_complaints": 59.52873088640604,
+    "fisher_audit": 2.2147413184609777,
+    "kl_complaints_next_step": 0.07345567251662215,
+    "kl_audit_next_step": 0.0026664362033845105
+   },
+   {
+    "b": 0.05,
+    "f": 0.8,
+    "fisher_complaints": 57.80810919796231,
+    "fisher_audit": 1.8210955712031265,
+    "kl_complaints_next_step": 0.07274251820561004,
+    "kl_audit_next_step": 0.0022172703243581436
+   },
+   {
+    "b": 0.05,
+    "f": 1.0,
+    "fisher_complaints": 15.824050649296199,
+    "fisher_audit": 0.3963747125181505,
+    "kl_complaints_next_step": 0.0,
+    "kl_audit_next_step": 0.0
+   },
+   {
+    "b": 0.1,
+    "f": 0.0,
+    "fisher_complaints": 39.99786694127516,
+    "fisher_audit": 3.98548136708734,
+    "kl_complaints_next_step": 0.170998802454563,
+    "kl_audit_next_step": 0.01435123754916513
+   },
+   {
+    "b": 0.1,
+    "f": 0.2,
+    "fisher_complaints": 83.91608394977771,
+    "fisher_audit": 4.800307223504858,
+    "kl_complaints_next_step": 0.09875258109538695,
+    "kl_audit_next_step": 0.005417760964432889
+   },
+   {
+    "b": 0.1,
+    "f": 0.4,
+    "fisher_complaints": 64.17112300472647,
+    "fisher_audit": 2.9592803037695994,
+    "kl_complaints_next_step": 0.07814793557951316,
+    "kl_audit_next_step": 0.0034935992789084376
+   },
+   {
+    "b": 0.1,
+    "f": 0.6,
+    "fisher_complaints": 57.97101449738761,
+    "fisher_audit": 2.2147413184609777,
+    "kl_complaints_next_step": 0.07212994910670913,
+    "kl_audit_next_step": 0.0026664362033845105
+   },
+   {
+    "b": 0.1,
+    "f": 0.8,
+    "fisher_complaints": 59.1133004994847,
+    "fisher_audit": 1.8210955712031265,
+    "kl_complaints_next_step": 0.07501812803863298,
+    "kl_audit_next_step": 0.0022172703243581436
+   },
+   {
+    "b": 0.1,
+    "f": 1.0,
+    "fisher_complaints": 17.14266125761339,
+    "fisher_audit": 0.3963747125181505,
+    "kl_complaints_next_step": 0.0,
+    "kl_audit_next_step": 0.0
+   },
+   {
+    "b": 0.15,
+    "f": 0.0,
+    "fisher_complaints": 28.23436412672506,
+    "fisher_audit": 3.98548136708734,
+    "kl_complaints_next_step": 0.12775897292241842,
+    "kl_audit_next_step": 0.01435123754916513
+   },
+   {
+    "b": 0.15,
+    "f": 0.2,
+    "fisher_complaints": 73.05936074925847,
+    "fisher_audit": 4.800307223504858,
+    "kl_complaints_next_step": 0.08746104458721697,
+    "kl_audit_next_step": 0.005417760964432889
+   },
+   {
+    "b": 0.15,
+    "f": 0.4,
+    "fisher_complaints": 60.529634307562596,
+    "fisher_audit": 2.9592803037695994,
+    "kl_complaints_next_step": 0.07442846289810122,
+    "kl_audit_next_step": 0.0034935992789084376
+   },
+   {
+    "b": 0.15,
+    "f": 0.6,
+    "fisher_complaints": 57.62304922532586,
+    "fisher_audit": 2.2147413184609777,
+    "kl_complaints_next_step": 0.0722748294470647,
+    "kl_audit_next_step": 0.0026664362033845105
+   },
+   {
+    "b": 0.15,
+    "f": 0.8,
+    "fisher_complaints": 61.77606178312163,
+    "fisher_audit": 1.8210955712031265,
+    "kl_complaints_next_step": 0.07914494881603112,
+    "kl_audit_next_step": 0.0022172703243581436
+   },
+   {
+    "b": 0.15,
+    "f": 1.0,
+    "fisher_complaints": 19.199692843414386,
+    "fisher_audit": 0.3963747125181505,
+    "kl_complaints_next_step": 0.0,
+    "kl_audit_next_step": 0.0
+   }
+  ],
+  "grid_step": 0.05,
+  "fisher_complaints": {
+   "mean": 71.07254223573864,
+   "min": 15.132324636788388,
+   "max": 363.42051729178405
+  },
+  "fisher_audit": {
+   "mean": 2.696213416090675,
+   "min": 0.3963747125181505,
+   "max": 4.800307223504858
+  },
+  "audit_share_of_total_information": 0.03654953092629284,
+  "note": "Information is highest near f = 0, where the complaint rate is small and a single extra complaint is surprising, and falls as the rate grows. The platform therefore discriminates best exactly where merchants fabricate least -- the opposite of where it needs to."
+ },
+ "detector": {
+  "f_ref": 0.5,
+  "rows": [
+   {
+    "kappa": 0.5,
+    "tau": 0.2,
+    "p_punished_marginal": 0.7296041218044145,
+    "false_positive_rate_on_fully_honest": 0.026804907141644237,
+    "false_positive_rate_below_ref": 0.6748903672059852,
+    "recall_at_or_above_ref": 0.999120024085566,
+    "precision": 0.23108628230808761,
+    "false_negative_rate": 0.0008799759144340058,
+    "auc_complaint_rate": 0.9937156148232632
+   },
+   {
+    "kappa": 4.0,
+    "tau": 0.3,
+    "p_punished_marginal": 0.37695149773117725,
+    "false_positive_rate_on_fully_honest": 0.0005817792678755046,
+    "false_positive_rate_below_ref": 0.2521717322974856,
+    "recall_at_or_above_ref": 0.9916073793119549,
+    "precision": 0.44391319908808624,
+    "false_negative_rate": 0.008392620688045138,
+    "auc_complaint_rate": 0.9937156148232632
+   },
+   {
+    "kappa": 1.0,
+    "tau": 0.05,
+    "p_punished_marginal": 0.9952659410631792,
+    "false_positive_rate_on_fully_honest": 0.552934149439366,
+    "false_positive_rate_below_ref": 0.9943049706451657,
+    "recall_at_or_above_ref": 0.9999996101593203,
+    "precision": 0.16955260624524185,
+    "false_negative_rate": 3.898406797375742e-07,
+    "auc_complaint_rate": 0.9937156148232632
+   },
+   {
+    "kappa": 1.0,
+    "tau": 0.15,
+    "p_punished_marginal": 0.8809117940866718,
+    "false_positive_rate_on_fully_honest": 0.10355634946557467,
+    "false_positive_rate_below_ref": 0.8567651744916736,
+    "recall_at_or_above_ref": 0.9998562535731442,
+    "precision": 0.19153534317860135,
+    "false_negative_rate": 0.0001437464268557731,
+    "auc_complaint_rate": 0.9937156148232632
+   },
+   {
+    "kappa": 4.0,
+    "tau": 0.02,
+    "p_punished_marginal": 0.9998555218140422,
+    "false_positive_rate_on_fully_honest": 0.8686764292680098,
+    "false_positive_rate_below_ref": 0.9998261920563974,
+    "recall_at_or_above_ref": 0.9999999980276255,
+    "precision": 0.1687743838839815,
+    "false_negative_rate": 1.9723744859589942e-09,
+    "auc_complaint_rate": 0.9937156148232632
+   },
+   {
+    "kappa": 8.0,
+    "tau": 0.02,
+    "p_punished_marginal": 0.9998555218140422,
+    "false_positive_rate_on_fully_honest": 0.8686764292680098,
+    "false_positive_rate_below_ref": 0.9998261920563974,
+    "recall_at_or_above_ref": 0.9999999980276255,
+    "precision": 0.1687743838839815,
+    "false_negative_rate": 1.9723744859589942e-09,
+    "auc_complaint_rate": 0.9937156148232632
+   },
+   {
+    "kappa": 16.0,
+    "tau": 0.4,
+    "p_punished_marginal": 0.19869075333656264,
+    "false_positive_rate_on_fully_honest": 2.854831116166166e-06,
+    "false_positive_rate_below_ref": 0.04110665815813678,
+    "recall_at_or_above_ref": 0.9749383332895493,
+    "precision": 0.8280246613385641,
+    "false_negative_rate": 0.025061666710450736,
+    "auc_complaint_rate": 0.9937156148232632
+   }
+  ],
+  "note": "A false positive here is a merchant punished for noise. It is reported per policy because it is the cost side of every deterrence number in this package, and it does not appear anywhere in the GMV objective."
+ },
+ "calibration": {
+  "prior_mean": 0.40875000000000006,
+  "prior_variance": 0.07036093749999998,
+  "expected_posterior_variance": 0.0043710175896994425,
+  "variance_reduction": 0.9378772122003144,
+  "curve": [
+   {
+    "complaints": 0,
+    "p_observed": 0.00014447818593954563,
+    "posterior_mean_f": 0.1948244370330522,
+    "posterior_sd_f": 0.06071352814912987
+   },
+   {
+    "complaints": 2,
+    "p_observed": 0.0036088032947721566,
+    "posterior_mean_f": 0.22763813924782444,
+    "posterior_sd_f": 0.058111991347917606
+   },
+   {
+    "complaints": 4,
+    "p_observed": 0.019606952438161813,
+    "posterior_mean_f": 0.2517390255847436,
+    "posterior_sd_f": 0.05437020608758575
+   },
+   {
+    "complaints": 6,
+    "p_observed": 0.05124941961801813,
+    "posterior_mean_f": 0.2693761651439253,
+    "posterior_sd_f": 0.05164555482540989
+   },
+   {
+    "complaints": 8,
+    "p_observed": 0.08278765760351829,
+    "posterior_mean_f": 0.28286248907471173,
+    "posterior_sd_f": 0.049996726853377416
+   },
+   {
+    "complaints": 10,
+    "p_observed": 0.09352954316126692,
+    "posterior_mean_f": 0.2939538406134126,
+    "posterior_sd_f": 0.049239207182430085
+   },
+   {
+    "complaints": 12,
+    "p_observed": 0.07874311665706914,
+    "posterior_mean_f": 0.3040669413357005,
+    "posterior_sd_f": 0.04943022168739822
+   },
+   {
+    "complaints": 14,
+    "p_observed": 0.05073553519596041,
+    "posterior_mean_f": 0.31446890375782555,
+    "posterior_sd_f": 0.0519585628954229
+   },
+   {
+    "complaints": 16,
+    "p_observed": 0.025268985605885516,
+    "posterior_mean_f": 0.32858772105329903,
+    "posterior_sd_f": 0.0701214318989552
+   },
+   {
+    "complaints": 18,
+    "p_observed": 0.010210674905171267,
+    "posterior_mean_f": 0.3781664622632686,
+    "posterior_sd_f": 0.166388069934826
+   },
+   {
+    "complaints": 20,
+    "p_observed": 0.0050800932197864156,
+    "posterior_mean_f": 0.6412752251031034,
+    "posterior_sd_f": 0.3238845432958897
+   },
+   {
+    "complaints": 22,
+    "p_observed": 0.006652621634796648,
+    "posterior_mean_f": 0.9394553013718757,
+    "posterior_sd_f": 0.18598719098481856
+   },
+   {
+    "complaints": 24,
+    "p_observed": 0.011858246417992773,
+    "posterior_mean_f": 0.994182426273005,
+    "posterior_sd_f": 0.05919750013963023
+   },
+   {
+    "complaints": 26,
+    "p_observed": 0.017085208200731672,
+    "posterior_mean_f": 0.9994647010846952,
+    "posterior_sd_f": 0.0176424001841568
+   },
+   {
+    "complaints": 28,
+    "p_observed": 0.018447648929488962,
+    "posterior_mean_f": 0.9999502822357553,
+    "posterior_sd_f": 0.005263401138631796
+   },
+   {
+    "complaints": 30,
+    "p_observed": 0.014422969453919604,
+    "posterior_mean_f": 0.9999954280775661,
+    "posterior_sd_f": 0.001567604407440973
+   },
+   {
+    "complaints": 32,
+    "p_observed": 0.007652822790504995,
+    "posterior_mean_f": 0.9999995913015917,
+    "posterior_sd_f": 0.0004626420931861791
+   },
+   {
+    "complaints": 34,
+    "p_observed": 0.002476193777554521,
+    "posterior_mean_f": 0.9999999647024959,
+    "posterior_sd_f": 0.00013481098092708966
+   },
+   {
+    "complaints": 36,
+    "p_observed": 0.0004130226839847129,
+    "posterior_mean_f": 0.9999999970466711,
+    "posterior_sd_f": 3.878934145423537e-05
+   },
+   {
+    "complaints": 38,
+    "p_observed": 2.6125472780805927e-05,
+    "posterior_mean_f": 0.9999999997591801,
+    "posterior_sd_f": 1.1040600947485626e-05
+   },
+   {
+    "complaints": 40,
+    "p_observed": 2.5855693822943684e-07,
+    "posterior_mean_f": 0.9999999999807496,
+    "posterior_sd_f": 3.115245598750295e-06
+   }
+  ],
+  "note": "One round of 40 audited transactions leaves substantial residual uncertainty about the hidden action. Any risk hint the platform shows a merchant must be phrased at this resolution, which is why the assistance arm states signal levels and policy consequences rather than an inferred fabrication rate."
+ },
+ "monitoring_continuum": {
+  "seeds": [
+   70000,
+   70019
+  ],
+  "n_seeds": 20,
+  "N_obs_grid": [
+   10,
+   20,
+   40,
+   80,
+   160
+  ],
+  "cs_grid": [
+   0.0,
+   0.15,
+   0.3,
+   0.6,
+   1.0
+  ],
+  "rows": [
+   {
+    "N_obs": 10,
+    "cs": 0.0,
+    "G_FB": 0.8841835802360786,
+    "G_NP": 0.3441737770265679,
+    "G_SB_P": 0.34970974197029625,
+    "ratio_SB_over_FB": 0.3961346171594641,
+    "ratio_NP_over_FB": 0.3895978426317827,
+    "implementation_power": 0.010769803402871956,
+    "mean_f_at_SB": 1.0
+   },
+   {
+    "N_obs": 10,
+    "cs": 0.15,
+    "G_FB": 0.8818262224576493,
+    "G_NP": 0.34417377702656793,
+    "G_SB_P": 0.43079577785820555,
+    "ratio_SB_over_FB": 0.4843995339057705,
+    "ratio_NP_over_FB": 0.3907464366134896,
+    "implementation_power": 0.15263668549935674,
+    "mean_f_at_SB": 0.755
+   },
+   {
+    "N_obs": 10,
+    "cs": 0.3,
+    "G_FB": 0.8818262224576257,
+    "G_NP": 0.34417377702656216,
+    "G_SB_P": 0.5419820311066232,
+    "ratio_SB_over_FB": 0.608961739396454,
+    "ratio_NP_over_FB": 0.39074643661349484,
+    "implementation_power": 0.35852940209161643,
+    "mean_f_at_SB": 0.52
+   },
+   {
+    "N_obs": 10,
+    "cs": 0.6,
+    "G_FB": 0.8818262224576259,
+    "G_NP": 0.3441737770265625,
+    "G_SB_P": 0.6501416435041504,
+    "ratio_SB_over_FB": 0.7338510236372924,
+    "ratio_NP_over_FB": 0.39074643661349534,
+    "implementation_power": 0.5637391173931026,
+    "mean_f_at_SB": 0.33062500000000006
+   },
+   {
+    "N_obs": 10,
+    "cs": 1.0,
+    "G_FB": 0.8822913633338464,
+    "G_NP": 0.344173777026568,
+    "G_SB_P": 0.6550656766315498,
+    "ratio_SB_over_FB": 0.7382274043313964,
+    "ratio_NP_over_FB": 0.39053932692542576,
+    "implementation_power": 0.5708214950804853,
+    "mean_f_at_SB": 0.328125
+   },
+   {
+    "N_obs": 20,
+    "cs": 0.0,
+    "G_FB": 0.8862093598991884,
+    "G_NP": 0.34417377702656815,
+    "G_SB_P": 0.3513618433093218,
+    "ratio_SB_over_FB": 0.3970976201673933,
+    "ratio_NP_over_FB": 0.38869039092546587,
+    "implementation_power": 0.01378270453234299,
+    "mean_f_at_SB": 1.0
+   },
+   {
+    "N_obs": 20,
+    "cs": 0.15,
+    "G_FB": 0.8828418160436717,
+    "G_NP": 0.34417377702656804,
+    "G_SB_P": 0.48465745455896486,
+    "ratio_SB_over_FB": 0.544170142567007,
+    "ratio_NP_over_FB": 0.39032074836682645,
+    "implementation_power": 0.25196547358944266,
+    "mean_f_at_SB": 0.6412500000000001
+   },
+   {
+    "N_obs": 20,
+    "cs": 0.3,
+    "G_FB": 0.8828418160436629,
+    "G_NP": 0.34417377702656937,
+    "G_SB_P": 0.6138829115855869,
+    "ratio_SB_over_FB": 0.6909295727271434,
+    "ratio_NP_over_FB": 0.3903207483668323,
+    "implementation_power": 0.4937202034059405,
+    "mean_f_at_SB": 0.39875000000000005
+   },
+   {
+    "N_obs": 20,
+    "cs": 0.6,
+    "G_FB": 0.8830943499374506,
+    "G_NP": 0.34417377702657226,
+    "G_SB_P": 0.6651468560274948,
+    "ratio_SB_over_FB": 0.7501951184491736,
+    "ratio_NP_over_FB": 0.3902089426073685,
+    "implementation_power": 0.5914529004212021,
+    "mean_f_at_SB": 0.30750000000000005
+   },
+   {
+    "N_obs": 20,
+    "cs": 1.0,
+    "G_FB": 0.8844465475731,
+    "G_NP": 0.344173777026568,
+    "G_SB_P": 0.6707155971022553,
+    "ratio_SB_over_FB": 0.753251933512014,
+    "ratio_NP_over_FB": 0.3895987609637999,
+    "implementation_power": 0.5958866061482179,
+    "mean_f_at_SB": 0.30250000000000005
+   },
+   {
+    "N_obs": 40,
+    "cs": 0.0,
+    "G_FB": 0.888928475444408,
+    "G_NP": 0.3441737770265513,
+    "G_SB_P": 0.3536127878870753,
+    "ratio_SB_over_FB": 0.39838129139555295,
+    "ratio_NP_over_FB": 0.38746746689389816,
+    "implementation_power": 0.017777285110753962,
+    "mean_f_at_SB": 1.0
+   },
+   {
+    "N_obs": 40,
+    "cs": 0.15,
+    "G_FB": 0.8844126103703267,
+    "G_NP": 0.34417377702650276,
+    "G_SB_P": 0.5703135890261276,
+    "ratio_SB_over_FB": 0.6404753266318683,
+    "ratio_NP_over_FB": 0.3896278645321177,
+    "implementation_power": 0.41141122342223324,
+    "mean_f_at_SB": 0.47875000000000006
+   },
+   {
+    "N_obs": 40,
+    "cs": 0.3,
+    "G_FB": 0.8844126103703032,
+    "G_NP": 0.34417377702650154,
+    "G_SB_P": 0.6611495487595452,
+    "ratio_SB_over_FB": 0.7441385894065627,
+    "ratio_NP_over_FB": 0.389627864532128,
+    "implementation_power": 0.5813671977838094,
+    "mean_f_at_SB": 0.320625
+   },
+   {
+    "N_obs": 40,
+    "cs": 0.6,
+    "G_FB": 0.8852970094073005,
+    "G_NP": 0.34417377702650803,
+    "G_SB_P": 0.6820426887972633,
+    "ratio_SB_over_FB": 0.7670072386239793,
+    "ratio_NP_over_FB": 0.3892336497297484,
+    "implementation_power": 0.6188837123488504,
+    "mean_f_at_SB": 0.28562499999999996
+   },
+   {
+    "N_obs": 40,
+    "cs": 1.0,
+    "G_FB": 0.8871867014285574,
+    "G_NP": 0.344173777026568,
+    "G_SB_P": 0.6810257296451041,
+    "ratio_SB_over_FB": 0.7628183553868387,
+    "ratio_NP_over_FB": 0.3884241401000959,
+    "implementation_power": 0.6124607743659801,
+    "mean_f_at_SB": 0.28500000000000003
+   },
+   {
+    "N_obs": 80,
+    "cs": 0.0,
+    "G_FB": 0.8921831879026332,
+    "G_NP": 0.34417377702652974,
+    "G_SB_P": 0.35546973191907166,
+    "ratio_SB_over_FB": 0.39892559993291066,
+    "ratio_NP_over_FB": 0.3860310908756389,
+    "implementation_power": 0.020877117844922792,
+    "mean_f_at_SB": 1.0
+   },
+   {
+    "N_obs": 80,
+    "cs": 0.15,
+    "G_FB": 0.8866272899430738,
+    "G_NP": 0.3441737770265284,
+    "G_SB_P": 0.6289437679608885,
+    "ratio_SB_over_FB": 0.7054571427377676,
+    "ratio_NP_over_FB": 0.3886547627165092,
+    "implementation_power": 0.5190212784584467,
+    "mean_f_at_SB": 0.3818750000000001
+   },
+   {
+    "N_obs": 80,
+    "cs": 0.3,
+    "G_FB": 0.8867675728321645,
+    "G_NP": 0.3441737770265072,
+    "G_SB_P": 0.6778721273200501,
+    "ratio_SB_over_FB": 0.7608322373023115,
+    "ratio_NP_over_FB": 0.38859301088403486,
+    "implementation_power": 0.6092483669110815,
+    "mean_f_at_SB": 0.29500000000000004
+   },
+   {
+    "N_obs": 80,
+    "cs": 0.6,
+    "G_FB": 0.8878664041734308,
+    "G_NP": 0.3441737770265403,
+    "G_SB_P": 0.6884998068633456,
+    "ratio_SB_over_FB": 0.772431637977008,
+    "ratio_NP_over_FB": 0.38810088911414287,
+    "implementation_power": 0.6287759017476988,
+    "mean_f_at_SB": 0.27374999999999994
+   },
+   {
+    "N_obs": 80,
+    "cs": 1.0,
+    "G_FB": 0.8899327843381011,
+    "G_NP": 0.344173777026568,
+    "G_SB_P": 0.6899179216443508,
+    "ratio_SB_over_FB": 0.7726210859103471,
+    "ratio_NP_over_FB": 0.3872480903240862,
+    "implementation_power": 0.6298719433929911,
+    "mean_f_at_SB": 0.270625
+   },
+   {
+    "N_obs": 160,
+    "cs": 0.0,
+    "G_FB": 0.8941414367352476,
+    "G_NP": 0.34417377702664476,
+    "G_SB_P": 0.35735542144826765,
+    "ratio_SB_over_FB": 0.4002078216242052,
+    "ratio_NP_over_FB": 0.38527694167366244,
+    "implementation_power": 0.024075353000398616,
+    "mean_f_at_SB": 1.0
+   },
+   {
+    "N_obs": 160,
+    "cs": 0.15,
+    "G_FB": 0.8877215591359692,
+    "G_NP": 0.3441737770265182,
+    "G_SB_P": 0.64383723292703,
+    "ratio_SB_over_FB": 0.7216709612391681,
+    "ratio_NP_over_FB": 0.3882698188009287,
+    "implementation_power": 0.5457597275470765,
+    "mean_f_at_SB": 0.358125
+   },
+   {
+    "N_obs": 160,
+    "cs": 0.3,
+    "G_FB": 0.8884184370284034,
+    "G_NP": 0.3441737770265277,
+    "G_SB_P": 0.6839248478549705,
+    "ratio_SB_over_FB": 0.7666810186538471,
+    "ratio_NP_over_FB": 0.3879529980173424,
+    "implementation_power": 0.6194254732001594,
+    "mean_f_at_SB": 0.28500000000000003
+   },
+   {
+    "N_obs": 160,
+    "cs": 0.6,
+    "G_FB": 0.8902453975572673,
+    "G_NP": 0.34417377702654794,
+    "G_SB_P": 0.6913081580122671,
+    "ratio_SB_over_FB": 0.7736237007704587,
+    "ratio_NP_over_FB": 0.3871361754075435,
+    "implementation_power": 0.6314821444005804,
+    "mean_f_at_SB": 0.27125
+   },
+   {
+    "N_obs": 160,
+    "cs": 1.0,
+    "G_FB": 0.8924416713645822,
+    "G_NP": 0.344173777026568,
+    "G_SB_P": 0.6943313419363829,
+    "ratio_SB_over_FB": 0.775286733287241,
+    "ratio_NP_over_FB": 0.38621718459245313,
+    "implementation_power": 0.6348551217041752,
+    "mean_f_at_SB": 0.264375
+   }
+  ],
+  "implementation_power_definition": "(G_SB_P - G_NP) / (G_FB - G_NP): the fraction of the gap between doing nothing and first best that a signal-contingent policy in the finite class can actually close. 0 at cs = 0 by Proposition 6.",
+  "note": "This scan is the quantitative form of the claim that the earlier oracle interfaces are the perfect-monitoring endpoint of the same model, not a different model."
+ },
+ "runtime_seconds": 825.9
+}

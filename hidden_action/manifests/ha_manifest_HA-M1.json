@@ -1,0 +1,141 @@
+{
+  "manifest_id": "HA-M1",
+  "schema_version": "ha-manifest-1",
+  "title": "Hidden-action equilibrium under signal-based reputation and penalty design",
+  "frozen_utc": "2026-08-15T00:00:00Z",
+  "frozen_before_any_llm_call": true,
+  "supersedes": null,
+  "distinct_from": {
+    "branch": "azure-llm-handoff",
+    "note": "Different manifest id, different seed block, different checkpoint layout and different output path. No file, seed or results directory of the earlier handoff is read, written or overwritten by this package."
+  },
+
+  "research_question": "The platform does not observe merchants' true fabrication and cannot display counterfactual payoffs across fabrication rates. It can publish a policy and return feedback built only from what it observes. Can it thereby bring LLM merchants to a stable hidden-action equilibrium, and what fraction of theoretically attainable GMV is reached?",
+
+  "design": {
+    "unit_of_inference": "market seed",
+    "models": ["gemma", "llama"],
+    "model_notes": "Aliases only. The alias to deployment mapping is supplied by environment variables at run time and is never stored in this repository.",
+    "arms": ["A0_oracle", "A1_policy", "A2_history", "A3_assist"],
+    "arm_roles": {
+      "A0_oracle": "Upper-bound control. The merchant is shown the exact stationary payoff table across all 21 fabrication rates. NOT implementable by a real platform; retained only to bound what the information itself is worth.",
+      "A1_policy": "Published policy only. The merchant knows the penalty rule and its own state, and nothing else.",
+      "A2_history": "A1 plus the merchant's own observable history window.",
+      "A3_assist": "A2 plus platform assistance generated ONLY from platform-observable fields: policy explanation, arithmetic of its own last penalty, threshold warnings, a compliance hint, and one economic retry."
+    },
+    "policies": {
+      "P_GMV": {"kappa": 0.5, "tau": 0.20, "kappa_a": 0.0, "tau_a": 0.0},
+      "P_robust": {"kappa": 4.0, "tau": 0.30, "kappa_a": 0.0, "tau_a": 0.0}
+    },
+    "seed_block": {
+      "name": "HA-M1",
+      "start": 70000,
+      "count": 60,
+      "end_inclusive": 70059,
+      "verified_unused": true,
+      "note": "Checked against every seed block used by earlier studies in this repository line. Market draws use base 1000; common random numbers use base 500000; the two streams cannot alias."
+    },
+    "rounds": 80,
+    "merchants_per_market": 4,
+    "action_grid": {"n": 21, "from": 0.0, "to": 1.0, "step": 0.05},
+    "r_init": 0.5,
+    "temperature": 0
+  },
+
+  "tiers": {
+    "note": "Both tiers are fixed here, BEFORE any result exists. The choice between them is a budget decision to be made and recorded before the analyser is run even once. Tier B is a strict subset of Tier A in both seeds and rounds: seeds are a prefix of the block, and the common random numbers are drawn at a fixed horizon and sliced, so a 40-round trajectory is exactly the 80-round trajectory truncated. Results from the two tiers are therefore poolable and a downgrade never becomes a different experiment.",
+    "A_full": {"seeds": 60, "rounds": 80, "cells": 960, "base_decisions": 307200},
+    "B_reduced": {"seeds": 40, "rounds": 40, "cells": 640, "base_decisions": 102400,
+                  "seed_range": "70000-70039",
+                  "permitted_reason": "API budget or wall-clock only. Never a result-dependent reason."}
+  },
+
+  "cost_model": {
+    "cells_tier_A": 960,
+    "cells_formula": "2 models x 4 arms x 2 policies x 60 seeds",
+    "base_decisions_tier_A": 307200,
+    "base_decisions_formula": "960 cells x 80 rounds x 4 merchants",
+    "economic_retry_upper_bound": 74880,
+    "economic_retry_formula": "240 A3 cells x 78 eligible rounds x 4 merchants; fires only when the merchant's own complaint rate exceeded tau in each of its last two recorded rounds",
+    "schema_repair_budget_per_decision": 2,
+    "expected_api_calls_range": [307200, 382080],
+    "central_estimate_api_calls": 340000,
+    "note": "One API call is one decision attempt. Transport-level HTTP retries are additional and are counted separately; they are not decisions."
+  },
+
+  "information_classes": {
+    "enforced_by": "ha_infoclass.py",
+    "merchant_private": "Own honest quality q_i, own baseline complaint propensity b_i, own price, own past actions, own realised profit and own observable history.",
+    "platform_observable": "Own sampled transactions, complaints, refunds, audit flags, reputation before and after, penalty applied, round index, published kappa/tau/kappa_a/tau_a, published category traffic index.",
+    "evaluator_only": "True fabrication of any merchant, rivals' quality or baseline propensity, the displayed payoff table, its argmax, regret, the latent complaint probability theta, the latent audit probability psi, and every benchmark quantity.",
+    "positive_control": "A0_oracle is built to receive an evaluator-only object and MUST fail the invariance probe. A leak detector that never fires on an arm designed to leak has not been shown to work."
+  },
+
+  "primary_metrics": [
+    "hidden_action_equilibrium_regret",
+    "exploitability_against_the_realised_rival_profile",
+    "tail_action_stability_last_20_rounds",
+    "lock_time_to_stable_action",
+    "terminal_fabrication_rate_distribution",
+    "realised_merchant_profit",
+    "realised_platform_GMV",
+    "G_LLM_over_G_SB_P",
+    "G_SB_P_over_G_FB",
+    "G_LLM_over_G_FB",
+    "complaint_and_audit_signal_calibration",
+    "false_positive_punishment_rate",
+    "false_negative_detection_rate",
+    "oracle_minus_nonoracle_arm_gap"
+  ],
+
+  "comparison": {
+    "pairing": "By market seed. Every arm, policy and model plays the identical market draw and the identical uniform noise.",
+    "interval": "Paired bootstrap over market seeds, 10000 resamples, seed 20260815, percentile method.",
+    "multiplicity": "Benjamini-Hochberg across the preregistered primary comparisons at q = 0.05.",
+    "primary_contrasts": [
+      "A3_assist vs A1_policy, within model and policy",
+      "A2_history vs A1_policy, within model and policy",
+      "A0_oracle vs A3_assist, within model and policy",
+      "P_robust vs P_GMV, within model and arm"
+    ]
+  },
+
+  "stopping_rules": {
+    "no_interim_peeking": "The analyser is not run on partial LLM data for any purpose other than operational health, which is read from the progress files and never from the metric summaries.",
+    "cell_failure": "A cell is retried at most twice. A cell that still fails is recorded as failed and excluded, and the exclusion count is reported alongside every affected metric.",
+    "abort": "If more than 5 percent of cells fail, the run stops and the cause is reported rather than the remainder being analysed.",
+    "no_threshold_adjustment": "The thresholds and contrasts above are frozen. If the evidence is negative it is reported as negative."
+  },
+
+  "declared_visible_channels": {
+    "note": "Two channels are visible by construction and are declared here so they cannot later be presented as discoveries.",
+    "traffic_index": "The published category traffic index Q = Q0 exp(-lambda * mean f) is invertible in the market-average action. It is retained because without it the four merchants face independent decision problems and the word equilibrium would be empty. The lambda/m term of the deviation identity already accounts for it.",
+    "own_type": "Each merchant sees its own q_i and b_i. That is precisely why the platform cannot rebuild the payoff table, and so it is the substance of the hidden-action assumption rather than a leak."
+  },
+
+  "what_this_design_cannot_show": [
+    "It cannot establish equilibrium from a stable fabrication rate alone. Stability is necessary and not sufficient; the regret and exploitability metrics carry that burden.",
+    "It cannot claim a global second best. Every second-best quantity here is relative to the stated finite policy class and must be called policy-class second best.",
+    "It cannot demonstrate autonomous learning or strategic adaptation without direct evidence from an environment with identifiable strategic interaction.",
+    "It cannot license the statement that a ratio near or above one means the theoretical global maximum GMV was reached."
+  ],
+
+  "artefacts": {
+    "raw": "hidden_action/results/raw/{alias}__{arm}__{policy}__s{seed}.json.gz",
+    "attempts": "hidden_action/results/attempts/attempts.jsonl",
+    "progress": "hidden_action/results/progress/{progress.jsonl,state.json,errors.jsonl}",
+    "provenance": "hidden_action/results/progress/provenance_{mode}.json",
+    "summaries": "hidden_action/results/summaries/",
+    "validation": "hidden_action/results/validation/",
+    "solver": "hidden_action/results/solver/"
+  },
+
+  "commands": {
+    "offline_tests": "python hidden_action/offline_tests/run_offline_tests.py",
+    "smoke": "python hidden_action/code/to_run.py --mode smoke",
+    "plan": "python hidden_action/code/to_run.py --mode main --plan",
+    "main": "python hidden_action/code/to_run.py --mode main",
+    "analyse": "python hidden_action/code/ha_analyze.py",
+    "validate": "python hidden_action/code/ha_validate.py"
+  }
+}

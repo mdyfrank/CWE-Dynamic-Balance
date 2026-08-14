@@ -1,0 +1,95 @@
+{
+  "schema_version": "ha-validation-1",
+  "generated_utc": "2026-08-14T18:03:18Z",
+  "raw_dir": "..\\results\\raw_smoke",
+  "summaries_dir": "..\\results\\summaries\\smoke",
+  "n_cells": 32,
+  "n_metric_records": 32,
+  "n_checks_run": 12,
+  "n_pass": 12,
+  "all_pass": true,
+  "seconds": 0.2,
+  "checks": [
+    {
+      "check": "V1_cell_integrity",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V2_accounting_identity",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V3_reputation_recursion",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V4_signal_bounds",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V5_action_grid",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V6_crn_reproducible",
+      "pass": true,
+      "n_signals_checked": 512,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V7_metric_recomputation",
+      "pass": true,
+      "n_cells_recomputed": 32,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V8_benchmark_alignment",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V9_manifest_conformance",
+      "pass": true,
+      "n_violations": 0,
+      "n_cells": 32,
+      "distinct_horizons": [
+        4
+      ],
+      "note": "all cells share one horizon",
+      "violations": []
+    },
+    {
+      "check": "V10_counter_separation",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    },
+    {
+      "check": "V11_prompt_hygiene",
+      "pass": true,
+      "prompts_scanned": 32,
+      "n_violations": 0,
+      "violations": [],
+      "note": "Only arm A0_oracle is permitted to carry the payoff table, and it is declared evaluator-only there rather than scanned as a secret."
+    },
+    {
+      "check": "V12_claim_traceability",
+      "pass": true,
+      "n_violations": 0,
+      "violations": []
+    }
+  ]
+}
