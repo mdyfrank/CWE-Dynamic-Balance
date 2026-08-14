@@ -1,0 +1,177 @@
+{
+ "built": "2026-08-14T12:55:32",
+ "files": {
+  "code/azure_transport.py": "c7d27239119016f343e8b0ff6d3e85fa2e9a07ef1d6fd7dc53bd0f4f98a57dd6",
+  "code/balance8_runner.py": "cc1eb4451e45576a64d6b100b8850f848bf0761341180663913438d54efc349a",
+  "code/balance9_prereg_freeze.py": "6ecbb7d4edd82aab29a052b3b5df496fa12e5d5d48316c72e5c586da3a31df24",
+  "code/balance9_prompts.py": "9e19cfdc6a41ae397ee356ac579bace8f50518f71649a7068569258b03e8652f",
+  "code/balance9_ratspec.py": "d0ff1d52ab5ef8b475935eeab4387149458ff9726ef54f5a67a8589528f11220",
+  "code/balance9_runner.py": "034860bd3575010907865da33c1325ff277399cdc92dc12d2cb4805f5614dfac",
+  "code/balance9_validate.py": "16efb27d43e09dbb2e72248c394b902b137cf677aaf27294312a8f569f3c47fe",
+  "code/equilibrium.py": "faa66150598ff0a6f2e8225509ca8689d4931ccf131445ca600e4e2bf0ae32ff",
+  "code/hetero.py": "37cc7501c7d4b14bd3ec2a7adb25538e10c382ab2f3e161cd26e7e2eb678e84f",
+  "code/hetero_policy_audit.py": "a268fbdc4f1c1431f54ac8898f1012e155ae1fa7a28fda77974c027f5728d9e6",
+  "code/phase2_exploitability.py": "c75f39326e3b474859fcca2fede53b3015c2a04dbe7b0a44390e7dfbab1ca0ba",
+  "code/phase2_framing_controlled.py": "80ae0507bceb497d40d5e0683d5a8505c584a2e0142e1c6e943eba10d6e9b5c2",
+  "code/phase2_llm.py": "40f673b3c749878e8c95d1c7b98a9653c91766bf3aa35117d7c9f13a363c46fd",
+  "input_data/BALANCE9_PREREGISTRATION.md": "459e798f617850f1fb389e1db788da83033a4713e35272af6ff359653ce6013a",
+  "input_data/BALANCE9_PROTOCOL.md": "df82aaba123ec0a6f42fb314eb68bded3d7cae59c7894c8f78805c8b367cf251",
+  "input_data/balance9_prompt_hashes.json": "e68483bd071d47b00fba70cc85a03a39496223c17c2072b8c6a02de5249dd11a",
+  "input_data/catalog_types.json": "c16c50563f0232d068190143fe22ce1e42369d16d0e72a30432df870b089fbf5",
+  "input_data/prior_seeds.json": "aa69d519fc7766b0f8b0ae85d9f45547bf0a0db464bfdbd8ddbc7b21e4a1c7b8",
+  "offline_tests/run_offline_tests.py": "b1173047b47606b3e76a6e62611ee859239da7d08ed91de83fce861ccd380c10",
+  "requirements.txt": "d6dbbf23ae5bc1a36ce03bff242ebb8e52bc7ca182eda54ca3d7bc6a27dfc5f9",
+  "to_run.py": "ca36338d28f4a1bff091bcb37f899f69305e043d9e43d8ba65ba1f05b034dc2b"
+ },
+ "n_files": 21,
+ "provenance": {
+  "code/azure_transport.py": {
+   "bytes": 26922,
+   "frozen": false,
+   "identical_to_source": null,
+   "sha256": "c7d27239119016f343e8b0ff6d3e85fa2e9a07ef1d6fd7dc53bd0f4f98a57dd6",
+   "source": "written for this package"
+  },
+  "code/balance8_runner.py": {
+   "bytes": 57634,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "cc1eb4451e45576a64d6b100b8850f848bf0761341180663913438d54efc349a",
+   "source": "balance8_runner.py"
+  },
+  "code/balance9_prereg_freeze.py": {
+   "bytes": 60138,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "6ecbb7d4edd82aab29a052b3b5df496fa12e5d5d48316c72e5c586da3a31df24",
+   "source": "balance9_prereg_freeze.py"
+  },
+  "code/balance9_prompts.py": {
+   "bytes": 38957,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "9e19cfdc6a41ae397ee356ac579bace8f50518f71649a7068569258b03e8652f",
+   "source": "balance9_prompts.py"
+  },
+  "code/balance9_ratspec.py": {
+   "bytes": 8574,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "d0ff1d52ab5ef8b475935eeab4387149458ff9726ef54f5a67a8589528f11220",
+   "source": "balance9_ratspec.py"
+  },
+  "code/balance9_runner.py": {
+   "bytes": 52019,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "034860bd3575010907865da33c1325ff277399cdc92dc12d2cb4805f5614dfac",
+   "source": "balance9_runner.py"
+  },
+  "code/balance9_validate.py": {
+   "bytes": 107918,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "16efb27d43e09dbb2e72248c394b902b137cf677aaf27294312a8f569f3c47fe",
+   "source": "balance9_validate.py"
+  },
+  "code/equilibrium.py": {
+   "bytes": 24359,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "faa66150598ff0a6f2e8225509ca8689d4931ccf131445ca600e4e2bf0ae32ff",
+   "source": "equilibrium.py"
+  },
+  "code/hetero.py": {
+   "bytes": 7752,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "37cc7501c7d4b14bd3ec2a7adb25538e10c382ab2f3e161cd26e7e2eb678e84f",
+   "source": "hetero.py"
+  },
+  "code/hetero_policy_audit.py": {
+   "bytes": 13095,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "a268fbdc4f1c1431f54ac8898f1012e155ae1fa7a28fda77974c027f5728d9e6",
+   "source": "hetero_policy_audit.py"
+  },
+  "code/phase2_exploitability.py": {
+   "bytes": 6342,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "c75f39326e3b474859fcca2fede53b3015c2a04dbe7b0a44390e7dfbab1ca0ba",
+   "source": "phase2_exploitability.py"
+  },
+  "code/phase2_framing_controlled.py": {
+   "bytes": 23053,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "80ae0507bceb497d40d5e0683d5a8505c584a2e0142e1c6e943eba10d6e9b5c2",
+   "source": "phase2_framing_controlled.py"
+  },
+  "code/phase2_llm.py": {
+   "bytes": 18427,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "40f673b3c749878e8c95d1c7b98a9653c91766bf3aa35117d7c9f13a363c46fd",
+   "source": "phase2_llm.py"
+  },
+  "input_data/BALANCE9_PREREGISTRATION.md": {
+   "bytes": 49007,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "459e798f617850f1fb389e1db788da83033a4713e35272af6ff359653ce6013a",
+   "source": "BALANCE9_PREREGISTRATION.md"
+  },
+  "input_data/BALANCE9_PROTOCOL.md": {
+   "bytes": 46479,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "df82aaba123ec0a6f42fb314eb68bded3d7cae59c7894c8f78805c8b367cf251",
+   "source": "BALANCE9_PROTOCOL.md"
+  },
+  "input_data/balance9_prompt_hashes.json": {
+   "bytes": 40502,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "e68483bd071d47b00fba70cc85a03a39496223c17c2072b8c6a02de5249dd11a",
+   "source": "data/balance9_prompt_hashes.json"
+  },
+  "input_data/catalog_types.json": {
+   "bytes": 75374,
+   "frozen": true,
+   "identical_to_source": true,
+   "sha256": "c16c50563f0232d068190143fe22ce1e42369d16d0e72a30432df870b089fbf5",
+   "source": "data/catalog_types.json"
+  },
+  "input_data/prior_seeds.json": {
+   "bytes": 5126,
+   "frozen": false,
+   "identical_to_source": null,
+   "sha256": "aa69d519fc7766b0f8b0ae85d9f45547bf0a0db464bfdbd8ddbc7b21e4a1c7b8",
+   "source": "written for this package"
+  },
+  "offline_tests/run_offline_tests.py": {
+   "bytes": 36071,
+   "frozen": false,
+   "identical_to_source": null,
+   "sha256": "b1173047b47606b3e76a6e62611ee859239da7d08ed91de83fce861ccd380c10",
+   "source": "written for this package"
+  },
+  "requirements.txt": {
+   "bytes": 861,
+   "frozen": false,
+   "identical_to_source": null,
+   "sha256": "d6dbbf23ae5bc1a36ce03bff242ebb8e52bc7ca182eda54ca3d7bc6a27dfc5f9",
+   "source": "written for this package"
+  },
+  "to_run.py": {
+   "bytes": 49954,
+   "frozen": false,
+   "identical_to_source": null,
+   "sha256": "ca36338d28f4a1bff091bcb37f899f69305e043d9e43d8ba65ba1f05b034dc2b",
+   "source": "written for this package"
+  }
+ },
+ "purpose": "Byte identity of every file this package runs. to_run.py re-checks these before any Azure request; a mismatch aborts the run, because a changed prompt or constant turns a replication into a different experiment wearing the same name."
+}

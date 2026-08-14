@@ -1,0 +1,93 @@
+{
+ "experiment": "B9-P3-AZURE",
+ "title": "Fresh Azure replication of the Balance-9 P3 llama matrix",
+ "provider": "Azure AI Foundry",
+ "model": {
+  "expected": "Llama-3.3-70B-Instruct",
+  "openrouter_counterpart": "meta-llama/llama-3.3-70b-instruct",
+  "substitution_forbidden": [
+   "quantised builds (AWQ/GPTQ/GGUF/int4/int8/fp8)",
+   "community rebuilds",
+   "any other parameter count",
+   "any other Llama version"
+  ],
+  "identity_checked_on": "the first live response, before any raw record is written"
+ },
+ "design": {
+  "policies": [
+   "P_GMV",
+   "P_robust"
+  ],
+  "interfaces": [
+   "U",
+   "H",
+   "R",
+   "G"
+  ],
+  "seed_block": "B9-P3",
+  "seeds": [
+   9000,
+   9059
+  ],
+  "n_seeds": 60,
+  "rounds": 80,
+  "merchants": 4,
+  "runs": 480,
+  "launch_order": [
+   [
+    1,
+    [
+     "U",
+     "H"
+    ]
+   ],
+   [
+    2,
+    [
+     "R"
+    ]
+   ],
+   [
+    3,
+    [
+     "G"
+    ]
+   ]
+  ],
+  "launch_order_note": "the LLM restriction of preregistration 5.1 wave order (M, O, U, H | R | G); M and O call no model and are not run"
+ },
+ "constants": {
+  "NIDX": 20,
+  "ETA": 0.01,
+  "TAU_TIE": 1e-12,
+  "OMEGA": 0.5,
+  "LAM": 1.0,
+  "ZETA": 0.2,
+  "MAX_ECON_RETRY": 2,
+  "SCHEMA_REPAIR": 2,
+  "TRANSPORT_RETRIES": 6,
+  "P_GMV": [
+   0.5,
+   0.2
+  ],
+  "P_robust": [
+   4.0,
+   0.3
+  ]
+ },
+ "separation": {
+  "openrouter_results": "untouched; this package neither reads them for writing nor merges with them",
+  "azure_output": "results/raw/balance9_azure_p3_llama_raw.jsonl",
+  "merge_policy": "Azure runs must be reported as a standalone replication. Do NOT append them to the incomplete OpenRouter llama cells."
+ },
+ "join_keys": {
+  "raw": "run_key + round + merchants[].j",
+  "attempts": "run_key + round + j (decision_key)",
+  "run_id_map": "results/logs/run_id_map.json"
+ },
+ "environment": {
+  "built_on": "Windows-10-10.0.19043-SP0",
+  "python": "3.12.9"
+ },
+ "built": "2026-08-14T12:55:32"
+}

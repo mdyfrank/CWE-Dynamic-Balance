@@ -1,0 +1,14 @@
+# Everything the run produces stays local. The collaborator sends results back as the archive from
+# results/final_delivery/, not as a commit.
+results/**
+# the directories must be re-included first: git does not descend into an excluded directory, so
+# without this line the .gitkeep rule below would never be reached
+!results/**/
+!results/**/.gitkeep
+
+# Placed at run time by gate A-V2 from input_data/catalog_types.json, and verified against the
+# manifest. Shipping it twice would create a second file whose hash could disagree with the first.
+code/data/
+
+__pycache__/
+*.pyc

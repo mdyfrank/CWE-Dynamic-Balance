@@ -1,0 +1,135 @@
+{
+ "passed": 18,
+ "purpose": "Result of the offline test suite as run by the package author before shipping, on a tree with no placed catalogue and no results -- i.e. exactly what a fresh clone looks like. No socket was opened and no Azure request was made. Re-run it yourself with: python azure_handoff/offline_tests/run_offline_tests.py",
+ "python": "3.12.9",
+ "results": [
+  {
+   "detail": "21 files verified; 16 frozen abort on drift, 5 package-own recorded and continue",
+   "error": "",
+   "ok": true,
+   "seconds": 0.1,
+   "test": "T1  vendored code is byte-identical to the frozen originals"
+  },
+  {
+   "detail": "22 prompt hashes identical (incl. module::source)",
+   "error": "",
+   "ok": true,
+   "seconds": 0.58,
+   "test": "T2  published prompt hashes reproduce exactly"
+  },
+  {
+   "detail": "35/35 runner gates",
+   "error": "",
+   "ok": true,
+   "seconds": 14.53,
+   "test": "T3  balance9_runner gates G-R1..G-R10"
+  },
+  {
+   "detail": "14/14 design gates",
+   "error": "",
+   "ok": true,
+   "seconds": 0.21,
+   "test": "T4  design gates re-derived from the preregistration"
+  },
+  {
+   "detail": "5 endpoints routed, 2 refusals, 2 URL shapes",
+   "error": "",
+   "ok": true,
+   "seconds": 0.02,
+   "test": "T5  Azure route selection is explicit, never guessed"
+  },
+  {
+   "detail": "3 accepted, 8 refused, override honoured only on exact match",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T6  model identity refuses quantised / wrong models"
+  },
+  {
+   "detail": "6 samples redacted, patterns hold without registration",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T7  credential redaction"
+  },
+  {
+   "detail": "3-tuple contract, frozen payload, 24 attempt fields",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T8  transport honours the frozen transport_call contract"
+  },
+  {
+   "detail": "429/500 retried to 7, 401/402/403/404/400 stopped at 1, filter -> error",
+   "error": "",
+   "ok": true,
+   "seconds": 0.03,
+   "test": "T9  retry budget, hard-stop statuses, content filter"
+  },
+  {
+   "detail": "quantised build refused, verdict recorded, attempt logged as failed",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T10 identity gate aborts before anything is written"
+  },
+  {
+   "detail": "16 runs, 48 rounds, validator 3906/3906 with 0 failures, 48 G overrides, 96 R econ-retries, 407 attempts joined",
+   "error": "",
+   "ok": true,
+   "seconds": 9.11,
+   "test": "T11 end-to-end 16-run mock matrix through the frozen runner"
+  },
+  {
+   "detail": "290 bytes identical, prefix guard kept",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T12 durable writer is byte-identical to the frozen writer"
+  },
+  {
+   "detail": "trap confirmed; both-handle patch survives selftest",
+   "error": "",
+   "ok": true,
+   "seconds": 1.72,
+   "test": "T13 selftest does not silently revert the transport patch"
+  },
+  {
+   "detail": "openrouter key reachable=True; patched transport is azure_transport",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T14 no OpenRouter call is reachable from the patched path"
+  },
+  {
+   "detail": "306 prior seeds, range 1000-7699, 0 overlap with 9000-9059",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T15 seed-freshness supplement is real and disjoint"
+  },
+  {
+   "detail": "14 members, extraction verified, cost left null not guessed",
+   "error": "",
+   "ok": true,
+   "seconds": 0.02,
+   "test": "T16 packaging builds an archive that extracts to its hashes"
+  },
+  {
+   "detail": "4 invocations; --validate-only and --package-results exit before any transport exists",
+   "error": "",
+   "ok": true,
+   "seconds": 0.0,
+   "test": "T17 exactly four CLI invocations; read-only modes cannot call"
+  },
+  {
+   "detail": "scanned 49 files, 0 findings",
+   "error": "",
+   "ok": true,
+   "seconds": 0.05,
+   "test": "T18 no credential-shaped string anywhere in the package"
+  }
+ ],
+ "total": 18,
+ "when": "2026-08-14T12:55:04"
+}

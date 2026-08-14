@@ -1,0 +1,8 @@
+# Byte identity is the whole point of this package. to_run.py refuses to start if any frozen file's
+# SHA-256 differs from manifests/vendored_sha256.json, and git's end-of-line translation is a silent
+# byte change: with core.autocrlf=true (the Windows default) every .py and .md here would arrive with
+# CRLF, every hash would differ, and gate A-V1 would abort a perfectly honest clone.
+#
+# So: no translation, in either direction, for anything in this directory. What was committed is what
+# is checked out, on every platform.
+* -text

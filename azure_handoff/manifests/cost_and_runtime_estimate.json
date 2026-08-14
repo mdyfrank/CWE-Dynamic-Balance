@@ -1,0 +1,68 @@
+{
+ "purpose": "Expected calls, tokens, wall-clock and cost for the 480-run Azure matrix. Every figure is extrapolated from the OpenRouter llama cells that DID complete, not from a guess.",
+ "measured_basis": {
+  "source": "data/balance9_p3_raw.jsonl, llama LLM-arm records only (U/H/R/G)",
+  "completed_runs_measured": 382,
+  "calls_measured": 129991,
+  "prompt_tokens_measured": 152949362,
+  "completion_tokens_measured": 5203512,
+  "mean_prompt_tokens_per_call": 1176.62,
+  "mean_completion_tokens_per_call": 40.03,
+  "mean_total_tokens_per_call": 1216.64,
+  "mean_latency_s_per_call": 1.894,
+  "calls_per_decision": 1.0634,
+  "note": "calls_per_decision exceeds 1 because of economic retries (R, G) and schema repairs. It is measured, not assumed."
+ },
+ "per_cell_projection": {
+  "llama|U|P_GMV": {"runs": 60, "calls": 19205, "basis": "measured, complete cell"},
+  "llama|U|P_robust": {"runs": 60, "calls": 19212, "basis": "measured, complete cell"},
+  "llama|H|P_GMV": {"runs": 60, "calls": 19204, "basis": "measured, complete cell"},
+  "llama|H|P_robust": {"runs": 60, "calls": 19202, "basis": "measured, complete cell"},
+  "llama|R|P_GMV": {"runs": 60, "calls": 20825, "basis": "measured, complete cell"},
+  "llama|R|P_robust": {"runs": 60, "calls": 24557, "basis": "measured, complete cell"},
+  "llama|G|P_GMV": {"runs": 60, "calls": 21235, "basis": "extrapolated from the 22 completed seeds (7786 calls / 22 = 353.9 calls per run)"},
+  "llama|G|P_robust": {"runs": 60, "calls": 24815, "basis": "never run on OpenRouter; scaled from llama|R|P_robust by the gemma G/R ratio at P_robust (37567/37177 = 1.0105)"}
+ },
+ "totals": {
+  "runs": 480,
+  "rounds": 38400,
+  "decisions": 153600,
+  "expected_calls": 168255,
+  "expected_prompt_tokens": 197969000,
+  "expected_completion_tokens": 6735000,
+  "expected_total_tokens": 204704000,
+  "uncertainty": "+/- about 3 percent on calls; the two G cells are the extrapolated ones and together are 27 percent of the total"
+ },
+ "runtime": {
+  "formula_hours": "16.47 * mean_call_latency_s / seed_workers",
+  "derivation": "168255 calls at the measured concurrency efficiency of the OpenRouter run (aggregate per-run wall 112356 s at 6 concurrent seeds). Within a round all 4 merchants are called in parallel and the round cannot advance until the slowest returns, which is why the effective speed-up is 1.41x short of the naive 4 x seed_workers.",
+  "table_hours": {
+   "seed_workers=4, latency=1.9s": 7.8,
+   "seed_workers=6, latency=1.9s": 5.2,
+   "seed_workers=6, latency=3.0s": 8.2,
+   "seed_workers=6, latency=5.0s": 13.7,
+   "seed_workers=12, latency=1.9s": 2.6,
+   "seed_workers=12, latency=3.0s": 4.1
+  },
+  "default_seed_workers": 6,
+  "recommendation": "Start with the default 6. Raise it only if your Azure deployment's tokens-per-minute quota can absorb roughly 1.3 million tokens per minute per 6 workers at 1.9 s latency; otherwise 429s will throttle you back anyway and the retry budget will absorb them.",
+  "interruption": "The run is resumable at seed granularity, so it does not need to finish in one sitting. --max-seconds stops cleanly between cells."
+ },
+ "cost": {
+  "method": "cost = prompt_tokens/1e6 * input_rate + completion_tokens/1e6 * output_rate",
+  "expected_prompt_tokens_millions": 197.97,
+  "expected_completion_tokens_millions": 6.74,
+  "illustrative_only": {
+   "at $0.71 per 1M in and out": 145.3,
+   "at $1.50 in / $2.00 out": 310.4,
+   "at $2.68 in / $3.54 out": 554.4
+  },
+  "warning": "These three rows are ILLUSTRATIVE ARITHMETIC, not quoted Azure prices. Llama-3.3-70B-Instruct pricing on Azure AI Foundry varies by region and by whether the deployment is serverless (pay-per-token) or provisioned. Read your own rate card, then set AZURE_PRICE_PER_1M_INPUT and AZURE_PRICE_PER_1M_OUTPUT so that results/summaries/usage_and_cost.json reports the real number instead of null.",
+  "dominant_term": "Input tokens are 97 percent of the volume. The prompt carries a 21-row payoff table every round, so cost scales with rounds x merchants x runs and is almost independent of how verbose the model is."
+ },
+ "what_would_change_these_numbers": [
+  "A higher schema-repair rate than OpenRouter's (Azure may format differently under response_format=json_object), which would raise calls_per_decision above the measured 1.0634.",
+  "Content-filter rejections, which are logged as transport errors and retried, and which do not exist in the OpenRouter baseline at all.",
+  "Rate-limit 429s, which cost wall clock but not tokens."
+ ]
+}

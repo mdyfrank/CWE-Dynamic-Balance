@@ -1,0 +1,16 @@
+# Python 3.11 or newer (built and tested on 3.12.9).
+#
+# numpy      the payoff tables, the RNG streams and the tie rule
+# matplotlib imported at module level by hetero.py / hetero_policy_audit.py /
+#            phase2_exploitability.py, which balance9_runner imports. It draws nothing during a run;
+#            it is listed rather than stripped because removing the import would change the vendored
+#            files, and byte identity with the OpenRouter half is the point of this package.
+# azure-identity  only needed if you authenticate with DefaultAzureCredential instead of
+#            AZURE_AI_API_KEY. Harmless to install either way.
+#
+# The Azure call itself uses the standard library (urllib), so there is no azure-ai-inference or
+# openai SDK version to pin and no SDK-side retry to reason about.
+
+numpy>=1.24
+matplotlib>=3.5
+azure-identity>=1.15
