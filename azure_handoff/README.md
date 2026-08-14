@@ -63,7 +63,8 @@ python azure_handoff/to_run.py --package-results    # writes results/final_deliv
 ```
 
 Send back everything in `azure_handoff/results/final_delivery/` — in particular
-`balance9_azure_p3_llama_results.tar.gz` and `SHA256SUMS.json`.
+`balance9_azure_p3_llama_results.tar.gz` and `SHA256SUMS.json`. Expect roughly 80 MB; send it by file
+transfer or shared drive rather than committing it to git.
 
 ## 7. Input data
 
