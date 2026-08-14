@@ -1,9 +1,9 @@
 """to_run.py -- the only runner in this package.
 
-    python azure_handoff/to_run.py                  start
-    python azure_handoff/to_run.py --resume         continue an interrupted run
-    python azure_handoff/to_run.py --validate-only  validate what is already on disk
-    python azure_handoff/to_run.py --package-results build the final delivery archive
+    python to_run.py                  start
+    python to_run.py --resume         continue an interrupted run
+    python to_run.py --validate-only  validate what is already on disk
+    python to_run.py --package-results build the final delivery archive
 
 WHAT THIS RUNS
     A fresh Azure replication of the Balance-9 P3 llama matrix:
@@ -935,7 +935,7 @@ def main():
         f"{art['cells_complete']}/{art['cells_total']}   raw {art['raw_bytes'] / 1e6:.1f} MB")
     log(f"transport: {json.dumps(tx.stats(), sort_keys=True)}")
     if finished and art["runs_done"] == art["runs_target"]:
-        log("matrix COMPLETE -- now run:  python azure_handoff/to_run.py --package-results")
+        log("matrix COMPLETE -- now run:  python to_run.py --package-results")
     else:
         log("matrix INCOMPLETE -- rerun with --resume to continue")
 

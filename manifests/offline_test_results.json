@@ -1,27 +1,27 @@
 {
  "passed": 18,
- "purpose": "Result of the offline test suite as run by the package author before shipping, on a tree with no placed catalogue and no results -- i.e. exactly what a fresh clone looks like. No socket was opened and no Azure request was made. Re-run it yourself with: python azure_handoff/offline_tests/run_offline_tests.py",
+ "purpose": "Result of the offline test suite as run by the package author before shipping, on a tree with no placed catalogue and no results -- i.e. exactly what a fresh clone looks like. No socket was opened and no Azure request was made. Re-run it yourself from the repository root with: python offline_tests/run_offline_tests.py",
  "python": "3.12.9",
  "results": [
   {
    "detail": "21 files verified; 16 frozen abort on drift, 5 package-own recorded and continue",
    "error": "",
    "ok": true,
-   "seconds": 0.1,
+   "seconds": 0.13,
    "test": "T1  vendored code is byte-identical to the frozen originals"
   },
   {
    "detail": "22 prompt hashes identical (incl. module::source)",
    "error": "",
    "ok": true,
-   "seconds": 0.58,
+   "seconds": 0.55,
    "test": "T2  published prompt hashes reproduce exactly"
   },
   {
    "detail": "35/35 runner gates",
    "error": "",
    "ok": true,
-   "seconds": 14.53,
+   "seconds": 14.16,
    "test": "T3  balance9_runner gates G-R1..G-R10"
   },
   {
@@ -77,7 +77,7 @@
    "detail": "16 runs, 48 rounds, validator 3906/3906 with 0 failures, 48 G overrides, 96 R econ-retries, 407 attempts joined",
    "error": "",
    "ok": true,
-   "seconds": 9.11,
+   "seconds": 8.66,
    "test": "T11 end-to-end 16-run mock matrix through the frozen runner"
   },
   {
@@ -91,7 +91,7 @@
    "detail": "trap confirmed; both-handle patch survives selftest",
    "error": "",
    "ok": true,
-   "seconds": 1.72,
+   "seconds": 1.68,
    "test": "T13 selftest does not silently revert the transport patch"
   },
   {
@@ -123,7 +123,7 @@
    "test": "T17 exactly four CLI invocations; read-only modes cannot call"
   },
   {
-   "detail": "scanned 49 files, 0 findings",
+   "detail": "scanned 51 files, 0 findings",
    "error": "",
    "ok": true,
    "seconds": 0.05,
@@ -131,5 +131,5 @@
   }
  ],
  "total": 18,
- "when": "2026-08-14T12:55:04"
+ "when": "2026-08-14T13:04:57"
 }

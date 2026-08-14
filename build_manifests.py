@@ -53,6 +53,18 @@ def sha256_file(p: Path) -> str:
 
 
 def main():
+    # This tool only means anything next to the sources it is checking against. In the delivered
+    # repository SRC points at whatever happens to sit above the checkout, every source file is
+    # missing, and the drift check below would report all 16 vendored files as drifted -- a confusing
+    # way to say "you are not in the source repository". Say that instead.
+    if not any((SRC / s).exists() for _, s in VENDORED):
+        raise SystemExit(
+            "build_manifests.py is a build tool for the SOURCE repository, where the originals of the\n"
+            "vendored files live one directory up. None of them are present next to this checkout, so\n"
+            "there is nothing to check byte identity against.\n"
+            "The collaborator never needs to run this: manifests/vendored_sha256.json is already built,\n"
+            "and to_run.py verifies it on every start.")
+
     files, provenance, drift = {}, {}, []
     for rel, src_rel in VENDORED:
         p, s = HERE / rel, SRC / src_rel

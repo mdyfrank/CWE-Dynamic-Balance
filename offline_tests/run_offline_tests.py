@@ -1,6 +1,6 @@
 """run_offline_tests.py -- everything that can be proved without spending an Azure call.
 
-    python azure_handoff/offline_tests/run_offline_tests.py
+    python offline_tests/run_offline_tests.py
 
 Nothing here opens a socket. The Azure transport is exercised through its `dry_run_hook`, which
 replaces the single `urllib` POST with a scripted response, so the retry logic, the redaction, the
@@ -675,7 +675,7 @@ def T18_no_secret_in_the_package():
 # =================================================================================================
 def main():
     print("=" * 108)
-    print("azure_handoff offline tests -- nothing here opens a socket")
+    print("Balance-9 P3 Azure offline tests -- nothing here opens a socket")
     print("=" * 108)
     tests = [
         ("T1  vendored code is byte-identical to the frozen originals", T1_vendored_integrity),
