@@ -31,7 +31,7 @@ branch.
 | N9 | Signal informativeness, calibration, detector rates, monitoring continuum | **DONE** | `results/solver/ha_signal_analysis.json` | complaint-count posterior cuts variance in `f` by 93.8%; audit Fisher information is 1.1–14.1% of the complaint channel's (median 3.8%) across the 24 `(b, f)` cells |
 | N10 | Oracle-dependency audit of the earlier design | **DONE** | `theory/ORACLE_DEPENDENCY_AUDIT.md` | three instruments identified as unimplementable, cited to frozen line numbers |
 | N11 | Hidden-action theory with proofs | **DONE** | `theory/HIDDEN_ACTION_THEORY.md` | P1–P10, each with a falsifier and a traceability key |
-| N12 | Offline test suite | **DONE** | `results/validation/offline_tests.json` | **14/14 PASS**, 134.9 s |
+| N12 | Offline test suite | **DONE** | `results/validation/offline_tests.json` | **14/14 PASS**, 143.9 s |
 | N13 | Mock end-to-end rehearsal | **DONE** | regenerable by `--mode smoke` | 32/32 cells, resume makes 0 calls |
 | N14 | Analyser and validator exercised on mock data | **DONE** | `results/validation/validation_smoke.json` | **12/12 PASS**; 512 signals rebuilt from seeds alone |
 
@@ -214,13 +214,24 @@ python code/ha_benchmarks.py --seeds 70000-70059              # 64 policies  [ 7
 python code/ha_benchmarks.py --seeds 70000-70059 --extended   # 640 policies [733 s]
 python code/ha_theory_check.py                                # 12 checks    [ 75 s]
 python code/ha_signal_analysis.py                             #              [826 s]
-python offline_tests/run_offline_tests.py                     # 14 tests     [135 s]
-python code/to_run.py --mode smoke                            # 32 cells     [ 57 s]
+python offline_tests/run_offline_tests.py                     # 14 tests     [145 s]
+python code/to_run.py --mode smoke                            # 32 cells     [1.3 s]
 ```
 
 The first four are ordered: `ha_theory_check.py` and `ha_signal_analysis.py` both read
 `ha_benchmarks.json` and exit with a message if it is missing. Total, about 33 minutes.
 
+Almost all of the offline suite's 145 s is deliberate retry backoff in `mock_smoke` (60 s) and
+`retry_counters_separate` (75 s), which drive a mock backend that returns malformed responses on
+purpose. The smoke run itself is 1.3 s because nothing there has to fail and be retried.
+
 `ha_benchmarks_extended.json.gz` is committed compressed because it is 15.9 MB raw and nothing reads
 it programmatically; `ha_benchmarks.json` is committed uncompressed because the analyser, the
 validator, the theory checker and the signal analyser all open it by that exact path.
+
+The accompanying `ha_benchmarks_extended.log` is the record of that run and is left exactly as it was
+written, so its last line still names an absolute path containing `hidden_action\` and the
+uncompressed `.json` filename — both from before the package moved to the branch root and the
+artefact was gzipped. Rewriting a log to agree with a later reorganisation would make the provenance
+worse, not better. It is the only stale path anywhere in the tree; everything the code opens is
+resolved relative to the file that opens it.

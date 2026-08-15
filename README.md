@@ -5,7 +5,9 @@
 arm A3's economic retries. See `manifests/ha_manifest_HA-M1.json` for the frozen design and
 `PROTOCOL.md` for what the experiment is.
 
-All commands below are run from the root of this repository.
+All commands below are run from the root of this repository. Everything that could be checked
+without a key has been checked already and the evidence is committed under `results/validation/`,
+so there is nothing to verify before you start.
 
 ## 1. Install
 
@@ -38,15 +40,7 @@ reports a name that does not contain the expected tokens, set `HA_ALLOW_MODEL_GE
 
 Nothing here is stored in this repository.
 
-## 3. Check before you spend anything
-
-```bash
-python offline_tests/run_offline_tests.py     # 14 tests, no key, no network   [~135 s]
-python code/to_run.py --mode main --plan      # the matrix and the cost, writes nothing
-python code/to_run.py --mode smoke            # the whole pipeline on a mock backend [~57 s]
-```
-
-## 4. Start
+## 3. Start
 
 ```bash
 python code/to_run.py --mode main
@@ -56,19 +50,22 @@ To continue after any interruption, run the same command again. Completed cells 
 the transport is touched, so a resumed run costs nothing for work already done. Ctrl-C is safe; at
 most the one cell in flight is lost.
 
-## 5. Progress
+Add `--plan` to print the matrix and the call count and exit without writing anything, if you want
+to see the size of the job before committing to it.
+
+## 4. Progress
 
 Live: `results/progress/progress.jsonl` and `results/progress/state.json`
 (cells done / target, per-arm counts, transport and token totals).
 Errors: `results/progress/errors.jsonl`.
 
-## 6. Results
+## 5. Results
 
 - raw: `results/raw/{model}__{arm}__{policy}__s{seed}.json.gz`, one per cell, 960 files
 - per-call log: `results/attempts/attempts.jsonl`
 - summaries: `results/summaries/`
 
-## 7. Validate and package
+## 6. Validate and package
 
 ```bash
 python code/ha_analyze.py       # writes results/summaries/
@@ -81,12 +78,12 @@ every complaint, refund and audit count from the market seed alone.
 Send back everything in `results/raw/` and `results/summaries/`. Expect roughly 100 MB; send it by
 file transfer or shared drive rather than committing it to git.
 
-## 8. Input data
+## 7. Input data
 
 Not compressed; no extraction step is needed. Everything the run reads is already in `input_data/`,
 `manifests/` and `code/`.
 
-## 9. If the budget is short
+## 8. If the budget is short
 
 ```bash
 python code/to_run.py --mode main --tier B_reduced    # 640 cells, 40 seeds x 40 rounds
