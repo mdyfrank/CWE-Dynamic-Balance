@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """run_offline_tests.py -- everything that can be checked without spending a single API call.
 
-    python hidden_action/offline_tests/run_offline_tests.py
-    python hidden_action/offline_tests/run_offline_tests.py --quick     (skips the mock matrix)
+    python offline_tests/run_offline_tests.py
+    python offline_tests/run_offline_tests.py --quick     (skips the mock matrix)
 
 This is the gate that stands in front of the paid run. If any test here fails, the experiment as
 specified is not the experiment the code would execute, and running it would produce numbers that

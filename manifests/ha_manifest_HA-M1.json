@@ -121,21 +121,21 @@
   ],
 
   "artefacts": {
-    "raw": "hidden_action/results/raw/{alias}__{arm}__{policy}__s{seed}.json.gz",
-    "attempts": "hidden_action/results/attempts/attempts.jsonl",
-    "progress": "hidden_action/results/progress/{progress.jsonl,state.json,errors.jsonl}",
-    "provenance": "hidden_action/results/progress/provenance_{mode}.json",
-    "summaries": "hidden_action/results/summaries/",
-    "validation": "hidden_action/results/validation/",
-    "solver": "hidden_action/results/solver/"
+    "raw": "results/raw/{alias}__{arm}__{policy}__s{seed}.json.gz",
+    "attempts": "results/attempts/attempts.jsonl",
+    "progress": "results/progress/{progress.jsonl,state.json,errors.jsonl}",
+    "provenance": "results/progress/provenance_{mode}.json",
+    "summaries": "results/summaries/",
+    "validation": "results/validation/",
+    "solver": "results/solver/"
   },
 
   "commands": {
-    "offline_tests": "python hidden_action/offline_tests/run_offline_tests.py",
-    "smoke": "python hidden_action/code/to_run.py --mode smoke",
-    "plan": "python hidden_action/code/to_run.py --mode main --plan",
-    "main": "python hidden_action/code/to_run.py --mode main",
-    "analyse": "python hidden_action/code/ha_analyze.py",
-    "validate": "python hidden_action/code/ha_validate.py"
+    "offline_tests": "python offline_tests/run_offline_tests.py",
+    "smoke": "python code/to_run.py --mode smoke",
+    "plan": "python code/to_run.py --mode main --plan",
+    "main": "python code/to_run.py --mode main",
+    "analyse": "python code/ha_analyze.py",
+    "validate": "python code/ha_validate.py"
   }
 }

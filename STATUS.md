@@ -5,7 +5,7 @@ exact cell count, seed block, manifest and target output path it will produce. N
 done because the code for it exists; a row is `DONE` only when the artefact is in `results/`.
 
 Manifest under which all of this is frozen: `manifests/ha_manifest_HA-M1.json`,
-sha256 `65ad45f6e378814af63d40b7d8d3158b9ae8e3f7ca021bd9a3f866e52958b3db`. That hash is written into
+sha256 `adf8a76ebc8e337093c5b5e4cc82a456f984d67098fa3a3913b2fc4d617eae6b`. That hash is written into
 the provenance record of every run, so a silently edited manifest is visible in the results.
 
 ---
@@ -72,9 +72,9 @@ Nothing in this section has been run. No API call has been made under manifest H
 | Decisions | **307,200** |
 | API calls | **307,200 – 382,080** (the upper end is arm A3's economic retries) |
 | Models | Gemma 3 27B, Llama 3.3 70B; temperature 0 |
-| Manifest | `manifests/ha_manifest_HA-M1.json` @ `65ad45f6…` |
-| Command | `python hidden_action/code/to_run.py --mode main` |
-| Target raw output | `hidden_action/results/raw/*.json.gz`, one per cell, 960 files |
+| Manifest | `manifests/ha_manifest_HA-M1.json` @ `adf8a76e…` |
+| Command | `python code/to_run.py --mode main` |
+| Target raw output | `results/raw/*.json.gz`, one per cell, 960 files |
 | Target progress | `results/progress/{progress.jsonl, state.json, errors.jsonl, provenance_*.json}` |
 | Target attempts | `results/attempts/attempts.jsonl`, one line per transport attempt |
 | Then | `ha_analyze.py` → `results/summaries/`, `ha_validate.py` → `results/validation/validation.json` |
@@ -88,7 +88,7 @@ Nothing in this section has been run. No API call has been made under manifest H
 | Seed block | 70000–70039, a **prefix** of HA-M1 |
 | Rounds | 40 |
 | Decisions | **102,400** |
-| Command | `python hidden_action/code/to_run.py --mode main --tier B_reduced` |
+| Command | `python code/to_run.py --mode main --tier B_reduced` |
 
 B_reduced is a **strict subset** of A_full, not a different experiment: the seeds are a prefix, and
 the common random numbers are drawn at a fixed horizon of 120 rounds and sliced, so a 40-round
@@ -162,8 +162,8 @@ cannot collide even if they are executed on the same machine at the same time.
 |---|---|---|
 | Manifest | balance-9 manifest | `ha_manifest_HA-M1.json` |
 | Seed block | earlier blocks | 70000–70059 |
-| Output path | `www_project/results/` | `hidden_action/results/` |
-| Checkpoint | that package's state file | `hidden_action/results/progress/state.json` |
+| Output path | `www_project/results/` | `results/` |
+| Checkpoint | that package's state file | `results/progress/state.json` |
 
 ---
 
@@ -207,12 +207,12 @@ which breaks one thing per cell and requires the matching check to turn red.
 No key, no network, no cost. Wall-clock on a laptop in brackets.
 
 ```bash
-python hidden_action/code/ha_benchmarks.py --seeds 70000-70059              # 64 policies  [ 75 s]
-python hidden_action/code/ha_benchmarks.py --seeds 70000-70059 --extended   # 640 policies [733 s]
-python hidden_action/code/ha_theory_check.py                                # 12 checks    [ 75 s]
-python hidden_action/code/ha_signal_analysis.py                             #              [826 s]
-python hidden_action/offline_tests/run_offline_tests.py                     # 14 tests     [135 s]
-python hidden_action/code/to_run.py --mode smoke                            # 32 cells     [ 57 s]
+python code/ha_benchmarks.py --seeds 70000-70059              # 64 policies  [ 75 s]
+python code/ha_benchmarks.py --seeds 70000-70059 --extended   # 640 policies [733 s]
+python code/ha_theory_check.py                                # 12 checks    [ 75 s]
+python code/ha_signal_analysis.py                             #              [826 s]
+python offline_tests/run_offline_tests.py                     # 14 tests     [135 s]
+python code/to_run.py --mode smoke                            # 32 cells     [ 57 s]
 ```
 
 The first four are ordered: `ha_theory_check.py` and `ha_signal_analysis.py` both read

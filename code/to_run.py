@@ -330,7 +330,7 @@ def main(argv=None) -> int:
         missing = [v for v in ("HA_ENDPOINT", "HA_API_KEY") if not os.environ.get(v)]
         if missing and not os.environ.get("HA_ENDPOINT_GEMMA"):
             print(f"\nmissing environment: {', '.join(missing)}")
-            print("See hidden_action/README.md. Credentials are never stored in this repository.")
+            print("See README.md. Credentials are never stored in this repository.")
             return 2
 
     identity = []

@@ -271,7 +271,7 @@ Every statement above is checkable from artefacts in this branch:
 | `H` marks `argmax_min_index(v)` | `www_project/balance9_prompts.py:186-188` |
 | `R` reports `v[i_chosen]` and the relative shortfall | `www_project/balance9_prompts.py:204-218`, `balance9_runner.py:333` |
 | `G` substitutes the argmax | `www_project/balance9_runner.py:93,152-153,336` |
-| Displayed table = best-response payoff; fixed points are Nash | `hidden_action/code/ha_theory_check.py::p8b_oracle_reduction`; `results/solver/ha_theory_checks.json` check `P8b_oracle_reduction`, 120/120 |
+| Displayed table = best-response payoff; fixed points are Nash | `code/ha_theory_check.py::p8b_oracle_reduction`; `results/solver/ha_theory_checks.json` check `P8b_oracle_reduction`, 120/120 |
 | Pure equilibria exist and are unique here | same file, check `P1_existence`: 3840 pairs, 0 with zero, 0 with multiple |
 | GMV benchmarks that replace M6 | `results/solver/ha_benchmarks.json`, `results/solver/ha_benchmarks_extended.json.gz` |
 

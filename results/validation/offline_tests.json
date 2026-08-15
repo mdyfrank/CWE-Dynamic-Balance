@@ -1,12 +1,12 @@
 {
   "schema_version": "ha-offline-tests-1",
-  "utc": "2026-08-14T18:15:03Z",
+  "utc": "2026-08-15T03:47:32Z",
   "n_tests": 14,
   "n_pass": 14,
   "all_pass": true,
-  "seconds": 134.9,
+  "seconds": 143.9,
   "git": {
-    "commit": "2f22899bc588b1d8ea4144f12ef80c6bb561ba44",
+    "commit": "cc06b9b3737e3a2ec0319342a307bf8fdb846092",
     "branch": "exp/hidden-action-handoff-20260815",
     "dirty": true
   },
@@ -16,13 +16,13 @@
     "ha_prompts.py": "f18458f1645f2ad5",
     "ha_transport.py": "dfcba28f41843ab8",
     "ha_runner.py": "ba991753bccb33ec",
-    "to_run.py": "bc16ee0781df7992"
+    "to_run.py": "be5c8dec78fc76ed"
   },
   "results": [
     {
       "pass": true,
       "manifest_id": "HA-M1",
-      "sha256": "65ad45f6e378814a",
+      "sha256": "adf8a76ebc8e3370",
       "problems": [],
       "test": "manifest_matches_code",
       "seconds": 0.0
@@ -54,7 +54,7 @@
         "retry_path": true
       },
       "test": "transport_selftest",
-      "seconds": 3.71
+      "seconds": 3.36
     },
     {
       "pass": true,
@@ -90,7 +90,7 @@
       ],
       "hits": [],
       "test": "no_credentials_in_repo",
-      "seconds": 0.01
+      "seconds": 0.02
     },
     {
       "pass": true,
@@ -100,14 +100,14 @@
       "api_calls": 768,
       "transport_retries": 54,
       "test": "mock_smoke",
-      "seconds": 54.65
+      "seconds": 63.31
     },
     {
       "pass": true,
       "second_run_api_calls": 0,
       "second_run_skipped": 8,
       "test": "resume_idempotence",
-      "seconds": 0.11
+      "seconds": 0.1
     },
     {
       "pass": true,
@@ -123,7 +123,7 @@
       "differing": [],
       "note": "arms differ in what the merchant is shown, never in what the harness does",
       "test": "harness_neutrality",
-      "seconds": 0.73
+      "seconds": 0.74
     },
     {
       "pass": true,
@@ -165,7 +165,7 @@
         "decisions": 320
       },
       "test": "retry_counters_separate",
-      "seconds": 74.1
+      "seconds": 74.74
     },
     {
       "pass": true,
@@ -192,7 +192,7 @@
         "V10_counter_separation": false
       },
       "test": "validator_catches_corruption",
-      "seconds": 0.74
+      "seconds": 0.76
     }
   ]
 }
