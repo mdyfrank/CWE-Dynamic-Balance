@@ -1,0 +1,13 @@
+# Byte-identical checkouts on every platform.
+#
+# The manifest sha256 quoted in STATUS.md and in the reports, and the per-file
+# code_sha256_prefix that to_run.py writes into the provenance record of every
+# run, are hashes of the working-tree bytes. Without this file a Windows clone
+# checks out CRLF and every one of those hashes changes, so two collaborators
+# running identical code would record different provenance. Pinning eol=lf keeps
+# the quoted hashes reproducible everywhere.
+#
+# text=auto still detects binary content and leaves it untouched; the .gz
+# artefact is marked binary explicitly as well.
+* text=auto eol=lf
+*.gz binary

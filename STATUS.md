@@ -6,7 +6,10 @@ done because the code for it exists; a row is `DONE` only when the artefact is i
 
 Manifest under which all of this is frozen: `manifests/ha_manifest_HA-M1.json`,
 sha256 `adf8a76ebc8e337093c5b5e4cc82a456f984d67098fa3a3913b2fc4d617eae6b`. That hash is written into
-the provenance record of every run, so a silently edited manifest is visible in the results.
+the provenance record of every run, so a silently edited manifest is visible in the results. It is a
+hash of the file's bytes, and `.gitattributes` pins `eol=lf`, so a checkout on Windows reproduces it
+too; without that pin a CRLF checkout would change this value and every `code_sha256_prefix` in the
+provenance record without a single character of content having changed.
 
 ---
 
