@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """ha_validate.py -- an independent check on everything the analyser claims.
 
-    python ha_validate.py                                      # results/raw + results/summaries
-    python ha_validate.py --raw ../results/raw_smoke --summaries ../results/summaries/smoke
+Run from the root of the repository:
+
+    python code/ha_validate.py                                 # results/raw + results/summaries
+    python code/ha_validate.py --raw results/raw_smoke --summaries results/summaries/smoke
 
 This deliberately does NOT import ha_analyze. Where it checks a number the analyser produced, it
 recomputes that number from the raw cells with its own arithmetic and compares. A validator that

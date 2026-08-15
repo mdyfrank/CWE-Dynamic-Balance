@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """ha_analyze.py -- raw cells to the preregistered metrics.
 
-    python ha_analyze.py                                   # results/raw  -> results/summaries
-    python ha_analyze.py --raw ../results/raw_smoke --out ../results/summaries/smoke
+Run from the root of the repository:
+
+    python code/ha_analyze.py                              # results/raw  -> results/summaries
+    python code/ha_analyze.py --raw results/raw_smoke --out results/summaries/smoke
 
 Reads only `results/raw/*.json.gz` and the solver benchmarks, and writes three artefacts:
 

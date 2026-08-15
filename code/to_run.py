@@ -377,10 +377,11 @@ def main(argv=None) -> int:
                   f"threshold. Report the cause rather than analysing the remainder.")
     print("=" * 96)
     if args.mode == "smoke":
-        print("\nsmoke complete. Next:")
-        print("  python ha_analyze.py --raw ../results/raw_smoke --out ../results/summaries/smoke")
-        print("  python ha_validate.py --raw ../results/raw_smoke "
-              "--summaries ../results/summaries/smoke")
+        print("\nsmoke complete. Next, from the root of the repository:")
+        print("  python code/ha_analyze.py --raw results/raw_smoke "
+              "--out results/summaries/smoke")
+        print("  python code/ha_validate.py --raw results/raw_smoke "
+              "--summaries results/summaries/smoke")
     return 0 if summary["failed"] == 0 else 1
 
 
