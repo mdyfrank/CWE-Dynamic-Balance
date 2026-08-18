@@ -422,6 +422,18 @@ Against it, the two named policies do well: \(P_{\mathrm{GMV}}\) reaches **97.1%
 per-seed figure the same policies read 87.5% and 87.6%. Both are correct; they answer different
 questions; the report states which.
 
+**\(G^{\mathrm{SB}}_{\mathcal P,\text{unif}}\) is selected in sample, and that is worth 2.1 points.**
+The single policy \((\kappa,\tau)=(2.0,0.30)\) is chosen by maximising the mean over the same 60 seeds
+it is then scored on, so 0.6326 is an in-sample optimum, not an out-of-sample guarantee.
+Leave-one-out — choose the policy on 59 seeds, score it on the held-out one — gives **0.6140**, i.e.
+**68.4%** of \(G^{\mathrm{FB}}\) rather than 70.5%; the selection premium is **0.0186**, about 2.9% of
+the benchmark. The cause is a near-tie at the top of the class: \((2.0,0.30)\) scores 0.632578 and
+\((16.0,0.40)\) scores 0.632465, a gap of \(1.1\times10^{-4}\), so the argmax moves between three
+policies across the 60 folds. **Where a claim needs a number the platform could have committed to
+without seeing these markets, 68.4% is the defensible one**; 70.5% is the value of the best policy in
+the class given this seed block, and is reported as such. Both are recomputed by
+`offline_tests/recompute_gmv_benchmarks.py`.
+
 **First best is not "no penalty".** A penalty can raise attainable GMV even with the incentive problem
 switched off, because reputation enters a logit share and merchants carry different prices, so a
 penalty biting unequally across \(b\) reallocates demand toward high-price merchants. This happens on

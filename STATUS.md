@@ -25,7 +25,8 @@ branch.
 | N3 | First best `G^FB` | **DONE** | both benchmark files, `aggregate.G_FB` | mean 0.8978 |
 | N4 | No-penalty floor `G^NP` | **DONE** | same, `aggregate.G_NP` | mean 0.3491 = 38.9% of first best |
 | N5 | Policy-class second best `G^SB_P`, per-seed tuned | **DONE** | same, `aggregate.G_SB_P_pessimistic` | 0.7035 (64-policy) → 0.7084 (640-policy) = 78.7% of first best |
-| N6 | Committable second best `G^SB_uniform`, one policy for all seeds | **DONE** | same, `aggregate.G_SB_uniform` | 0.6326 (64) → 0.6366 (640) at κ=2, τ=0.3 |
+| N6 | Committable second best `G^SB_uniform`, one policy for all seeds | **DONE** | same, `aggregate.G_SB_uniform` | 0.6326 (64) → 0.6366 (640) at κ=2, τ=0.3; **in-sample**, leave-one-out gives 0.6140 = 68.4% of FB |
+| N15 | Independent recomputation of `G^FB` and `G^SB_uniform` | **DONE** | `offline_tests/recompute_gmv_benchmarks.py` | rebuilt from `catalog_types.json` + seeds importing nothing from `code/`; largest \|diff\| 1.6e-13 |
 | N7 | Gap decomposition | **DONE** | same | gap to first best 0.2612 = **8% instrument cost + 92% incentive gap** |
 | N8 | Twelve theory propositions, numerically checked | **DONE** | `results/solver/ha_theory_checks.json` | **12/12 PASS**, 74.8 s |
 | N9 | Signal informativeness, calibration, detector rates, monitoring continuum | **DONE** | `results/solver/ha_signal_analysis.json` | complaint-count posterior cuts variance in `f` by 93.8%; audit Fisher information is 1.1–14.1% of the complaint channel's (median 3.8%) across the 24 `(b, f)` cells |
