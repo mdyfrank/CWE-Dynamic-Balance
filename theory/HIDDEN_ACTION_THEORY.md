@@ -1190,6 +1190,145 @@ assembled from merchant 0's and merchant 1's decompositions — which share no a
 
 ---
 
+## 11. Verdict
+
+### 11.1 The question, answered
+
+The question this section exists to answer: *when the platform cannot see fabrication and has only
+noisy complaints and a reputation signal, does merchants' fabrication settle into a stationary
+hidden-action equilibrium after many rounds, and what fraction of first-best GMV does that equilibrium
+reach?* Three answers, in the order they were established, none of which needed an LLM API.
+
+**Yes, a resting point exists — within the constant-action class.** Best-response iteration over
+constant actions scored by the exact discounted payoff from the experiment's own initial condition
+reached a **fixed point on 60 of 60 seeds**, with no cycles and no iteration caps (§10.5). So the
+premise of the stationary narrative is not empty: there is a well-defined profile that merchants
+restricted to a fixed fabrication rate would settle on.
+
+**No, it is not the profile the corpus reports.** That fixed point differs from \(f^*\) on **41 of 60
+seeds**. Mean fabrication is higher — \(0.380\) at \(f^*\), \(0.487\) at the fixed point — because
+\(f^*\) is scored by a plug-in stationary payoff and the fixed point by the payoff a merchant starting
+at \(r_0=0.5\) actually collects.
+
+**It reaches 62.91% of first best, not the 70.35% reported**, at the headline \(\delta=0.95\); 57.88%
+at \(\delta=0.90\) and 69.18% at \(\delta=0.99\). The published figure is recovered only in the
+patient limit.
+
+And then the resting point itself does not survive the next rung. Letting merchant \(i\)'s action
+depend on nothing more than its **own** reputation pays strictly on **223 of 240** merchant-instances
+and on all 60 of 60 seeds (§10.3). Since every \(r_i\)-measurable strategy is measurable with respect
+to the full state, \(f^*\) is **not** a subgame-perfect equilibrium of \(\Gamma_\delta\). So the
+complete answer to the mandate's question is: *within the constant class a stationary profile does
+form, it is not the one on record, and it books 7.4 points less GMV; in the actual dynamic game no
+stationary equilibrium claim is licensed at all.*
+
+The one place \(f^*\) does survive is instructive rather than reassuring. The 17 instances with
+exactly zero own-state deviation gain are **exactly** the 17 where \(f^*_i\) already sits at the top
+of the fabrication grid — the sets coincide, in sample and on 30 held-out seeds. \(f^*\) is
+unimprovable only where it already prescribes total fabrication.
+
+### 11.2 What may be called what
+
+The mandate for this section forbids the label "dynamic equilibrium" for anything whose one-shot
+deviation condition has not been verified on the full sufficient state space. Applying that rule:
+
+| statement | licensed | evidence |
+|---|---|---|
+| \(f^*\) is the unique pure Nash equilibrium of \(\mathcal G(\theta,\kappa,\tau)\) | **yes** | Prop 1′, exhaustive over \(21^4\) profiles |
+| \(f^*\) is a Nash equilibrium of the stationary game scored with \(\mathbb E[\cdot]\) | **no** — a \(0.22\%\)-equilibrium, failing on 12/60 seeds | §9.5 |
+| \(f^*\) is a Nash equilibrium of the constant-strategy discounted game | **no** at \(\delta\le0.99\); a *patient* equilibrium — 24.6% of instances deviate at \(\delta=0.95\) | §10.2 |
+| \(f^*\) is a stationary or dynamic equilibrium of \(\Gamma_\delta\) | **no** — refuted on 223 of 240 instances | §10.3 |
+| the \(\mathcal C_1\) fixed point is a dynamic equilibrium | **no** — it is a fixed point of the *constant* class only | §10.5 |
+| the marketplace attains 70.35% of first best | **only if merchants play \(f^*\)** | §6, §10.5 |
+| the marketplace attains 62.91% of first best | as the \(\mathcal C_1\) figure; **not** as a dynamic figure, and not as a lower bound on one | §10.5 |
+| \(\Gamma_{80}\) shows merchants would fabricate more late in a repeated market | **no** — an end-game artefact; first-half gains max at 0.0589% | §10.3 |
+
+Nothing in this package establishes what \(\Gamma_\delta\)'s equilibrium *is*. It establishes what it
+is not. That asymmetry is inherent: a positive equilibrium claim needs a fixed point of a
+state-contingent best-response map over four merchants, which is a strictly larger computation than
+anything run here, whereas a refutation needs one profitable deviation.
+
+### 11.3 Proposition 1′, amended
+
+§9.5 promised this amendment; §10 makes it larger than §9.5 alone would have.
+
+> **Proposition 1′ (pure existence and uniqueness), amended.** *In every one of the 3,840 (seed,
+> policy) pairs of the frozen design, the restricted stationary surrogate
+> \(\mathcal G(\theta,\kappa,\tau)\) — constant actions, stationary evaluation, plug-in reputation —
+> has exactly one pure-strategy Nash equilibrium \(f^*\). This is a statement about \(\mathcal G\)
+> and about no other game. Scored with \(\mathbb E_\Pi[\pi_i(r)]\) rather than the plug-in, \(f^*\) is
+> only a \(0.22\%\)-equilibrium and fails outright on 12 of 60 seeds at the headline policy. Scored
+> with the exact discounted payoff from \(r_0=0.5\) over the same constant class, it is not a Nash
+> equilibrium unless merchants are patient: 24.6% of merchant-instances prefer a different constant
+> action at \(\delta=0.95\), and 20 of 240 prefer one at every \(\delta\) tested up to 0.9999. Over
+> strategies contingent on the merchant's own reputation it is not an equilibrium on 223 of 240
+> instances, the exceptions being exactly those at the fabrication corner. \(f^*\) is therefore
+> reported as the unique equilibrium* of \(\mathcal G\) *and never as the equilibrium of the dynamic
+> game the experiment runs.*
+
+The uniqueness half is untouched and the enumeration behind it stands. What is withdrawn is the
+implicit bridge — the step from "unique equilibrium of the object we solved" to "what merchants would
+do" — which was never separately verified and is false.
+
+### 11.4 What survives
+
+Most of the document. Propositions 2–12 are statements about the deviation identity, the information
+content of the signal, and the limits of the punishment instrument; none of them asserts that \(f^*\)
+is played, and none is affected. §5's impossibility, §5's over-punishment reversal, Proposition 8's
+zero Fisher information for refunds and Proposition 10's implementation floor are all properties of
+the mechanism, not of the profile. §6's four benchmarks survive as benchmarks: they were always
+defined as optima over enumerated profiles, and an optimum does not require anyone to play it.
+
+What does not survive is any sentence that reads the corpus's equilibrium GMV as the GMV a merchant
+population would produce. That is now a conditional statement and §10.5 gives the number it is
+conditional on.
+
+### 11.5 Two deductions from 70.35%, which are not one deduction
+
+Two independent corrections to the headline have now been measured, and they must not be silently
+combined:
+
+| correction | size | source |
+|---|---|---|
+| the uniform policy is chosen in sample on the seeds it is then scored on | 70.5% → **68.4%** out of sample | §6 |
+| merchants play the constant-class equilibrium rather than \(f^*\) | 70.35% → **62.91%** | §10.5 |
+
+They are independent in origin and would compound, but their composition is **not** the product: the
+policy \((\kappa,\tau)\) would be re-selected under the \(\mathcal C_1\) criterion, and there is no
+reason the argmax over the 64-policy class is the same one. §6 already shows the top of that class is
+a near-tie moving across three policies over 60 leave-one-out folds. A single combined number is
+therefore not reported. The chain is reported, and a reader who needs one figure should be told which
+question it answers.
+
+### 11.6 What would overturn this
+
+Stated so that a disagreement can be settled by computation rather than argument.
+
+* **Patience.** Everything above is at \(\delta=0.95\). The refutation weakens monotonically with
+  patience — 20 of 240 instances at \(\delta=0.999\) against 59 at \(0.95\), and the \(\mathcal C_1\)
+  GMV rises to 69.18% at \(\delta=0.99\). A defensible argument that merchants in this market are
+  much more patient than 0.95 would shrink the finding substantially, though not to zero: the 20
+  instances that deviate at every \(\delta\) on the grid are not a patience artefact.
+* **The tail assumption.** \(\mathcal C_1\), \(\mathcal C_2\) and \(\mathcal C_{2.5}\) sum \(T_0=250\)
+  rounds explicitly and close with a resolvent, so they assume the rivals' law has settled by \(T_0\).
+  That assumption carries \(\sim10^{-11}\) of the value at \(\delta=0.9\) and **97.5% at
+  \(\delta=0.9999\)** (§10.1). The patient-limit rows are the ones to distrust; the headline row is
+  not.
+* **The wrong \(f^*\).** \(f^*\) is enumerated from \(b\) snapped onto `B_GRID` while the runner and
+  the solver both use the exact draw (§10.2). Re-enumerating the frozen corpus on the exact \(b\)
+  would change *which* markets fail. It would not change that some do: the exact-\(b\) process fails
+  on more instances than the bucketed one, not fewer.
+* **A tighter upper rung.** \(\mathcal C_{2.5}\) is a lower bound on \(\varepsilon_3\), so the true
+  exploitability of \(\Gamma_\delta\) is at least what is reported and possibly much more. §10.4
+  measures the gap directly where the full program has been run. Nothing there can lower the verdict;
+  it can only raise it.
+* **A different strategy class for the platform.** Everything is inside the 64-point
+  \(\{\kappa\}\times\{\tau\}\) class (§8, item 1). A mechanism with transfers, bonding or menus is
+  outside it and might restore an equilibrium at a much better GMV. That is a different paper, and
+  this one should not be read as ruling it out.
+
+---
+
 ## 12. Traceability
 
 | Claim | Artefact | Key |
