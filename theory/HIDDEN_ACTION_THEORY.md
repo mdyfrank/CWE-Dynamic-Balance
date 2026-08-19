@@ -195,6 +195,14 @@ exists. §10 therefore solves the deviation problem on the full \(31^4\) state s
 reduction is retained only as a cross-check whose gap to the full solution measures how much
 conditioning on rivals is worth.
 
+The bound is one-sided, and it is worth being explicit about which side, because the answer turned
+out to sit on the useful one. A lower bound cannot *certify* an equilibrium — \(\varepsilon_{2.5}=0\)
+would say nothing. It can *refute* one: \(\varepsilon_{2.5}>0\) implies \(\varepsilon_3>0\)
+immediately, since every \(r_i\)-measurable strategy is an \(x\)-measurable strategy. §10.3 finds it
+strictly positive on every instance tested, so the refutation is carried by the cheap object and the
+\(31^4\) program is left to answer the quantitative question §2.4 actually poses — *how much* is
+conditioning on rivals worth — rather than the qualitative one.
+
 ---
 
 ## 3. Equilibrium
@@ -646,8 +654,15 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
    \(\mathbb E[u(r)]\)) costs \(1.7\times10^{-4}\) of GMV, but it changes an incentive conclusion:
    the profile Proposition 1′ calls the unique pure Nash equilibrium is **not** a Nash equilibrium of
    the expected-payoff stationary game on 12 of 60 seeds, with gains up to 0.22% of profit (§9.5).
-   **R1** (constant, state-independent actions) is the one that excludes build-then-exploit, and is
-   tested in §10. Until §10, the gap between Proposition 1 and Propositions 2–12 is real.
+   **R1** (constant, state-independent actions) is the one that excludes build-then-exploit, and §10
+   measures it: it is the largest of the three by a wide margin. Merely scoring the *same* constant
+   strategies correctly already flips the best action on 24.6% of merchant-instances at
+   \(\delta=0.95\) (§10.2), and the constant-action equilibrium that results reaches **62.9% of
+   first best against the 70.4% the corpus reports** (§10.5). Allowing the action to depend on the
+   merchant's own reputation raises the deviation gain further on **223 of 240** instances (§10.3),
+   and the 17 that survive are *exactly* the instances where \(f^*_i\) already sits at the fabrication
+   corner and there is nothing above it to deviate to. \(f^*\) is an equilibrium of \(\mathcal G\); it
+   is not one of \(\Gamma_\delta\).
 3. **Uniqueness is computational, not proved** (Proposition 1′). It holds in 38,400 pairs tested and
    may fail elsewhere.
 4. **Robust implementation is nearly vacuous** (Proposition 6): guaranteed against the whole type
@@ -682,6 +697,12 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
 | "The stationary solver has a well-defined answer" | 315 kernels have **three** recurrent classes; the reported \(\bar r\) is chosen by the initial guess | §9.1 |
 | "Slow mixing invalidates the stationary payoffs" | worst TV to \(\pi\) at 80 rounds is 0.968, yet the mean is right to \(3.2\times10^{-3}\) | §9.2 |
 | "\(f^*\) is *the* unique pure Nash equilibrium" | it is one of \(\mathcal G\); under expectations it is only a 0.22%-equilibrium, failing on 12/60 seeds | §9.5 |
+| "\(f^*\) is the equilibrium of the game the runner plays" | \(f^*\) is enumerated from \(b\) **snapped to `B_GRID`**; the runner and the dynamic solver use the exact draw. The snap is \(\le4.9\times10^{-3}\), but an argmax is not Lipschitz and the two processes name different failing markets | §10.2 |
+| "A restriction that barely moves GMV barely moves incentives" | R2 costs 0.24% of GMV and is over by round 20, yet it flips the best constant action on **24.6% of merchant-instances** at \(\delta=0.95\) | §9.4, §10.2 |
+| "The stationary profile is what merchants would settle on" | the constant-action equilibrium under exact discounted payoffs differs from \(f^*\) on **41/60 seeds** and delivers **62.9%** of first best, not 70.4% | §10.5 |
+| "Stopping value iteration when \(\varepsilon=V-P\) has settled is safe" | \(V\) and \(P\) share the \(c/(1-\delta)\) level, which converges at rate \(\delta\) while \(\varepsilon\) converges at the mixing rate; the level was short by \(3.4\times10^{-6}\) | §10.1 |
+| "\(f^*\) at least survives the dynamic objection on *some* markets" | the 17 of 240 instances with zero own-state deviation gain are **exactly** the 17 with \(f^*_i=1\) — the sets coincide, in sample and held out. \(f^*\) survives only where it already prescribes total fabrication | §10.3 |
+| "\(\Gamma_{80}\)'s equilibrium failure is a statement about the market" | the best switch round is in the last five on 224/240; confined to the first half the largest gain over all 240 instances is **0.0589%**. It is backward induction from a terminal round the merchants are never told about (G-H4) | §10.3 |
 
 ---
 
@@ -903,21 +924,32 @@ exploitability \(\varepsilon\) is non-decreasing along it:
 | \(\mathcal C_0\) | constant \(f_i\) | stationary, plug-in | the frozen corpus — \(\mathcal G\) |
 | \(\mathcal C_1\) | constant \(f_i\) | discounted from \(x_0\), exact | **R2 alone** |
 | \(\mathcal C_2\) | open-loop \(\{f_i^t\}_{t}\), state-independent | exact | + timing |
-| \(\mathcal C_3\) | closed-loop \(f_i^t(x)\), \(x\in R^m\) | exact | + state contingency = \(\Gamma_\delta\) |
+| \(\mathcal C_{2.5}\) | closed-loop on **own** reputation, \(f_i^t(r_i)\) | exact | + own-state contingency |
+| \(\mathcal C_3\) | closed-loop \(f_i^t(x)\), \(x\in R^m\) | exact | + rival contingency = \(\Gamma_\delta\) |
 
 \(\mathcal C_0\) and \(\mathcal C_1\) share a strategy set and differ only in the payoff functional;
-\(\mathcal C_1\subset\mathcal C_2\subset\mathcal C_3\) are genuine enlargements. Reading the ladder
-upward is what makes the result interpretable: if \(\varepsilon\) is already large at
-\(\mathcal C_1\), the surrogate's failure has nothing to do with dynamic strategy at all and
-everything to do with how it scores; if \(\varepsilon\) only appears at \(\mathcal C_3\), the failure
-is exactly the build-then-exploit story R1 was written to flag.
+\(\mathcal C_1\subset\mathcal C_2\subset\mathcal C_{2.5}\subset\mathcal C_3\) are genuine
+enlargements. Reading the ladder upward is what makes the result interpretable: if \(\varepsilon\) is
+already large at \(\mathcal C_1\), the surrogate's failure has nothing to do with dynamic strategy at
+all and everything to do with how it scores; if \(\varepsilon\) only appears at \(\mathcal C_3\), the
+failure is exactly the build-then-exploit story R1 was written to flag.
 
-The methods are deliberately unrelated. \(\mathcal C_1\) and \(\mathcal C_2\) are pure forward
-simulations of a product law and are computed in `offline_tests/recompute_dynamic_dp.py`, which
-imports no solver code; \(\mathcal C_3\) needs backward induction on all \(31^4=923{,}521\) states
-(§2.4 explains why the 31-state reduction cannot be substituted) and is `code/ha_dynamic_dp.py`. So
-the two cheap rungs are also independent lower bounds on the expensive one, and §10.4 checks that the
-solver's \(\varepsilon\) is at least as large as the certificates that need no solver.
+\(\mathcal C_{2.5}\) is the rung §2.4 promised. Conditioning on \(r_i\) alone is a 31-state MDP, so
+it is solvable in milliseconds by value iteration on the same tail tables §10.2 already builds; and
+because it is sandwiched — every open-loop deviation is available to it, and it is available to the
+full \(31^4\) program — it converts the two cheap rungs from *suggestive* lower bounds into a
+**rigorous bracket** around \(\mathcal C_3\). That matters for a practical reason: it means the
+verdict on whether \(f^*\) survives R1 does not have to wait for, or depend on, the expensive solver.
+If \(\varepsilon_{2.5}>0\) then \(\varepsilon_3>0\), full stop.
+
+The methods are deliberately unrelated. \(\mathcal C_1\), \(\mathcal C_2\) and \(\mathcal C_{2.5}\)
+are built from forward simulation of a product law and a \(31\times31\) resolvent, and are computed
+in `offline_tests/recompute_dynamic_dp.py`, which imports no solver code; \(\mathcal C_3\) needs
+backward induction on all \(31^4=923{,}521\) states (§2.4 explains why the 31-state reduction cannot
+be *substituted* — only bracketed) and is `code/ha_dynamic_dp.py`. So the cheap rungs are independent
+lower bounds on the expensive one, and §10.4 checks that the solver's \(\varepsilon\) is at least as
+large as the certificates that need no solver. Where they disagree in sign, the cheap rungs win: they
+are the ones with a closed-form tail.
 
 Two facts make the cheap rungs exact rather than approximate. Merchant \(i\)'s action never enters a
 rival's kernel, so under any open-loop strategy the four reputations stay independent and the joint
@@ -939,6 +971,222 @@ adequate evidence that it has settled. It is reported
 stationary expected payoff §9.5 computed by power-iterating stationary laws and contracting them
 against the payoff tensor. Two unrelated routes to the same limit must name the same failing markets,
 and that is asserted as a check rather than hoped for.
+
+One arithmetic point, because the 60-seed block caught it and a 3-seed probe had not. The reported
+quantity is \(\varepsilon=V-P\), so it is tempting to iterate both and stop when \(\varepsilon\) has
+settled. That is wrong. \(V\) and \(P\) share the level term \(\sim c/(1-\delta)\), which converges
+at rate \(\delta\); their *difference* converges at the chain's mixing rate, which in these kernels
+is far faster. Stopping on \(\varepsilon\) therefore returns a \(P\) whose **level** is still short
+by \(O(\delta^n/(1-\delta))\) — invisible in \(\varepsilon\), and \(P\) is the denominator of every
+relative figure quoted below. Measured against the resolvent, which has the level in closed form,
+the iterated \(P\) was wrong by \(3.4\times10^{-6}\) in value units. Both tails are consequently
+*solved*, not iterated: the policy value is one \(31\times31\) linear solve and the optimum is
+Howard policy iteration, after which the two routes agree to \(1.8\times10^{-15}\). The guard that
+caught this is retained at \(10^{-9}\).
+
+### 10.2 \(\mathcal C_1\): \(f^*\) is not an equilibrium, it is a *patient* equilibrium
+
+The first rung changes nothing about the strategy class. Merchant \(i\) still picks one number and
+holds it for ever; only the scoring moves, from \(V_i(\bar r)\) to the exact discounted value from
+the initial condition the experiment actually starts at, \(r_0=0.5\) for everyone. Any failure here
+is **R2 and nothing else** — it cannot be build-then-exploit, because a constant action builds
+nothing.
+
+Sweeping \(\delta\) over a twelve-point grid, on all 60 seeds and all four merchants — 240
+merchant-instances:
+
+| \(\delta\) | instances preferring a *different constant* action | of which prefer \(f=1\) |
+|---|---|---|
+| 0.80 | 180 / 240 (75.0%) | 121 |
+| 0.85 | 141 / 240 (58.8%) | 96 |
+| 0.90 | 103 / 240 (42.9%) | 74 |
+| 0.925 | 86 / 240 (35.8%) | 61 |
+| **0.95** | **59 / 240 (24.6%)** | **40** |
+| 0.96 | 51 / 240 (21.2%) | 31 |
+| 0.97 | 49 / 240 (20.4%) | 29 |
+| 0.98 | 39 / 240 (16.2%) | 19 |
+| 0.99 | 25 / 240 (10.4%) | 5 |
+| 0.995 | 22 / 240 (9.2%) | 1 |
+| 0.999 | 20 / 240 (8.3%) | 0 |
+| 0.9999 | 20 / 240 (8.3%) | 0 |
+
+Three separate claims live in that table.
+
+**\(f^*\) is not an equilibrium of the constant-strategy game unless merchants are patient.** The
+median instance needs \(\delta^*=0.90\) before \(f^*\) becomes its best constant action; the worst
+needs \(0.999\); and **20 of 240 never prefer \(f^*\) anywhere on the grid**, including at
+\(\delta=0.9999\). The largest gain from a constant deviation anywhere on the grid is **48.2% of the
+merchant's own discounted profit**. None of this is a plug-in artefact: it is the same strategy class
+the surrogate optimises over, scored correctly.
+
+**At impatient \(\delta\) the deviation is to the corner, not to the margin.** At \(\delta=0.90\),
+74 of the 103 deviating instances want \(f=1\) — total fabrication. Reputation is a stock that takes
+rounds to burn; a merchant discounting at 0.90 collects the demand now and is gone before the stock
+matters. As \(\delta\to1\) the corner deviations disappear first (5 at \(\delta=0.99\), **none at
+\(\delta=0.999\)**) and what remains is a residue of near-tied mis-rankings — the same phenomenon
+§9.5 found by an unrelated route, arriving here as the \(\delta\to1\) limit of a different criterion.
+
+**R2 is small for GMV and decisive for incentives, and §9.4 is not contradicted by this.** §9.4
+measured R2 at 0.24% of GMV and called it a start-up effect over by round 20. That is a statement
+about *levels*, and it stands. The table above is a statement about *rankings*: the same transient
+that moves the level by a quarter of a percent moves the argmax on a quarter of all instances at the
+headline \(\delta\). A restriction can be negligible in one currency and decisive in another. R2 is.
+
+#### The \(b\)-discretisation: \(f^*\) solves a game the runner never plays
+
+Chasing the \(\delta\to1\) cross-check above turned up a defect with nothing to do with dynamics.
+`rbar_grid()` is tabulated on a grid of base complaint rates `B_GRID`, and `pure_nash` enumerates
+\(f^*\) from `rbar_grid()[mkt.bidx]` — each merchant's drawn \(b_i\) **snapped to the nearest grid
+point**. But `ha_model.sample_signal`, which the runner executes, and `ha_dynamic_dp.Case`, which
+§10.4 solves, both use the exact draw \(b_i\). Those are different games. The snap is small — at most
+\(4.9\times10^{-3}\) in \(b\) — but \(f^*\) is defined by an argmax over a 21-point grid, and an
+argmax is not Lipschitz.
+
+The consequence is not hypothetical: the two reputation processes **disagree about which markets
+fail** in the patient limit. Scored on the bucketed \(b\), the \(\delta\to1\) criterion reproduces
+§9.5's failing seed list exactly; scored on the exact \(b\) it does not, and neither list contains
+the other. Both computations are correct — they answer the question for two different games, one of
+which is enumerated and the other of which is run. It is recorded as a counterexample in §8 rather
+than repaired, because repairing it means re-enumerating every benchmark in the frozen corpus.
+
+### 10.3 \(\mathcal C_2\) and \(\mathcal C_{2.5}\): the horizon is an artefact, the state-contingency is not
+
+Two questions have to be kept apart here. \(\Gamma_{80}\) has a last round, so *something* must fail
+in it — at \(t=80\) reputation has no future and nothing restrains fabrication. That is a property of
+the truncation. The question that matters is whether anything survives when the horizon is removed.
+
+**\(\Gamma_{80}\) first, and it is mostly the end-game.** The open-loop one-shot certificate
+(\(\mathcal C_2\): hold \(f^*\), switch to some other action at one round, revert) is strictly
+positive on 223 of the 240 merchant-instances, with a largest gain of **2.00%** of the merchant's own
+80-round profit. But the best switch round lies in the **last five rounds on 224 of 240** instances,
+and if the switch is confined to the first half of the horizon the largest gain over all 240 collapses
+to **0.0589%** and the mean to **0.0118%** — factors of 34 and 170. Lifting to \(\mathcal C_{2.5}\)
+(own-reputation-contingent, still undiscounted, still 80 rounds) raises the maximum to **3.23%** at
+\(x_0\) and **4.42%** over own reputation: larger, same shape. So \(\Gamma_{80}\)'s violation is
+overwhelmingly terminal. That is exactly what gate G-H4 (§2.1) exists to contain — merchants are never
+told the horizon, so the end-game is not available to them — and it is why the honest \(\Gamma_{80}\)
+number to quote a platform is the first-half one, which is under a tenth of a percent.
+
+**\(\Gamma_\delta\), where the horizon is gone, is a different story.** At \(\delta=0.95\), conditioning
+only on the merchant's *own* reputation:
+
+| | instances with a strictly positive gain at \(x_0\) | median | mean | 90th pct | max at \(x_0\) | max over own \(r_i\) |
+|---|---|---|---|---|---|---|
+| \(\mathcal C_1\) — constant | 59 / 240 | — | — | — | — | — |
+| \(\mathcal C_{2.5}\) — \(f_i^t(r_i)\), \(\Gamma_{80}\) | 223 / 240 | 1.22% | 1.30% | — | 3.23% | 4.42% |
+| \(\mathcal C_{2.5}\) — \(f_i^t(r_i)\), \(\Gamma_\delta\) | **223 / 240** | 0.203% | 1.30% | 6.15% | **13.47%** | **21.53%** |
+
+and those 223 instances are spread over **all 60 of 60 seeds**. Conditioning on one scalar — the
+merchant's own stock — takes the count from 59 to 223. The 164 instances added are precisely the ones
+for which no constant action beats \(f^*\) but a contingent one does, and since the only thing
+conditioned on is the reputation stock, that *is* build-then-exploit in its minimal form. Seed 70000
+is the clean illustration: at \(\delta=0.95\) not one of its four merchants has a profitable constant
+deviation, and all four have a strictly positive own-reputation-contingent one (0.064%, 0.369%,
+0.276%, 0.177% at \(x_0\); up to 6.94% at the best own-reputation state).
+
+**The 17 survivors are exactly the corner.** Every instance whose gain is exactly zero has
+\(f^*_i=20\) — the top of the fabrication grid — and every instance with \(f^*_i=20\) has gain exactly
+zero. The two sets coincide, in \(\mathcal C_2\) and in both \(\mathcal C_{2.5}\) columns. The reason
+is not subtle: there is nothing above total fabrication to deviate to, and deviating downward does not
+pay. So \(f^*\) survives R1 on precisely the instances where it already prescribes maximal fabrication
+— that is, where its survival is worth nothing to the platform. Put the other way round: **on every
+instance where the surrogate's prediction is interesting, it is wrong.**
+
+**The bracket is checked, not assumed.** Three inequalities hold by construction, and each pair is
+computed by unrelated arithmetic, so a violation would mean one of the two routes is broken rather
+than that the theory is:
+
+| inequality | worst over 240 instances |
+|---|---|
+| \(\varepsilon_{2.5}\ge\) best open-loop one-shot gain, \(\Gamma_{80}\) | \(-1.5\times10^{-14}\) |
+| \(\varepsilon_{2.5}\ge\) best constant-action gain, \(\Gamma_\delta\) | \(-4.4\times10^{-15}\) |
+| \(V_i(f^*)\) by resolvent vs by reduced-state recursion | \(4.0\times10^{-15}\) |
+
+All three pass at round-off. Note the first is *tight*: on the worst instance the own-reputation
+optimum ties the single best one-shot switch exactly, so the bracket is not vacuously slack somewhere
+— the two routes meet.
+
+**What this settles without the solver.** Every \((t,r_i)\)-measurable strategy is
+\((t,x)\)-measurable, so \(\varepsilon_3\ge\varepsilon_{2.5}\) state by state. \(\varepsilon_{2.5}>0\)
+on 223 of 240 instances therefore proves that \(f^*\) is **not** a subgame-perfect equilibrium of
+\(\Gamma_\delta\) at \(\delta=0.95\). §10.4's dynamic program cannot overturn that; it can only report
+how much *more* is available from watching rivals as well. This is the reason the verdict in §11 does
+not rest on the expensive computation.
+
+#### Held out
+
+The block above chooses the strategy class after having seen the markets, so it was rerun unchanged on
+30 seeds that appear nowhere else in this package, `71000`–`71029` (120 merchant-instances):
+
+| | in sample (70000–70059) | held out (71000–71029) |
+|---|---|---|
+| instances with a \(\mathcal C_{2.5}\) gain at \(x_0\), \(\Gamma_\delta\) | 223 / 240 | 112 / 120 |
+| zero-gain instances that are the fabrication corner | 17 / 17 | 8 / 8 |
+| max relative gain at \(x_0\) | 13.47% | 14.93% |
+| max relative gain over own reputation | 21.53% | 22.86% |
+| \(\Gamma_{80}\) best switch in the last five rounds | 224 / 240 | 112 / 120 |
+| \(\Gamma_{80}\) max gain from a first-half switch | 0.0589% | 0.0647% |
+| \(\mathcal C_1\): want a different constant action at \(\delta=0.95\) | 24.6% | 22.5% |
+| \(b\)-bucketing flips the \(\delta\to1\) verdict | 23 / 240 | 5 / 120 |
+
+Every sign and every qualitative claim reproduces, including the corner law exactly; the magnitudes
+move by about a percentage point. One check does **not** transfer, and the artefact says so instead of
+passing quietly: the cross-validation against §9.5 compares against `ha_mixing_audit.json`, which
+covers only the 70000-block, so out of sample it records `cross_validation_applicable: false` rather
+than reporting a vacuous agreement over an empty intersection.
+
+### 10.5 What it costs the marketplace
+
+Everything above is about incentives. The question the platform actually asks is in GMV, and the
+translation is not automatic: a profile can be badly non-equilibrium and cost almost nothing, or
+barely non-equilibrium and cost a great deal. So the same 60 markets are priced four times, differing
+**only** in which restriction is lifted, each divided by the same per-seed first best \(G^{FB}\):
+
+| what is lifted | mean GMV | % of first best |
+|---|---|---|
+| nothing — the corpus's own plug-in \(\mathrm{GMV}(\bar r)\) at \(f^*\) \(\;[\mathcal C_0]\) | 0.6326 | **70.35%** |
+| R3: \(\mathbb E[\mathrm{GMV}(r)]\) at \(f^*\) under the exact stationary law | 0.6326 | **70.35%** |
+| R3 + R2: discounted average from \(r_0=0.5\) at \(f^*\) | 0.6270 | **69.74%** |
+| R3 + R2 + R1 (constant class): at the \(\mathcal C_1\) **equilibrium** | 0.5656 | **62.91%** |
+
+The first two rows are the same to four figures — R3 does not move GMV, as §9.3 said. The third row
+costs 0.6 points, which is §9.4's start-up transient. **The fourth row is the finding.** It is not a
+different way of scoring \(f^*\); it is the profile merchants actually settle on once they are scored
+correctly, and it is a different profile on **41 of 60 seeds**. Best-response iteration reached a
+**fixed point on 60 of 60** — no cycles, no iteration caps — so the object being priced is a genuine
+equilibrium of the constant-strategy game, not an artefact of a stalled search.
+
+Mean fabrication rises from \(0.380\) at \(f^*\) to \(0.487\) at that equilibrium. The mean GMV loss
+is **9.56%** and the worst seed loses **32.5%**.
+
+It is patience-dependent, and monotonically so:
+
+| \(\delta\) | \(\mathcal C_1\) equilibrium \(\neq f^*\) | mean \(f\) | % of first best | worst seed |
+|---|---|---|---|---|
+| 0.90 | 55 / 60 | 0.568 | **57.88%** | 38.83% |
+| 0.95 | 41 / 60 | 0.487 | **62.91%** | 45.74% |
+| 0.99 | 20 / 60 | 0.395 | **69.18%** | 52.29% |
+
+So the corpus's 70.35% is recovered only in the patient limit. At the headline \(\delta=0.95\) the
+marketplace attains **62.9% of first best, 7.4 points below what is reported**, and at \(\delta=0.90\)
+just 57.9%. The honest statement of §6's headline is therefore conditional: *the uniform second-best
+policy reaches 70.4% of first best **if merchants play the enumerated profile**, and 62.9% if they
+play the constant-strategy equilibrium of the game they are actually in.*
+
+Two caveats, both against the finding's favour and both stated because they bound it rather than
+soften it. First, \(\mathcal C_1\) is still the **constant** class: it is a rung on the ladder, not
+\(\Gamma_\delta\), and §10.3 shows state-contingent strategies do strictly better still — so 62.9%
+is not a floor, and the true dynamic figure is not bracketed by this table. Second, the ratios use
+`ha_benchmarks.json`'s \(G^{FB}\) rather than recomputing it, which is why the check asserts that its
+enumerated equilibrium agrees with the one recomputed here on **every one of the 60 seeds** before
+quoting any ratio.
+
+Four exactness guards run before any of this is believed: the reduced `Lite` market object
+reproduces the solver's `Case` field by field to **exactly 0.0**; the GMV table reproduces
+`ha_dynamic_dp.Case.GMV` contracted against the rivals' law to \(1.8\times10^{-15}\); platform GMV
+assembled from merchant 0's and merchant 1's decompositions — which share no arithmetic — agrees to
+\(1.5\times10^{-12}\); and the rivals' and the merchant's own laws have converged to
+\(6.1\times10^{-14}\) and \(9.9\times10^{-16}\).
 
 ---
 
@@ -964,6 +1212,13 @@ and that is asserted as a check rather than hoped for.
 | Jensen and transient costs, NE under expectations (§9.3–9.5) | same | `part_B_payoff_restrictions` |
 | Benchmark sensitivity to the solver's initial guess (§9.2) | same | `part_C_benchmark_sensitivity` |
 | Independent recomputation of all of §9 | `results/validation/recompute_dynamics_audit.json` | `all_pass` |
+| R1 dropped: the full \(31^4\) dynamic program, both horizons (§10.4) | `results/solver/ha_dynamic_equilibrium.json` | `policies.P_SB_uniform.aggregate` |
+| Per-block seed coverage of that artefact — **read before quoting any aggregate** | same | `policies.*.coverage_by_block` |
+| Rungs \(\mathcal C_1\), \(\mathcal C_2\), \(\mathcal C_{2.5}\), and the sandwich (§10.2–10.3) | `results/validation/recompute_dynamic_dp.json` | `results[].population_certificate` |
+| GMV consequence of dropping R1 (§10.5) | same | `results[].gmv_consequence` |
+| \(b\)-discretisation: \(f^*\) solves a game the runner never plays (§8) | same | `results[].population_certificate.b_discretisation_sensitivity` |
+| Same certificate on 30 held-out seeds never used in tuning | `results/validation/recompute_dynamic_dp_heldout.json` | `all_pass` |
+| Shape of the deviation — argmax, cash-in slope, first deviating state | `results/solver/ha_dp_policy_probe.json` | `summary`, `per_seed[].merchants[]` |
 
 Reproduce with:
 
@@ -974,6 +1229,26 @@ python code/ha_theory_check.py
 python code/ha_signal_analysis.py
 python code/ha_dynamics_audit.py --part all --seeds 70000-70059
 python offline_tests/recompute_dynamics_audit.py
+
+# section 10 -- R1. The solver costs about 13 min per seed on one core, so it is
+# sharded five seeds at a time and run STRICTLY SEQUENTIALLY: concurrent numpy
+# jobs contend for BLAS and made each Bellman sweep 12x slower, which is how the
+# first cost estimate for this run came out an order of magnitude wrong. The
+# merge keeps a separate n_seeds per gamma_* block so no aggregate silently
+# changes its denominator between blocks.
+for lo in 70000 70005 70010 ... 70055; do
+  python code/ha_dynamic_dp.py --seeds $lo-$((lo+4)) --policies P_SB_uniform \
+         --deltas 0.95 --out results/solver/_dp_shard_main_$lo.json
+done
+python code/ha_dynamic_dp.py --seeds 70000-70004 --policies P_SB_uniform \
+       --deltas 0.90,0.99 --no-finite --out results/solver/_dp_shard_delta.json
+python code/ha_dp_merge.py results/solver/_dp_shard_*.json
+python code/ha_dp_policy_probe.py --seeds 70000,70002 --delta 0.95
+
+# the solver-free rungs, and the same certificate out of sample
+python offline_tests/recompute_dynamic_dp.py --seeds 70000-70059
+python offline_tests/recompute_dynamic_dp.py --only population_certificate \
+       --seeds 71000-71029 --out results/validation/recompute_dynamic_dp_heldout.json
 ```
 
 No LLM API is involved in any of it.

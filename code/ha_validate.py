@@ -31,6 +31,7 @@ The checks, and what a failure of each would mean:
   V11 prompt hygiene        no evaluator-only quantity appears in any retained prompt
   V12 claim traceability    every summary field is backed by cells that exist
   V13 theory/artefact sync  every figure §9 of the theory document states is the one the solver wrote
+  V14 section 10 sync       the same for §10, across its three artefacts, plus the ladder inequality
 
 Exit code is non-zero if any check fails, so this can gate a delivery.
 """
@@ -500,6 +501,184 @@ def v13_theory_matches_artefacts(theory_text: str, audit: dict) -> dict:
                     "the solver no longer produces"}
 
 
+def v14_theory_section10_matches_artefacts(theory_text: str, rec: dict, held: dict,
+                                           dyn: dict) -> dict:
+    """The same prose-against-code check for §10, whose figures come from three separate artefacts.
+
+    §10 is the section that overturns a published claim, so it is the one where a stale number does
+    the most damage. It also draws on more sources than §9 did -- the solver-free rungs, the held-out
+    block, and (when it exists) the merged dynamic program -- and those are produced by runs of very
+    different cost, so they will drift apart in time if nothing forces them together. Hence one check
+    per source, each rendering the figure FROM the JSON and then searching the document for it.
+
+    `dyn` is optional on purpose: the full 31^4 solver costs about 13 minutes per seed, so a package
+    may legitimately ship with §§10.1-10.3 and 10.5 complete and §10.4 pending. Its claims are then
+    recorded as unavailable rather than as failures, which is the same convention v13 uses.
+    """
+    if not theory_text:
+        return {"check": "V14_theory_section10_matches_artefacts", "pass": None,
+                "why": "no theory document"}
+    if not rec:
+        return {"check": "V14_theory_section10_matches_artefacts", "pass": None,
+                "why": "no recompute_dynamic_dp artefact"}
+
+    def blk(doc, name):
+        for c in (doc or {}).get("results", []):
+            if c.get("check") == name:
+                return c
+        return None
+
+    def g(d, *ks):
+        for k in ks:
+            d = d.get(k) if isinstance(d, dict) else None
+        return d
+
+    claims = []
+
+    def claim(label, value, fmt):
+        if value is None:
+            claims.append({"claim": label, "rendered": None, "found": None})
+            return
+        s = fmt(value)
+        claims.append({"claim": label, "rendered": s, "found": s in theory_text})
+
+    pct2 = lambda v: f"{100 * v:.2f}%"                                            # noqa: E731
+    pct3 = lambda v: f"{100 * v:.3f}%"                                            # noqa: E731
+    pct4 = lambda v: f"{100 * v:.4f}%"                                            # noqa: E731
+    over = lambda n, d: f"{int(n)} / {int(d)}"                                    # noqa: E731
+
+    pc, gm = blk(rec, "population_certificate"), blk(rec, "gmv_consequence")
+
+    # ---- 10.2, the delta sweep over constant strategies -------------------------------------
+    cs = g(pc, "gamma_delta_constant_strategies") or {}
+    nall = (pc or {}).get("n_merchant_instances")
+    for dl, row in (cs.get("by_delta") or {}).items():
+        claim(f"10.2: delta={dl} row of the constant-deviation table",
+              row, lambda r: f"{r['n_merchants_wanting_a_different_constant_action']} / "
+                             f"{nall} ({100 * r['share']:.1f}%)")
+    claim("10.2: instances never preferring f* anywhere on the delta grid",
+          cs.get("n_never_optimal_on_grid"), lambda v: f"{int(v)} of {nall}")
+    claim("10.2: worst constant-deviation gain on the grid",
+          cs.get("worst_relative_gain_anywhere_on_grid"), lambda v: f"{100 * v:.1f}%")
+    claim("10.2: worst b-discretisation in b",
+          g(pc, "b_discretisation_sensitivity", "max_abs_b_discretisation"),
+          lambda v: f"{v:.1e}".replace("e-03", "\\times10^{-3}"))
+
+    # ---- 10.3, the open-loop and reduced-state rungs -----------------------------------------
+    g80, sw = g(pc, "gamma_80") or {}, g(pc, "reduced_state_sandwich") or {}
+    claim("10.3: Gamma_80 best switch in the last five rounds",
+          g80.get("best_switch_round_is_in_the_last_five"),
+          lambda s: over(*s.split("/")))
+    claim("10.3: Gamma_80 max first-half-switch gain",
+          g80.get("max_relative_gain_from_a_first_half_switch"), pct4)
+    claim("10.3: Gamma_80 mean first-half-switch gain",
+          g80.get("mean_relative_gain_from_a_first_half_switch"), pct4)
+    claim("10.3: Gamma_80 max one-shot gain", g80.get("max_relative_gain"), pct2)
+    claim("10.3: Gamma_80 reduced-state max at x0", sw.get("gamma_80_max_relative_eps"), pct2)
+    claim("10.3: Gamma_80 reduced-state max over own reputation",
+          sw.get("gamma_80_max_relative_eps_over_own_reputation"), pct2)
+    claim("10.3: Gamma_delta reduced-state max at x0",
+          sw.get("gamma_delta_max_relative_eps"), pct2)
+    claim("10.3: Gamma_delta reduced-state max over own reputation",
+          sw.get("gamma_delta_max_relative_eps_over_own_reputation"), pct2)
+    claim("10.3: instances with a reduced-state gain at x0",
+          sw.get("n_instances_with_a_reduced_state_gain_at_x0"), lambda v: over(v, nall))
+
+    # the corner law is the sharpest claim in §10.3 and is a property of the per-instance records,
+    # not of any aggregate the artefact already publishes -- so it is recomputed here rather than
+    # trusted, and the document's count is checked against the recomputation.
+    top = M.Config().Nf - 1
+
+    def corner_law(doc):
+        b = blk(doc, "population_certificate")
+        ms = [m for s in (b or {}).get("per_seed", []) for m in s["merchants"]]
+        if not ms:
+            return None, None, None
+        zero = [m for m in ms if m["reduced_state_gamma_delta"]["rel_at_r0"] <= 1e-12]
+        corner = [m for m in ms if m["f_star"] == top]
+        return len(zero), len(corner), all(m["f_star"] == top for m in zero)
+
+    for lab, doc in (("in sample", rec), ("held out", held)):
+        if not doc:
+            continue
+        nz, nc, coincide = corner_law(doc)
+        claims.append({
+            "claim": f"10.3 ({lab}): zero-gain set IS the fabrication-corner set (recomputed)",
+            "rendered": None if nz is None else f"{nz} zero, {nc} corner, coincide={coincide}",
+            "found": None if nz is None else bool(nz == nc and coincide)})
+
+    # ---- 10.5, GMV -------------------------------------------------------------------------
+    G, c1 = g(gm, "gmv") or {}, g(gm, "c1") or {}
+    for key, lab in (("plugin_stationary_at_f_star", "plug-in at f*"),
+                     ("exact_stationary_at_f_star", "exact stationary at f*"),
+                     ("discounted_average_at_f_star", "discounted average at f*"),
+                     ("discounted_average_at_c1_equilibrium", "at the C1 equilibrium")):
+        claim(f"10.5: mean GMV, {lab}", g(G, key, "mean"), lambda v: f"{v:.4f}")
+        claim(f"10.5: % of first best, {lab}", g(G, key, "mean_ratio_to_FB"), pct2)
+    claim("10.5: seeds where the C1 equilibrium differs from f*",
+          c1.get("n_seeds_where_the_c1_equilibrium_differs_from_f_star"),
+          lambda v: f"{int(v)} of {(gm or {}).get('n_seeds')}")
+    claim("10.5: mean f at f*", c1.get("mean_f_star"), lambda v: f"{v:.3f}")
+    claim("10.5: mean f at the C1 equilibrium", c1.get("mean_f_c1"), lambda v: f"{v:.3f}")
+    claim("10.5: mean GMV loss", c1.get("mean_gmv_loss_relative"), pct2)
+    claim("10.5: worst-seed GMV loss", c1.get("worst_gmv_loss_relative"),
+          lambda v: f"{100 * v:.1f}%")
+    for dl, row in (g(gm, "c1_by_delta") or {}).items():
+        claim(f"10.5: delta={dl} % of first best", row.get("mean_ratio_to_FB"), pct2)
+        claim(f"10.5: delta={dl} worst seed", row.get("worst_ratio_to_FB"), pct2)
+        claim(f"10.5: delta={dl} mean f", row.get("mean_f"), lambda v: f"{v:.3f}")
+
+    # ---- the held-out block ------------------------------------------------------------------
+    hpc = blk(held, "population_certificate") if held else None
+    hn = (hpc or {}).get("n_merchant_instances")
+    hsw, hg80 = g(hpc, "reduced_state_sandwich") or {}, g(hpc, "gamma_80") or {}
+    claim("held out: instances with a reduced-state gain at x0",
+          hsw.get("n_instances_with_a_reduced_state_gain_at_x0"), lambda v: over(v, hn))
+    claim("held out: max relative gain at x0", hsw.get("gamma_delta_max_relative_eps"), pct2)
+    claim("held out: max relative gain over own reputation",
+          hsw.get("gamma_delta_max_relative_eps_over_own_reputation"), pct2)
+    claim("held out: Gamma_80 best switch in the last five rounds",
+          hg80.get("best_switch_round_is_in_the_last_five"), lambda s: over(*s.split("/")))
+    claim("held out: Gamma_80 max first-half-switch gain",
+          hg80.get("max_relative_gain_from_a_first_half_switch"), pct4)
+    claim("held out: b-bucketing verdict flips",
+          g(hpc, "b_discretisation_sensitivity", "n_merchant_instances_whose_verdict_flips"),
+          lambda v: over(v, hn))
+    if hpc is not None and hpc.get("cross_validation_applicable"):
+        claims.append({"claim": "held out: cross-validation must NOT be applicable out of sample",
+                       "rendered": "cross_validation_applicable=false", "found": False})
+
+    # ---- the full dynamic program, if it has been run ---------------------------------------
+    ag = g(dyn, "policies", "P_SB_uniform", "aggregate") if dyn else None
+    for key in sorted(ag or {}):
+        claim(f"10.4: {key} max relative eps at x0", g(ag, key, "max_rel_at_x0"), pct2)
+        claim(f"10.4: {key} max relative eps on the reachable set",
+              g(ag, key, "max_rel_max_reachable"), pct2)
+
+    # the ladder is an ordering, not a set of independent numbers: the solver's eps must dominate
+    # the certificate that needs no solver, on the same delta. A violation means one of two
+    # unrelated implementations is wrong, and the document's whole argument rests on the order.
+    if ag:
+        dd = next((k for k in ag if k.startswith("gamma_delta_")), None)
+        lo = sw.get("gamma_delta_max_relative_eps_over_own_reputation")
+        hi = g(ag, dd, "max_rel_max_reachable") if dd else None
+        if lo is not None and hi is not None:
+            claims.append({"claim": "ladder: eps_3 >= eps_2.5 on the reachable set",
+                           "rendered": f"{100 * hi:.2f}% >= {100 * lo:.2f}%",
+                           "found": bool(hi >= lo - 1e-9)})
+
+    missing = [c for c in claims if c["found"] is False]
+    unchecked = [c for c in claims if c["found"] is None]
+    return {"check": "V14_theory_section10_matches_artefacts", "pass": not missing,
+            "n_claims": len(claims), "n_matched": sum(1 for c in claims if c["found"]),
+            "n_unavailable": len(unchecked),
+            "not_found_in_theory_document": [{"claim": c["claim"], "expected": c["rendered"]}
+                                             for c in missing],
+            "note": "§10 overturns a published claim, so a stale figure here is the most expensive "
+                    "kind; the artefacts are the authority and the prose must conform. The last "
+                    "entry is not a string match but the ladder inequality itself"}
+
+
 # ==================================================================================================
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
@@ -509,6 +688,13 @@ def main(argv=None) -> int:
     ap.add_argument("--manifest", default=str(PKG / "manifests" / "ha_manifest_HA-M1.json"))
     ap.add_argument("--audit", default=str(SOLVER / "ha_mixing_audit.json"))
     ap.add_argument("--theory", default=str(PKG / "theory" / "HIDDEN_ACTION_THEORY.md"))
+    ap.add_argument("--recompute-dp", default=str(PKG / "results" / "validation"
+                                                  / "recompute_dynamic_dp.json"))
+    ap.add_argument("--recompute-dp-heldout",
+                    default=str(PKG / "results" / "validation"
+                                / "recompute_dynamic_dp_heldout.json"))
+    ap.add_argument("--dynamic-equilibrium",
+                    default=str(SOLVER / "ha_dynamic_equilibrium.json"))
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
 
@@ -562,9 +748,17 @@ def main(argv=None) -> int:
         checks.append({"check": "V12_claim_traceability", "pass": None, "why": "no summary"})
     ap_ = Path(a.audit)
     tp_ = Path(a.theory)
+    theory_text = tp_.read_text(encoding="utf-8") if tp_.exists() else ""
     checks.append(v13_theory_matches_artefacts(
-        tp_.read_text(encoding="utf-8") if tp_.exists() else "",
-        json.loads(ap_.read_text(encoding="utf-8")) if ap_.exists() else {}))
+        theory_text, json.loads(ap_.read_text(encoding="utf-8")) if ap_.exists() else {}))
+
+    def _load(p):
+        q = Path(p)
+        return json.loads(q.read_text(encoding="utf-8")) if q.exists() else {}
+
+    checks.append(v14_theory_section10_matches_artefacts(
+        theory_text, _load(a.recompute_dp), _load(a.recompute_dp_heldout),
+        _load(a.dynamic_equilibrium)))
 
     checks.sort(key=lambda c: int(c["check"].split("_")[0][1:]))
     print()
