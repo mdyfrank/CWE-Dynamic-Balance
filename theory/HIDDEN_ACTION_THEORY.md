@@ -664,9 +664,10 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
    corner and there is nothing above it to deviate to. \(f^*\) is an equilibrium of \(\mathcal G\); it
    is not one of \(\Gamma_\delta\). One caveat cuts against the framing rather than the finding: the
    deviations R1 excludes are **not** the ones it was written to exclude. Build-then-exploit does not
-   occur in any instance; what occurs is its mirror image, total fabrication at the *lowest*
-   reputations and near-compliance above a threshold (§10.3). The restriction is doing real work, but
-   not the work it was justified by.
+   occur in any instance — 0 of 240 in sample, 0 of 120 out of sample; what occurs is its mirror
+   image, total fabrication at the *lowest* reputations and near-compliance above a threshold
+   (§10.3), and that shape survives when the rivals' reputations are made visible too (§10.4). The
+   restriction is doing real work, but not the work it was justified by.
 3. **Uniqueness is computational, not proved** (Proposition 1′). It holds in 38,400 pairs tested and
    may fail elsewhere.
 4. **Robust implementation is nearly vacuous** (Proposition 6): guaranteed against the whole type
@@ -707,8 +708,8 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
 | "Stopping value iteration when \(\varepsilon=V-P\) has settled is safe" | \(V\) and \(P\) share the \(c/(1-\delta)\) level, which converges at rate \(\delta\) while \(\varepsilon\) converges at the mixing rate; the level was short by \(3.4\times10^{-6}\) | §10.1 |
 | "\(f^*\) at least survives the dynamic objection on *some* markets" | the 17 of 240 instances with zero own-state deviation gain are **exactly** the 17 with \(f^*_i=1\) — the sets coincide, in sample and held out. \(f^*\) survives only where it already prescribes total fabrication | §10.3 |
 | "\(\Gamma_{80}\)'s equilibrium failure is a statement about the market" | the best switch round is in the last five on 224/240; confined to the first half the largest gain over all 240 instances is **0.0589%**. It is backward induction from a terminal round the merchants are never told about (G-H4) | §10.3 |
-| "The state-contingent deviation is build-then-exploit — that is what R1 excludes" | it never occurs. The own-reputation optimum sits at *total* fabrication over a block of the **lowest** reputations and returns to near \(f^*\) above a threshold: collapse, not cash-in, and the corner beats \(f^*\) by 72% of the state's whole action spread rather than by round-off | §10.3 |
-| "A positive cash-in slope means cash-in" | most maps have a positive fitted slope and none is build-then-exploit; the maps are non-monotone and the slope is a regression through a jagged argmax | §10.3 |
+| "The state-contingent deviation is build-then-exploit — that is what R1 excludes" | it never occurs: 0 of 240 in sample, 0 of 120 out of sample. The own-reputation optimum sits at *total* fabrication over a block of the **lowest** reputations and returns to near \(f^*\) above a threshold — collapse, not cash-in — and in the **weakest** of the 59 collapse instances the corner still beats \(f^*\) by 23.6% of the state's whole action spread, so it is a preference and not round-off | §10.3, §10.4 |
+| "A positive cash-in slope means cash-in" | 163 of 240 maps have a positive fitted slope and **none of those 163** exploits at high reputation — the slope is a rise *toward* \(f^*\) that stops there, fitted through a non-monotone argmax | §10.3 |
 
 ---
 
@@ -938,7 +939,8 @@ exploitability \(\varepsilon\) is non-decreasing along it:
 enlargements. Reading the ladder upward is what makes the result interpretable: if \(\varepsilon\) is
 already large at \(\mathcal C_1\), the surrogate's failure has nothing to do with dynamic strategy at
 all and everything to do with how it scores; if \(\varepsilon\) only appears at \(\mathcal C_3\), the
-failure is exactly the build-then-exploit story R1 was written to flag.
+failure is genuinely state-contingent and needs the rivals to be visible — the kind of thing R1 was
+written to flag.
 
 Where \(\varepsilon\) first becomes positive is not, however, the same question as *what the profitable
 deviation does*, and it is worth separating them before the numbers arrive. A rung of the ladder is a
