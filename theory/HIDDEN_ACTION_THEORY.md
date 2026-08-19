@@ -1268,9 +1268,10 @@ rivals are visible. The second is the one §10.3 explicitly could not answer, be
 watching only its own stock cannot, by construction, run a strategy that waits for a rival to
 stumble.
 
-Answering either means solving the undiscounted-in-nothing thing itself: \(31^4=923{,}521\) states,
-21 actions, value iteration to a tolerance on \(V-P\) rather than on \(V\) (§10.3's stopping-rule
-trap), per merchant, per seed. `code/ha_dynamic_dp.py` does this; it is the only computation in this
+Answering either means solving the unreduced program: \(31^4=923{,}521\) states, 21 actions, value
+iteration with the stopping rule applied to \(\varepsilon=V-P\) rather than to \(V\) (§10.3's
+stopping-rule trap — the two share the level \(c/(1-\delta)\) and only their difference converges at
+the mixing rate), per merchant, per seed. `code/ha_dynamic_dp.py` does this; it is the only computation in this
 package that is measured in hours rather than seconds, and it is the reason the verdict was
 constructed so as not to depend on it.
 
@@ -1330,7 +1331,8 @@ under a known end, not movement across *reputations*, and only the second bears 
 
 What the flag is picking up is the \(\Gamma_{80}\) end-game §7 warned about. Seed 70000's merchant 3
 has the path \(7\) for 66 rounds, then \(8\) for 4, then \(20\) for the last 10 — the entire "rise"
-is the terminal unravelling, and the 66 rounds before it sit *below* \(f^*_i=7\). Across the first
+is the terminal unravelling, and for 66 of the 80 rounds the merchant fabricates *less* than
+\(f^*_i=8\). Across the first
 completed block of 20 instances the flag is true 20 times, every path ends at the corner, and the
 window in which the action exceeds \(f^*_i\) has median length 4 rounds; 19 of the 20 never exceed
 \(f^*_i\) at any point in the first 40 rounds. Reading that flag as build-then-exploit would
