@@ -280,7 +280,11 @@ def main() -> int:
     ap.add_argument("--out", default=None, help="shard path; parallel runs must not share one")
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
-    out = Path(args.out) if args.out else OUT
+    # resolved, because the closing log line reports the path relative to the package and a shard
+    # named with a `..` prefix from inside `code/` is not literally a subpath of it. That raised
+    # AFTER a two-hour block had already been written to disk, so the run looked like a failure and
+    # the driver aborted the remaining blocks over a cosmetic string.
+    out = (Path(args.out).resolve() if args.out else OUT)
     lo, hi = (args.seeds.split("-") + [None])[:2]
     seeds = list(range(int(lo), int(hi) + 1)) if hi else [int(lo)]
     deltas = tuple(float(v) for v in args.deltas.split(",") if v)
@@ -336,7 +340,8 @@ def main() -> int:
 
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, indent=2))
-    print(f"wrote {out.relative_to(PKG)}  [{time.time() - t0:.0f}s]")
+    shown = out.relative_to(PKG) if out.is_relative_to(PKG) else out
+    print(f"wrote {shown}  [{time.time() - t0:.0f}s]")
     return 0
 
 

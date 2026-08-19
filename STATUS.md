@@ -40,10 +40,11 @@ branch.
 | N18 | Benchmark sensitivity to the solver's initial guess | **DONE** | same, `part_C_benchmark_sensitivity` | rebuilding §6 from `r₀ = 0.5`: `G^FB` −3.2e-4, `G^NP` −3.8e-5, `G^SB_uniform` **−2.5e-13**, argmax policy unchanged; SB/FB rises 70.458% → 70.484% |
 | N19 | Independent recomputation of theory §9 | **DONE** | `results/validation/recompute_dynamics_audit.json`, `offline_tests/recompute_dynamics_audit.py` | 7 checks by routes sharing no code with the audit: orbits enumerated by hand, 200,000 power iterations, `profile_outcome` at all 923,521 grid states, the rival aggregate by exact convolution |
 | N20 | Doc/artefact sync gate | **DONE** | `code/ha_validate.py::v13_theory_matches_artefacts` | 18 figures rendered from the JSON and required to appear in `theory/HIDDEN_ACTION_THEORY.md`; **18/18** |
-| N21 | R1 measured without the solver — the nested ladder C₀…C₂.₅ | **DONE** | `results/validation/recompute_dynamic_dp.json`, `offline_tests/recompute_dynamic_dp.py` | 6/6 checks, 333 s. Exact discounted scoring of the **same constant class** flips the best action on **24.6% of merchant-instances** at δ=0.95 (75.0% at 0.80); allowing dependence on the merchant's **own** reputation pays on **223 of 240** instances and on 60/60 seeds, so ε₃ > 0 without the 31⁴ program. The 17 survivors are *exactly* the instances where `f*ᵢ` is already at the fabrication corner |
+| N21 | R1 measured without the solver — the nested ladder C₀…C₂.₅ | **DONE** | `results/validation/recompute_dynamic_dp.json`, `offline_tests/recompute_dynamic_dp.py` | 7/7 checks, 870 s. Exact discounted scoring of the **same constant class** flips the best action on **24.6% of merchant-instances** at δ=0.95 (75.0% at 0.80); allowing dependence on the merchant's **own** reputation pays on **223 of 240** instances and on 60/60 seeds, so ε₃ > 0 without the 31⁴ program. The 17 survivors are *exactly* the instances where `f*ᵢ` is already at the fabrication corner |
 | N22 | What R1 costs the marketplace | **DONE** | same, `results[].gmv_consequence` | best response over constant actions under exact discounted payoffs reaches a **fixed point on 60/60 seeds** — but a different one, on **41/60**. Mean `f` 0.380 → 0.487; **62.91% of first best against the 70.35% reported** (57.88% at δ=0.90, 69.18% at 0.99). Mean loss 9.56%, worst seed 32.5% |
-| N23 | Held-out replication of N21 | **DONE** | `results/validation/recompute_dynamic_dp_heldout.json` | the certificate rerun unchanged on 30 seeds used nowhere else (71000–71029): 112/120 instances, the 8 zeros exactly the 8 corner instances, max gain 14.93% at x₀. The one check that cannot transfer records `cross_validation_applicable: false` rather than passing over an empty intersection |
-| N24 | §10/§11 doc/artefact sync gate | **DONE** | `code/ha_validate.py::v14_theory_section10_matches_artefacts` | 54 figures rendered from three separate artefacts and required to appear in the theory document, plus the ladder inequality ε₃ ≥ ε₂.₅ asserted rather than assumed; **54/54** |
+| N23 | Held-out replication of N21 | **DONE** | `results/validation/recompute_dynamic_dp_heldout.json` | the certificate rerun unchanged on 30 seeds used nowhere else (71000–71029): 112/120 instances, the 8 zeros exactly the 8 corner instances, max gain 14.93% at x₀. The shape result replicates too — **0/120** build-then-exploit, 0/120 non-decreasing. The one check that cannot transfer records `cross_validation_applicable: false` rather than passing over an empty intersection |
+| N24 | §10/§11 doc/artefact sync gate | **DONE** | `code/ha_validate.py::v14_theory_section10_matches_artefacts` | 80 figures rendered from three separate artefacts and required to appear in the theory document, plus the ladder inequality ε₃ ≥ ε₂.₅ asserted rather than assumed; **80/80**. The matcher was itself wrong until this session: a plain substring test passed `0 / 240` because `180 / 240` appears two sections earlier, so four figures the document never stated were reported as cited. Now delimited — see `_cited` |
+| N26 | What the deviation R1 hides actually *is* | **DONE** | `results[].cash_in_shape`, `results/solver/ha_dp_policy_probe.json` | R1 was justified as excluding build-then-exploit. It does not: **0 of 240** in sample and **0 of 120** out of sample, in all three blocks, and 0 non-decreasing maps. The real shape is the mirror image — 59/240 sit at *total* fabrication over a contiguous block of the **lowest** reputations and drop back near `f*ᵢ` above a threshold (reputation as a hostage), the rest fabricate *below* `f*ᵢ` and rise only *toward* it. 163/240 have a positive fitted slope and **none** of them exploits at high r, so the slope statistic alone would have reported cash-in for a population where it never happens. Confirmed on the full 31⁴ argmax for 3 instances; the corner region grows there |
 | N25 | Dynamic best response on the full 31⁴ state space (restriction R1) | **RUNNING** | `results/solver/ha_dynamic_equilibrium.json` | 80-round backward induction and discounted value iteration against rivals fixed at `f*`, ≈3.9 min/seed on one machine, sharded five seeds at a time. On seed 70000 it reports 2.025% against N21's solver-free lower bound of 2.002% — the ladder holds and is tight to 1.1% of the gain, which is what conditioning on *rivals'* reputations is worth |
 
 ### The twelve propositions and what would falsify each
@@ -234,10 +235,18 @@ python code/to_run.py --mode smoke                            # 32 cells     [1.
 # surrogate's three restrictions cost. Neither of these imports solver code.
 python code/ha_dynamics_audit.py --part all --seeds 70000-70059
 python offline_tests/recompute_dynamics_audit.py              # 7 checks
-python offline_tests/recompute_dynamic_dp.py --seeds 70000-70059          # [333 s]
-python offline_tests/recompute_dynamic_dp.py --only population_certificate \
-       --seeds 71000-71029 \
-       --out results/validation/recompute_dynamic_dp_heldout.json         # [132 s]
+python offline_tests/recompute_dynamic_dp.py --seeds 70000-70059          # 7 checks
+python offline_tests/recompute_dynamic_dp.py \
+       --only population_certificate cash_in_shape --seeds 71000-71029 \
+       --out results/validation/recompute_dynamic_dp_heldout.json
+
+# the full 31^4 program, which the two above bracket and do not depend on. Restartable by
+# construction: a block whose shard is already on disk is skipped, so a crash costs the block in
+# flight and nothing else. Run it ALONE -- it is BLAS-bound, and concurrent numpy jobs cost more
+# than they buy.
+bash _run_dp.sh                                                # 12 blocks x 5 seeds
+python code/ha_dp_merge.py results/solver/_dp_shard_*.json
+python code/ha_dp_policy_probe.py --seeds 70000,70002,70005 --merchants 3 --delta 0.95
 ```
 
 The first four are ordered: `ha_theory_check.py` and `ha_signal_analysis.py` both read

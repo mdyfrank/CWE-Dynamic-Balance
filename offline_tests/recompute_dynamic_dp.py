@@ -1186,6 +1186,207 @@ def t_gmv_consequence(args) -> dict:
     }
 
 
+def _reduced_state_policy(case, C, cinf, delta: float, horizon: int = None, cap: int = 200):
+    """The argmax of §2.4's 31-state MDP, which `_reduced_state_values` computes and discards.
+
+    The size of the deviation gain says whether f* is an equilibrium. It does not say what the
+    deviator DOES, and the shape is the whole content of the build-then-exploit story that R1 exists
+    to flag. Two maps are returned because they answer different questions: `pol_tail` is the
+    stationary optimal action once the rivals have settled -- the long-run shape -- and `pol_t0` is
+    the action at the experiment's own first round, which is the one a 80-round run would exhibit.
+
+    Each map comes with the Q-value margin over f* that produced it, state by state, and that pairing
+    is not decoration. A policy map is an argmax, and an argmax reports a winner whether it won by a
+    mile or by round-off -- at reputations where demand is nearly zero every action earns nearly the
+    same profit, so a map read on its own cannot distinguish "this merchant strictly prefers to
+    fabricate everything" from "nothing here mattered and the tie fell somewhere". The margin
+    settles it, and it is carried through to the artefact so a reader can check rather than trust.
+
+    Cheap, because everything it needs has already been built: one extra argmax per backward step.
+    """
+    R, ast, T_i = case.cfg.R, case.astar, case.T_i
+    if horizon is None:
+        V, _P, _n, _r = _tail_solve(T_i, cinf, delta, ast, cap)
+        Q = cinf + delta * (T_i @ V)
+        tail = (np.argmax(Q, axis=0), Q.max(axis=0) - Q[ast], Q.max(axis=0) - Q.min(axis=0))
+        rng = range(C.shape[0] - 1, -1, -1)
+    else:
+        V, tail = np.zeros(R), None
+        rng = range(horizon - 1, -1, -1)
+    t0 = (np.full(R, ast, dtype=int), np.zeros(R), np.zeros(R))
+    for t in rng:
+        Q = C[t] + delta * (T_i @ V)
+        V = Q.max(axis=0)
+        t0 = (np.argmax(Q, axis=0), V - Q[ast], V - Q.min(axis=0))
+    return tail, t0
+
+
+def _shape(triple, ast: int, top: int) -> dict:
+    """Which way does this action map run -- and the two hypotheses are tested symmetrically.
+
+    R1 was written to flag *build-then-exploit*: accumulate reputation while it is cheap, spend it
+    once it is valuable, i.e. a(r_i) rising, fabricating LESS than the equilibrium at low r_i and
+    MORE at high r_i. The opposite is equally possible and would mean something quite different --
+    reputation as a hostage, so that a merchant with nothing left to lose fabricates everything and
+    one with a stock protects it. Both are therefore given their own indicator, and the strict
+    version of each ("does it cross f*?", "is the corner region a lower interval?") is recorded
+    alongside the slope, because a slope can be positive while the map never crosses f* at all.
+
+    The corner-region test is the sharper of the two directions: full fabrication is the top of the
+    grid, so a(r)=top over a contiguous block of the LOWEST reputations is an unambiguous collapse
+    and cannot be confused with a one-step mis-ranking between near-tied actions.
+    """
+    pol, margin, spread = (np.asarray(v) for v in triple)
+    R = len(pol)
+    slope = float(np.polyfit(np.arange(R), pol, 1)[0])
+    d = np.diff(pol)
+    at_top = pol == top
+    idx = np.nonzero(at_top)[0]
+    k = int(idx.max()) + 1 if idx.size else 0
+    # how decisively the argmax won, in value units and as a share of the whole range of Q at that
+    # state. A corner action taken by 10^-15 over f* at a reputation where demand is nil is an
+    # arithmetic accident; one taken by 70% of the state's entire action spread is a preference.
+    share = np.divide(margin, spread, out=np.zeros_like(margin), where=spread > 1e-15)
+    return {"slope": slope,
+            "cash_in": bool(slope > 1e-9),
+            "non_decreasing": bool((d >= 0).all()),
+            "non_increasing": bool((d <= 0).all()),
+            "flat": bool((d == 0).all()),
+            "n_distinct_actions": int(len(np.unique(pol))),
+            "action_at_lowest_r": int(pol[0]), "action_at_highest_r": int(pol[-1]),
+            "f_star_i": int(ast), "top_of_grid": int(top),
+            # the 17 instances of §10.3's corner law: where f* already prescribes total
+            # fabrication there is nothing above it to deviate to, and both hypotheses are
+            # vacuous. Recorded so the tallies below can exclude them explicitly rather than
+            # letting them dilute a denominator.
+            "f_star_is_the_corner": bool(ast == top),
+            # hypothesis A -- build then exploit
+            "builds_at_low_r": bool(pol[0] < ast),
+            "exploits_at_high_r": bool(pol[-1] > ast),
+            "build_then_exploit": bool(pol[0] < ast < pol[-1]),
+            # hypothesis B -- reputation as a hostage, released when it is worthless
+            "corner_at_low_r": bool(ast < top and pol[0] == top),
+            "corner_at_high_r": bool(ast < top and pol[-1] == top),
+            "n_states_at_the_corner": int(at_top.sum()),
+            "corner_region_is_a_lower_interval": bool(idx.size and at_top[:k].all()),
+            "highest_corner_state": k - 1 if idx.size else -1,
+            "collapse_then_behave": bool(ast < top and pol[0] == top and pol[-1] != top
+                                         and idx.size and at_top[:k].all()),
+            # is the map a preference or an accident?
+            "margin_over_f_star_at_lowest_r": float(margin[0]),
+            "margin_share_at_lowest_r": float(share[0]),
+            "min_margin_share_where_action_differs":
+                float(share[pol != ast].min()) if (pol != ast).any() else float("nan"),
+            "max_margin_over_f_star": float(margin.max()),
+            "map": [int(v) for v in pol],
+            "margin_over_f_star": [float(v) for v in margin]}
+
+
+def t_cash_in_shape(args) -> dict:
+    """WHAT the own-reputation best response does, over the whole population -- not just its size.
+
+    §10.3 establishes that deviating pays on 223 of 240 instances. That is a statement about a
+    number. R1 was written to flag a specific mechanism -- accumulate reputation while it is cheap,
+    spend it once it is valuable -- and a gain of any size is consistent with some other mechanism
+    entirely. `code/ha_dp_policy_probe.py` answers this for the full 31^4 program but only on the
+    handful of instances named on its command line, because it must keep a (21, 31, 31^3) argmax
+    array alive. On §2.4's reduction the array is 31 integers, so the same question can be asked of
+    every instance at once, and the answer here is a population statement rather than an anecdote.
+
+    The reduction cannot see rivals, so what it reports is the shape of the deviation available to a
+    merchant watching only its own stock. §10.4 checks it against the full program where that has
+    been run; the two are not required to agree, and if they do not, the difference is what watching
+    rivals changes about the SHAPE rather than the size.
+    """
+    lo, hi = (int(v) for v in args.seeds.split("-"))
+    per_seed, skipped = [], []
+    for seed in range(lo, hi + 1):
+        a2 = argparse.Namespace(**{**vars(args), "seed": seed})
+        cfg, mkt, kappa, tau, fstar = _equilibrium(a2)
+        if fstar is None:
+            skipped.append(seed)
+            continue
+        rec = {"seed": seed, "f_star": [int(v) for v in fstar], "merchants": []}
+        top = cfg.Nf - 1
+        for i in range(mkt.m):
+            c = Case(cfg, mkt, i, fstar, kappa, tau)
+            C, cinf, _resid = _tail_table(c, args.tail_t0)
+            ptail, pt0 = _reduced_state_policy(c, C, cinf, args.delta)
+            _, p80 = _reduced_state_policy(c, C, cinf, 1.0, horizon=T_HORIZON)
+            rec["merchants"].append({
+                "merchant": i,
+                "gamma_delta_tail": _shape(ptail, c.astar, top),
+                "gamma_delta_first_round": _shape(pt0, c.astar, top),
+                "gamma_80_first_round": _shape(p80, c.astar, top)})
+            del c, C, cinf
+        per_seed.append(rec)
+
+    allm = [m for r in per_seed for m in r["merchants"]]
+    n = len(allm)
+
+    def tally(key):
+        s = [m[key] for m in allm]
+        # a map that is constant carries no shape information either way, so it is counted
+        # separately rather than folded into "non-decreasing", which it satisfies vacuously
+        return {"n": n,
+                "n_flat": sum(1 for v in s if v["flat"]),
+                "n_cash_in_slope_positive": sum(1 for v in s if v["cash_in"]),
+                "n_slope_negative": sum(1 for v in s if v["slope"] < -1e-9),
+                "n_non_decreasing_and_not_flat":
+                    sum(1 for v in s if v["non_decreasing"] and not v["flat"]),
+                "n_non_increasing_and_not_flat":
+                    sum(1 for v in s if v["non_increasing"] and not v["flat"]),
+                # hypothesis A -- build then exploit
+                "n_builds_at_low_r": sum(1 for v in s if v["builds_at_low_r"]),
+                "n_exploits_at_high_r": sum(1 for v in s if v["exploits_at_high_r"]),
+                "n_build_then_exploit": sum(1 for v in s if v["build_then_exploit"]),
+                # hypothesis B -- reputation as a hostage, surrendered once it is worthless. The
+                # two are counted side by side so the artefact cannot report the absence of one
+                # without also reporting the presence or absence of the other.
+                "n_corner_at_low_r": sum(1 for v in s if v["corner_at_low_r"]),
+                "n_corner_at_high_r": sum(1 for v in s if v["corner_at_high_r"]),
+                "n_corner_region_is_a_lower_interval":
+                    sum(1 for v in s if v["corner_region_is_a_lower_interval"]),
+                "n_collapse_then_behave": sum(1 for v in s if v["collapse_then_behave"]),
+                "mean_states_at_the_corner":
+                    float(np.mean([v["n_states_at_the_corner"] for v in s])) if s else float("nan"),
+                "max_states_at_the_corner":
+                    max((v["n_states_at_the_corner"] for v in s), default=0),
+                "n_f_star_is_the_corner": sum(1 for v in s if v["f_star_is_the_corner"]),
+                # the corner region survives only if it is a preference. The minimum over the
+                # instances that HAVE a corner region is the adversarial reading: if even the
+                # weakest of them beats f* by a visible share of the state's action spread, the
+                # pattern is not an argmax tie falling somewhere convenient.
+                "min_margin_share_at_lowest_r_among_corner_instances":
+                    min((v["margin_share_at_lowest_r"] for v in s if v["corner_at_low_r"]),
+                        default=float("nan")),
+                "min_margin_at_lowest_r_among_corner_instances":
+                    min((v["margin_over_f_star_at_lowest_r"] for v in s if v["corner_at_low_r"]),
+                        default=float("nan")),
+                "max_distinct_actions": max((v["n_distinct_actions"] for v in s), default=0),
+                "mean_slope": float(np.mean([v["slope"] for v in s])) if s else float("nan"),
+                "max_slope": max((v["slope"] for v in s), default=float("nan")),
+                "min_slope": min((v["slope"] for v in s), default=float("nan"))}
+
+    blocks = {k: tally(k) for k in ("gamma_delta_tail", "gamma_delta_first_round",
+                                    "gamma_80_first_round")}
+    # This check reports a shape; it does not have a pass/fail criterion of its own beyond the
+    # arithmetic having produced a policy at all. Inventing a threshold ("at least half must cash
+    # in") would be a conclusion dressed as a test.
+    return {
+        "pass": bool(allm),
+        "seeds": args.seeds, "policy": args.policy, "delta": args.delta,
+        "n_seeds": len(per_seed), "seeds_skipped": skipped, "n_merchant_instances": n,
+        "shape": blocks,
+        "per_seed": per_seed,
+        "note": "the action map over i's OWN reputation, all 31 states, for every instance. "
+                "'cash_in' is the OLS slope of a(r_i) being positive -- the better the stock, the "
+                "more it pays to spend it. 'build_then_exploit' is stricter and is the one to "
+                "quote: it requires a(r_min) < f*_i < a(r_max), i.e. fabricating less than the "
+                "equilibrium while the stock is low and more once it is high",
+    }
+
+
 # ==================================================================================================
 TESTS = [
     ("sweep_matches_naive_dp", t_sweep_matches_naive_dp),
@@ -1193,6 +1394,7 @@ TESTS = [
     ("open_loop_certificate", t_open_loop_certificate),
     ("persistent_deviation", t_persistent_deviation),
     ("population_certificate", t_population_certificate),
+    ("cash_in_shape", t_cash_in_shape),
     ("gmv_consequence", t_gmv_consequence),
 ]
 

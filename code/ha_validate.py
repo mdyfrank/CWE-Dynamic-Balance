@@ -42,6 +42,7 @@ import glob
 import gzip
 import json
 import math
+import re
 import sys
 import time
 from pathlib import Path
@@ -414,6 +415,26 @@ def v12_claim_traceability(summary, metrics) -> dict:
             "violations": bad[:6]}
 
 
+def _cited(rendered: str, text: str) -> bool:
+    """Is `rendered` quoted in `text` as a figure, rather than merely occurring inside another one?
+
+    A plain `rendered in text` is not good enough and the failure is silent in the dangerous
+    direction. "0 / 240" is a substring of "180 / 240" and of "20 / 240", so a claim the document
+    never makes passes because an unrelated table two sections earlier happens to contain a larger
+    number ending in the same digits -- which is exactly what happened here: two cash-in-shape
+    figures were reported as cited when the document did not state them at all. A false PASS on a
+    check whose whole purpose is to stop the prose drifting from the artefacts is worse than no
+    check, because it is trusted.
+
+    So the match must be delimited: no digit, decimal point or minus sign may sit immediately either
+    side of it. Everything else about the comparison is left alone -- this makes the check stricter,
+    never more permissive.
+    """
+    if not rendered:
+        return False
+    return re.search(r"(?<![0-9.\-−])" + re.escape(rendered) + r"(?![0-9])", text) is not None
+
+
 def v13_theory_matches_artefacts(theory_text: str, audit: dict) -> dict:
     """Every number §9 of the theory document states must be present in the artefact it cites.
 
@@ -452,7 +473,8 @@ def v13_theory_matches_artefacts(theory_text: str, audit: dict) -> dict:
             claims.append({"claim": label, "value": None, "rendered": None, "found": None})
             return
         s = fmt(value)
-        claims.append({"claim": label, "value": value, "rendered": s, "found": s in theory_text})
+        claims.append({"claim": label, "value": value, "rendered": s,
+                       "found": _cited(s, theory_text)})
 
     n = g(audit, "part_A_kernel_audit", "n_kernels")
     claim("A: kernels audited", n, com)
@@ -479,8 +501,11 @@ def v13_theory_matches_artefacts(theory_text: str, audit: dict) -> dict:
     claim("B: worst deviation gain under expectations", sb.get("eps_expectation_rel_max"),
           lambda v: f"{100 * v:.3f}%")
 
+    # Signed, not `abs`. The magnitude alone would let the document claim the first-best GMV moved
+    # UP when the solver says it moved down and still pass, and the direction is the whole content
+    # of a sentence about whether a published figure was optimistic.
     claim("C: shift in G_FB from the solver's initial guess", g(C, "shift", "G_FB"),
-          lambda v: f"{abs(v):.2e}".replace("e-04", "\\times10^{-4}"))
+          lambda v: f"{v:.2e}".replace("e-04", "\\times10^{-4}"))
     claim("C: published G_FB", g(C, "published_uniform_start", "G_FB"), lambda v: f"{v:.6f}")
     claim("C: corrected G_FB", g(C, "r_init_start", "G_FB"), lambda v: f"{v:.6f}")
     claim("C: published G_NP", g(C, "published_uniform_start", "G_NP"), lambda v: f"{v:.6f}")
@@ -540,8 +565,9 @@ def v14_theory_section10_matches_artefacts(theory_text: str, rec: dict, held: di
             claims.append({"claim": label, "rendered": None, "found": None})
             return
         s = fmt(value)
-        claims.append({"claim": label, "rendered": s, "found": s in theory_text})
+        claims.append({"claim": label, "rendered": s, "found": _cited(s, theory_text)})
 
+    pct1 = lambda v: f"{100 * v:.1f}%"                                            # noqa: E731
     pct2 = lambda v: f"{100 * v:.2f}%"                                            # noqa: E731
     pct3 = lambda v: f"{100 * v:.3f}%"                                            # noqa: E731
     pct4 = lambda v: f"{100 * v:.4f}%"                                            # noqa: E731
@@ -607,6 +633,34 @@ def v14_theory_section10_matches_artefacts(theory_text: str, rec: dict, held: di
             "rendered": None if nz is None else f"{nz} zero, {nc} corner, coincide={coincide}",
             "found": None if nz is None else bool(nz == nc and coincide)})
 
+    # ---- 10.3, the SHAPE of the reduced-state deviation ---------------------------------------
+    # The counts for the two hypotheses are required in the prose together. A document that reports
+    # "0 build-then-exploit" without also reporting what the maps DO instead has replaced a claim
+    # with an absence, which is the failure mode this whole section exists to correct.
+    for lab, doc in (("10.3", rec), ("held out", held)):
+        cis = blk(doc, "cash_in_shape") if doc else None
+        for bk, bl in (("gamma_delta_tail", "Gamma_delta tail"),
+                       ("gamma_delta_first_round", "Gamma_delta first round"),
+                       ("gamma_80_first_round", "Gamma_80 first round")):
+            b = g(cis, "shape", bk) or {}
+            nb = b.get("n")
+            claim(f"{lab}: {bl}, build-then-exploit maps", b.get("n_build_then_exploit"),
+                  lambda v: over(v, nb))
+            claim(f"{lab}: {bl}, corner at the lowest reputation", b.get("n_corner_at_low_r"),
+                  lambda v: over(v, nb))
+            claim(f"{lab}: {bl}, collapse-then-behave maps", b.get("n_collapse_then_behave"),
+                  lambda v: over(v, nb))
+            claim(f"{lab}: {bl}, mean slope of the action map", b.get("mean_slope"),
+                  lambda v: f"{v:+.3f}")
+        # An argmax names a winner whether it won by a mile or by round-off, so calling the corner
+        # region a mechanism commits the document to a margin. The weakest one is required in the
+        # prose as a figure rather than tested against a threshold invented here: a cutoff would be
+        # this file deciding the conclusion, and the reader can judge a number.
+        b = g(cis, "shape", "gamma_delta_tail") or {}
+        ms = b.get("min_margin_share_at_lowest_r_among_corner_instances")
+        claim(f"{lab}: weakest corner margin, as a share of the state's action spread",
+              None if ms is None or ms != ms else ms, pct1)
+
     # ---- 10.5, GMV -------------------------------------------------------------------------
     G, c1 = g(gm, "gmv") or {}, g(gm, "c1") or {}
     for key, lab in (("plugin_stationary_at_f_star", "plug-in at f*"),
@@ -655,17 +709,43 @@ def v14_theory_section10_matches_artefacts(theory_text: str, rec: dict, held: di
         claim(f"10.4: {key} max relative eps on the reachable set",
               g(ag, key, "max_rel_max_reachable"), pct2)
 
-    # the ladder is an ordering, not a set of independent numbers: the solver's eps must dominate
-    # the certificate that needs no solver, on the same delta. A violation means one of two
-    # unrelated implementations is wrong, and the document's whole argument rests on the order.
+    # The ladder is an ordering, not a set of independent numbers: every (t, r_i)-measurable
+    # deviation is (t, x)-measurable, so the solver's eps must dominate the certificate that needs
+    # no solver. A violation means one of two unrelated implementations is wrong, and the document's
+    # whole argument rests on the order. It is asserted per merchant instance rather than between
+    # two aggregates, because a max over 240 instances can hide a reversal on any one of them.
+    #
+    # Two traps, both of which this got wrong on the first attempt and which the comparison must
+    # avoid rather than merely survive:
+    #
+    #   * RELATIVE gains are not comparable. eps_2.5 and eps_3 are divided by the value of f* at
+    #     their own evaluation point, and those points differ, so an ordering on eps says nothing
+    #     about an ordering on eps/V. The comparison below is in value units.
+    #   * The REACHABLE subset is not the right ceiling. `eps_max_reachable` maximises over the
+    #     707,281 states the joint chain can enter from x_0; the reduced state maximises over own
+    #     reputation with the rivals integrated over their settled law, and its maximiser can pair
+    #     an own-reputation with a rival configuration outside that mask. Measured against
+    #     `eps_max_reachable` the inequality fails on 5 of the first 20 instances -- correctly, it
+    #     is simply not the implied inequality. Against `eps_max` over all 923,521 states it holds.
     if ag:
         dd = next((k for k in ag if k.startswith("gamma_delta_")), None)
-        lo = sw.get("gamma_delta_max_relative_eps_over_own_reputation")
-        hi = g(ag, dd, "max_rel_max_reachable") if dd else None
-        if lo is not None and hi is not None:
-            claims.append({"claim": "ladder: eps_3 >= eps_2.5 on the reachable set",
-                           "rendered": f"{100 * hi:.2f}% >= {100 * lo:.2f}%",
-                           "found": bool(hi >= lo - 1e-9)})
+        solver = {(s["seed"], m["merchant"]): m[dd]
+                  for s in (g(dyn, "policies", "P_SB_uniform", "per_seed") or [])
+                  for m in s["merchants"] if dd and dd in m}
+        pairs = []
+        for s in (g(pc, "per_seed") or []):
+            for m in s.get("merchants", []):
+                lo, hi = m.get("reduced_state_gamma_delta"), solver.get((s["seed"], m["merchant"]))
+                if lo and hi:
+                    pairs.append((hi["eps_at_x0"] >= lo["eps_at_r0"] - 1e-9,
+                                  hi["eps_max"] >= lo["eps_max_over_own_reputation"] - 1e-9))
+        if pairs:
+            n0 = sum(1 for a, _ in pairs if a)
+            n1 = sum(1 for _, b in pairs if b)
+            claims.append({"claim": "ladder: eps_3 >= eps_2.5 at x_0, per instance, in value units",
+                           "rendered": over(n0, len(pairs)), "found": bool(n0 == len(pairs))})
+            claims.append({"claim": "ladder: max eps_3 >= max eps_2.5 over all states, per instance",
+                           "rendered": over(n1, len(pairs)), "found": bool(n1 == len(pairs))})
 
     missing = [c for c in claims if c["found"] is False]
     unchecked = [c for c in claims if c["found"] is None]
@@ -773,9 +853,23 @@ def main(argv=None) -> int:
             extra = f"  ({c['n_cells_recomputed']} cells recomputed)"
         print(f"[{tag}] {c['check']}{extra}")
         if c["pass"] is False:
-            print(f"       {c['n_violations']} violations")
-            for v in c["violations"][:3]:
-                print(f"       - {v['cell']}: {v['what']} {json.dumps(v['detail'], default=str)[:160]}")
+            # Two failure schemas live here: the cell checks report `violations`, the theory checks
+            # report `claims`. Printing only the first shape meant a failing theory check crashed the
+            # runner on a KeyError BEFORE the artefact was written -- the failure was invisible and
+            # the whole suite looked like a crash rather than a result.
+            if "violations" in c:
+                print(f"       {c.get('n_violations', len(c['violations']))} violations")
+                for v in c["violations"][:3]:
+                    print(f"       - {v['cell']}: {v['what']} "
+                          f"{json.dumps(v['detail'], default=str)[:160]}")
+            elif "claims" in c:
+                miss = [q for q in c["claims"] if not q.get("found")]
+                print(f"       {len(miss)} of {len(c['claims'])} claims not found in the document")
+                for q in miss:
+                    print(f"       - {q['claim']}")
+                    print(f"           expected: {q['rendered']}")
+            else:
+                print(f"       {json.dumps({k: v for k, v in c.items() if k != 'check'})[:400]}")
         elif c["pass"] is None:
             print(f"       {c.get('why', '')}")
 

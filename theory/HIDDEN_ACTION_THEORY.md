@@ -662,7 +662,11 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
    merchant's own reputation raises the deviation gain further on **223 of 240** instances (§10.3),
    and the 17 that survive are *exactly* the instances where \(f^*_i\) already sits at the fabrication
    corner and there is nothing above it to deviate to. \(f^*\) is an equilibrium of \(\mathcal G\); it
-   is not one of \(\Gamma_\delta\).
+   is not one of \(\Gamma_\delta\). One caveat cuts against the framing rather than the finding: the
+   deviations R1 excludes are **not** the ones it was written to exclude. Build-then-exploit does not
+   occur in any instance; what occurs is its mirror image, total fabrication at the *lowest*
+   reputations and near-compliance above a threshold (§10.3). The restriction is doing real work, but
+   not the work it was justified by.
 3. **Uniqueness is computational, not proved** (Proposition 1′). It holds in 38,400 pairs tested and
    may fail elsewhere.
 4. **Robust implementation is nearly vacuous** (Proposition 6): guaranteed against the whole type
@@ -703,6 +707,8 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
 | "Stopping value iteration when \(\varepsilon=V-P\) has settled is safe" | \(V\) and \(P\) share the \(c/(1-\delta)\) level, which converges at rate \(\delta\) while \(\varepsilon\) converges at the mixing rate; the level was short by \(3.4\times10^{-6}\) | §10.1 |
 | "\(f^*\) at least survives the dynamic objection on *some* markets" | the 17 of 240 instances with zero own-state deviation gain are **exactly** the 17 with \(f^*_i=1\) — the sets coincide, in sample and held out. \(f^*\) survives only where it already prescribes total fabrication | §10.3 |
 | "\(\Gamma_{80}\)'s equilibrium failure is a statement about the market" | the best switch round is in the last five on 224/240; confined to the first half the largest gain over all 240 instances is **0.0589%**. It is backward induction from a terminal round the merchants are never told about (G-H4) | §10.3 |
+| "The state-contingent deviation is build-then-exploit — that is what R1 excludes" | it never occurs. The own-reputation optimum sits at *total* fabrication over a block of the **lowest** reputations and returns to near \(f^*\) above a threshold: collapse, not cash-in, and the corner beats \(f^*\) by 72% of the state's whole action spread rather than by round-off | §10.3 |
+| "A positive cash-in slope means cash-in" | most maps have a positive fitted slope and none is build-then-exploit; the maps are non-monotone and the slope is a regression through a jagged argmax | §10.3 |
 
 ---
 
@@ -934,6 +940,16 @@ already large at \(\mathcal C_1\), the surrogate's failure has nothing to do wit
 all and everything to do with how it scores; if \(\varepsilon\) only appears at \(\mathcal C_3\), the
 failure is exactly the build-then-exploit story R1 was written to flag.
 
+Where \(\varepsilon\) first becomes positive is not, however, the same question as *what the profitable
+deviation does*, and it is worth separating them before the numbers arrive. A rung of the ladder is a
+set of strategies; knowing that the optimum leaves that set says nothing about the direction it leaves
+in. Build-then-exploit is one shape a state-contingent deviation could have — fabricate little while
+the reputation stock is small, spend it once it is large — and its mirror image is another: hold
+fabrication down *because* the stock is worth protecting, and abandon that restraint once the stock is
+gone. The two are opposite in sign and mean opposite things for policy, and both are consistent with
+any given \(\varepsilon_{2.5}>0\). §10.3's last block therefore reports the argmax as well as the
+gain, and tests both hypotheses symmetrically rather than looking only for the one R1 names.
+
 \(\mathcal C_{2.5}\) is the rung §2.4 promised. Conditioning on \(r_i\) alone is a 31-state MDP, so
 it is solvable in milliseconds by value iteration on the same tail tables §10.2 already builds; and
 because it is sandwiched — every open-loop deviation is available to it, and it is available to the
@@ -1078,8 +1094,11 @@ only on the merchant's *own* reputation:
 
 and those 223 instances are spread over **all 60 of 60 seeds**. Conditioning on one scalar — the
 merchant's own stock — takes the count from 59 to 223. The 164 instances added are precisely the ones
-for which no constant action beats \(f^*\) but a contingent one does, and since the only thing
-conditioned on is the reputation stock, that *is* build-then-exploit in its minimal form. Seed 70000
+for which no constant action beats \(f^*\) but a contingent one does: the deviation that breaks the
+profile is available *only* to a merchant who watches its own reputation, and R1 is what hides it.
+It is tempting to go one step further and say that, since the only thing conditioned on is the
+reputation stock, this must be build-then-exploit in its minimal form. That step does not follow and
+the argmax refutes it — see below. Seed 70000
 is the clean illustration: at \(\delta=0.95\) not one of its four merchants has a profitable constant
 deviation, and all four have a strictly positive own-reputation-contingent one (0.064%, 0.369%,
 0.276%, 0.177% at \(x_0\); up to 6.94% at the best own-reputation state).
@@ -1113,6 +1132,96 @@ on 223 of 240 instances therefore proves that \(f^*\) is **not** a subgame-perfe
 how much *more* is available from watching rivals as well. This is the reason the verdict in §11 does
 not rest on the expensive computation.
 
+#### What the deviation actually does — and it is not build-then-exploit
+
+Everything above is a statement about the *size* of \(\varepsilon_{2.5}\). R1 was written to exclude a
+specific *shape*, and a gain of any size is consistent with a shape R1 never contemplated, so the
+argmax is worth as much as the gain. On the full \(31^4\) program the argmax is a \((21,31,31^3)\)
+array that `ha_dynamic_dp.py` deletes on every sweep because retaining it would cost 155 MB per
+iteration against roughly 6,000 iterations; on §2.4's reduction it is 31 integers, so the same
+question can be put to every instance at once rather than to a handful named on a command line. Three
+maps are recorded per instance — the stationary shape once the rivals have settled, the shape at the
+experiment's own first round, and the same for \(\Gamma_{80}\) — in `cash_in_shape`.
+
+**Build-then-exploit does not occur.** Not rarely: not once, in any of the three blocks, across all
+240 instances (60 seeds × 4 merchants).
+
+| | \(\Gamma_\delta\) tail | \(\Gamma_\delta\) round 1 | \(\Gamma_{80}\) round 1 |
+|---|---|---|---|
+| **build-then-exploit** \(\;\pi(r_{\min})<f^*_i<\pi(r_{\max})\) | **0 / 240** | **0 / 240** | **0 / 240** |
+| non-decreasing and not flat | 0 / 240 | 0 / 240 | 0 / 240 |
+| builds at low \(r\) \(\;\pi(r_{\min})<f^*_i\) | 164 / 240 | 127 / 240 | 184 / 240 |
+| exploits at high \(r\) \(\;\pi(r_{\max})>f^*_i\) | 18 / 240 | 27 / 240 | 0 / 240 |
+| — of those, also at the corner at \(r_{\min}\) | 18 of 18 | 26 of 27 | — |
+| at the corner at \(r_{\min}\) \(\;\pi(r_{\min})=20>f^*_i\) | 59 / 240 | 81 / 240 | 38 / 240 |
+| collapse-then-behave (corner region a lower interval, then not) | 56 / 240 | 81 / 240 | 38 / 240 |
+| states at the corner, mean (max) | 6.3 (31) | 6.6 (31) | 2.3 (30) |
+| fitted slope \(>0\) | 163 / 240 | 136 / 240 | 173 / 240 |
+| — of those, exploit at high \(r\) | 0 of 163 | 1 of 136 | 0 of 173 |
+| mean fitted slope | \(-0.081\) | \(-0.129\) | \(-0.038\) |
+| weakest corner margin at \(r_{\min}\), share of the action spread | 23.6% | 7.1% | 2.1% |
+
+(\(f^*_i\) is itself the corner in 17 of the 240 instances, where the corner rows are undefined and
+are not counted; \(164+59+17=240\) in the tail block.)
+
+The zero in the first row is not a knife-edge. The two halves of R1's story are *anticorrelated*: in
+the tail block all 163 instances with a positive fitted slope build at low \(r\) and **none** of them
+exploits at high \(r\), while all 18 that exploit at high \(r\) are at the corner at low \(r\) and
+have a negative slope. There is no instance in which the map crosses \(f^*_i\) from below and stays
+above it.
+
+What the maps do instead splits into two regimes, and the larger one is the *opposite* of cash-in:
+164 of 240 fabricate **less** than \(f^*_i\) at the lowest reputations and rise toward \(f^*_i\) as
+the stock grows — a positive slope that never crosses \(f^*_i\). The smaller regime, 59 of 240, is
+the sharper one: it sits at *total* fabrication over a contiguous block of the **lowest** reputations
+and then drops back to within a notch of \(f^*_i\) above a threshold. Seed 70000, merchant 3,
+\(f^*_i=8\), at \(\delta=0.95\) once the rivals have settled:
+
+```
+r index  0  1  2  3  4  5  6  7  8  9 10 | 11 12 13 14 15 ... 28 29 30
+action  20 20 20 20 20 20 20 20 20 20 20 |  8  7  8  7  7 ...  9  8  8
+```
+
+The switch is at \(r\approx0.37\), and the two sides of it are not the same kind of object. At the
+lowest reputation the corner action beats \(f^*_i\) by 0.0192 in value units, which is 72% of the
+entire spread of \(Q(\cdot,r)\) across all 21 actions at that state; the margin decays by an order of
+magnitude across the corner region and is exactly zero at the switch. Above the switch the map wobbles
+between 7, 8 and 9 with margins below \(2\times10^{-4}\) — those are near-ties between adjacent
+actions and should not be read as anything. The corner region is not, and not only in this instance:
+the *weakest* of the 59 corner instances still beats \(f^*_i\) at its lowest reputation by 23.6% of
+that state's entire action spread. The artefact records the margin state by state beside the map for
+exactly this reason: an argmax reports a winner whether it won by a mile or by round-off, and at
+reputations where demand is nearly nil it would be easy to mistake an arithmetic accident for a
+mechanism.
+
+The mechanism this suggests is not *build a reputation and cash it in*; it is **reputation as a
+hostage**. A merchant holding a stock protects it, because the threshold penalty
+\(P=\kappa\max(0,d/N-\tau)\) is bounded above while the demand a reputation earns is not, so the
+continuation value of restraint exceeds the one-round gain from fabricating. A merchant that has
+already lost the stock has nothing left to protect, the continuation value of restraint collapses,
+and total fabrication becomes strictly optimal. The two halves of R1's own story do both appear in
+the data — some maps fabricate less than \(f^*_i\) at low reputation, others fabricate more at high
+reputation — but they never appear in the same instance, and never in the order R1 predicts.
+
+Two further properties of the maps matter for how the result may be summarised. First, 216 of the 240
+tail maps are monotone in neither direction (7 are flat, 17 non-increasing, none non-decreasing), so
+the linear slope in the table is a regression through a jagged map and not a description of it; no
+threshold rule in \(r_i\) summarises the optimum, which is itself an argument against reading any of
+these deviations as a simple strategy a merchant could be said to "follow". Second, the sign of that
+slope and the sign of the mechanism disagree, and this is the trap the table is laid out to spring:
+**163 of 240 tail maps have a positive fitted slope**, and a paper that reported that number alone
+would have reported cash-in for a population in which cash-in does not happen once. The slope is
+positive because the map climbs *toward* \(f^*_i\) from below; it stops there. The mean slope is
+negative because the 59 collapse instances fall by twelve grid points at a stroke. Neither statistic
+survives contact with the argmax, and both are in the artefact so that the reader can see the
+disagreement rather than take the summary on trust.
+
+This is a genuine correction to how §10 was framed, not a refinement of it. \(\varepsilon_{2.5}>0\)
+refutes the equilibrium claim either way, so the verdict in §11 is unchanged; but the *reason* the
+profile fails is the opposite of the one R1 was written to guard against, and a mechanism designer
+who patched the model against build-then-exploit would have patched the wrong thing. §10.4 asks
+whether watching rivals changes the shape as well as the size.
+
 #### Held out
 
 The block above chooses the strategy class after having seen the markets, so it was rerun unchanged on
@@ -1128,12 +1237,105 @@ The block above chooses the strategy class after having seen the markets, so it 
 | \(\Gamma_{80}\) max gain from a first-half switch | 0.0589% | 0.0647% |
 | \(\mathcal C_1\): want a different constant action at \(\delta=0.95\) | 24.6% | 22.5% |
 | \(b\)-bucketing flips the \(\delta\to1\) verdict | 23 / 240 | 5 / 120 |
+| **build-then-exploit maps** (tail · round 1 · \(\Gamma_{80}\)) | **0 / 240** · 0 / 240 · 0 / 240 | **0 / 120** · 0 / 120 · 0 / 120 |
+| non-decreasing and not flat (tail · round 1 · \(\Gamma_{80}\)) | 0 / 240 · 0 / 240 · 0 / 240 | 0 / 120 · 0 / 120 · 0 / 120 |
+| at the corner at \(r_{\min}\) (tail · round 1 · \(\Gamma_{80}\)) | 59 / 240 · 81 / 240 · 38 / 240 | 17 / 120 · 31 / 120 · 14 / 120 |
+| collapse-then-behave (tail · round 1 · \(\Gamma_{80}\)) | 56 / 240 · 81 / 240 · 38 / 240 | 12 / 120 · 31 / 120 · 13 / 120 |
+| mean fitted slope (tail · round 1 · \(\Gamma_{80}\)) | \(-0.081\) · \(-0.129\) · \(-0.038\) | \(-0.029\) · \(-0.070\) · \(-0.029\) |
+| weakest corner margin at \(r_{\min}\), \(\Gamma_\delta\) tail | 23.6% | 64.2% |
 
 Every sign and every qualitative claim reproduces, including the corner law exactly; the magnitudes
-move by about a percentage point. One check does **not** transfer, and the artefact says so instead of
-passing quietly: the cross-validation against §9.5 compares against `ha_mixing_audit.json`, which
+move by about a percentage point. The shape rows are the ones that were *not* designed on these
+seeds in any sense — the two hypotheses were written down and tested symmetrically before the
+held-out block was run — and the zero survives: not one build-then-exploit map, and not one
+non-decreasing map, in 120 further instances. The mix shifts (the corner regime is rarer out of
+sample, 17 / 120 against 59 / 240, which is why the mean slope is nearer zero), so the *frequency* of
+the collapse is a property of the seed block and should not be quoted as a constant; its
+*existence*, and the absence of its opposite, are not. One check does **not** transfer, and the
+artefact says so instead of passing quietly: the cross-validation against §9.5 compares against `ha_mixing_audit.json`, which
 covers only the 70000-block, so out of sample it records `cross_validation_applicable: false` rather
 than reporting a vacuous agreement over an empty intersection.
+
+### 10.4 \(\mathcal C_3\): the full program, where rivals are watched too
+
+Everything to this point bounds \(\varepsilon_3\) from below without ever computing it. §10.3's
+reduction lets merchant \(i\) condition on its own reputation while the rivals are integrated out over
+their settled law; \(\mathcal C_3\) lets it condition on the whole vector \(R^m\), which is
+\(\Gamma_\delta\) itself. Because every \((t,r_i)\)-measurable strategy is \((t,x)\)-measurable, the
+reduction can only understate. Two questions survive that argument and neither can be settled by it:
+**how much** the extra conditioning is worth, and whether the *shape* of the optimum changes once
+rivals are visible. The second is the one §10.3 explicitly could not answer, because a merchant
+watching only its own stock cannot, by construction, run a strategy that waits for a rival to
+stumble.
+
+Answering either means solving the undiscounted-in-nothing thing itself: \(31^4=923{,}521\) states,
+21 actions, value iteration to a tolerance on \(V-P\) rather than on \(V\) (§10.3's stopping-rule
+trap), per merchant, per seed. `code/ha_dynamic_dp.py` does this; it is the only computation in this
+package that is measured in hours rather than seconds, and it is the reason the verdict was
+constructed so as not to depend on it.
+
+#### The shape, where the reduction could not see it
+
+`code/ha_dp_policy_probe.py` retains the argmax that the sweep discards and reports the map along
+merchant \(i\)'s own reputation with the rivals pinned at \(r_0=0.5\) — the same one-dimensional
+slice §10.3 computes, but cut out of the full four-dimensional optimum instead of out of a model in
+which rivals were never a state. Three instances were chosen to cover the three regimes §10.3 found,
+before the probe was run: a collapse instance, a near-\(f^*\) instance, and a build-toward-\(f^*\)
+instance. All are merchant 3 at \(\delta=0.95\); 29 of the 31 own-reputation indices are reachable.
+
+| | seed 70000 | seed 70002 | seed 70005 |
+|---|---|---|---|
+| \(f^*_i\) | 8 | 8 | 6 |
+| action at \(x_0\), full program | 8 | **20** | 5 |
+| action at \(x_0\), §10.3 reduction | 7 | **20** | 5 |
+| corner region, full program | own-\(r\) 0–13 | own-\(r\) 0–28 | none |
+| corner region, §10.3 reduction | own-\(r\) 0–10 | own-\(r\) 0–29 | none |
+| fitted slope, full program | \(-0.614\) | \(+0.000\) | \(+0.029\) |
+| reachable states where the action differs from \(f^*_i\) | 51.7% | 100.0% | 69.8% |
+| nearest deviating state to \(x_0\) (\(L_1\) on grid indices) | 2 | 0 | 0 |
+| action there | 20 | 20 | 5 |
+| relative gain at \(x_0\) | 0.178% | 13.468% | 0.033% |
+
+The shape survives the lifting of the restriction, and in the collapse instance it is *larger*: seed
+70000's corner region grows from eleven states to fourteen once rivals are visible. Nothing in any of
+the three maps rises through \(f^*_i\) and stays above it. The one instance with a positive slope,
+seed 70005, is the build-toward-\(f^*\) regime again — the map sits at 5 against \(f^*_i=6\) and
+touches 6 at scattered indices, which is a merchant fabricating *less* than the profile prescribes.
+
+Seed 70002 is worth stating on its own, because it is the instance behind the headline number. At
+\(x_0\) — all four reputations at 0.5, the published initial condition of every run in this package —
+the best response to the enumerated profile is \(f_i=20\), **total fabrication, immediately**. Not
+after a reputation has been accumulated, and not after the market has drifted somewhere unusual: the
+nearest deviating state is \(x_0\) itself, and the action differs from \(f^*_i\) at 100% of reachable
+states. That deviation is worth 13.468% of the merchant's own discounted value, and it is the same
+13.468% the \(\mathcal C_{2.5}\) certificate reports for this instance: \(0.150541662\) in value
+units by both routes, agreeing to nine significant figures. At the instance that produces the
+headline number, watching the rivals is worth **nothing** at \(x_0\) — the reduction is not merely a
+valid lower bound there, it is the answer.
+
+Two cautions. The probe's slope is fitted over the reachable indices only and §10.3's over all 31, so
+the two slope columns above are close but not the same statistic; the corner regions, which are read
+off the maps, are directly comparable. And a probe is three instances, chosen to span regimes rather
+than sampled — it can confirm that the reduction was not hiding a different shape, and it cannot
+establish a frequency. The frequencies in §10.3 are from all 240, and out of sample from all 120.
+
+#### One flag in the solver's output that must not be read as agreement
+
+`ha_dynamic_dp.py`'s per-merchant record carries a field named `build_then_exploit`, inside its
+`gamma_80` block, and it reads **true almost everywhere**. It does *not* corroborate anything above,
+and the collision of names is unfortunate enough to state plainly. The flag is
+`action_at_x0_round_T > action_at_x0_round_1` over `actions_at_x0_by_round`: the action **at the
+fixed state \(x_0\)** as the round index runs to the terminal date. It measures movement in *time*
+under a known end, not movement across *reputations*, and only the second bears on R1.
+
+What the flag is picking up is the \(\Gamma_{80}\) end-game §7 warned about. Seed 70000's merchant 3
+has the path \(7\) for 66 rounds, then \(8\) for 4, then \(20\) for the last 10 — the entire "rise"
+is the terminal unravelling, and the 66 rounds before it sit *below* \(f^*_i=7\). Across the first
+completed block of 20 instances the flag is true 20 times, every path ends at the corner, and the
+window in which the action exceeds \(f^*_i\) has median length 4 rounds; 19 of the 20 never exceed
+\(f^*_i\) at any point in the first 40 rounds. Reading that flag as build-then-exploit would
+reintroduce, as a finite-horizon artefact of a horizon §2 already declared unidentified, exactly the
+mechanism the state-indexed argmax says does not occur.
 
 ### 10.5 What it costs the marketplace
 
@@ -1242,6 +1444,7 @@ deviation condition has not been verified on the full sufficient state space. Ap
 | the marketplace attains 70.35% of first best | **only if merchants play \(f^*\)** | §6, §10.5 |
 | the marketplace attains 62.91% of first best | as the \(\mathcal C_1\) figure; **not** as a dynamic figure, and not as a lower bound on one | §10.5 |
 | \(\Gamma_{80}\) shows merchants would fabricate more late in a repeated market | **no** — an end-game artefact; first-half gains max at 0.0589% | §10.3 |
+| the deviation R1 hides is build-then-exploit | **no** — 0 of 240 in sample and 0 of 120 out of sample; the shape is the mirror image, total fabrication at the *lowest* reputations, and it survives on the full \(31^4\) program | §10.3, §10.4 |
 
 Nothing in this package establishes what \(\Gamma_\delta\)'s equilibrium *is*. It establishes what it
 is not. That asymmetry is inherent: a positive equilibrium claim needs a fixed point of a
@@ -1326,6 +1529,19 @@ Stated so that a disagreement can be settled by computation rather than argument
   \(\{\kappa\}\times\{\tau\}\) class (§8, item 1). A mechanism with transfers, bonding or menus is
   outside it and might restore an equilibrium at a much better GMV. That is a different paper, and
   this one should not be read as ruling it out.
+* **The shape, if the reduction is hiding it — partly closed, and not by an argument.** The finding
+  that no deviation is build-then-exploit is read off §2.4's reduction, where the strategy may
+  condition on own reputation but not on rivals'. A build-then-exploit deviation that requires
+  watching a rival would be invisible to it. This is the one conclusion in §10 that the reduction
+  bounds in the *wrong* direction — for the size of \(\varepsilon\) the reduction is a lower bound
+  and can only understate, but for the shape it is simply a different question. §10.4's probe of the
+  full \(31^4\) argmax was run for exactly this reason and did not overturn it: on the three instances
+  probed the collapse shape survives and in one case grows, and nothing rises through \(f^*_i\).
+  Three instances are not 240, so the residual risk is real but now bounded in kind rather than
+  unexamined: what remains possible is that build-then-exploit exists at \(\mathcal C_3\) on
+  instances the probe did not visit. Retaining the full argmax over all 240 would settle it and costs
+  155 MB per iteration, which is why it has not been done. If it ever is and the maps do cash in, the
+  sentence to withdraw is the one about the mechanism, not the one about the equilibrium.
 
 ---
 
@@ -1357,7 +1573,8 @@ Stated so that a disagreement can be settled by computation rather than argument
 | GMV consequence of dropping R1 (§10.5) | same | `results[].gmv_consequence` |
 | \(b\)-discretisation: \(f^*\) solves a game the runner never plays (§8) | same | `results[].population_certificate.b_discretisation_sensitivity` |
 | Same certificate on 30 held-out seeds never used in tuning | `results/validation/recompute_dynamic_dp_heldout.json` | `all_pass` |
-| Shape of the deviation — argmax, cash-in slope, first deviating state | `results/solver/ha_dp_policy_probe.json` | `summary`, `per_seed[].merchants[]` |
+| Shape of the reduced-state deviation, all 240 instances, with the margin that produced each argmax (§10.3) | same | `results[].cash_in_shape.shape` |
+| Shape of the deviation on the full \(31^4\) program — argmax, cash-in slope, first deviating state | `results/solver/ha_dp_policy_probe.json` | `summary`, `per_seed[].merchants[]` |
 
 Reproduce with:
 
@@ -1382,11 +1599,11 @@ done
 python code/ha_dynamic_dp.py --seeds 70000-70004 --policies P_SB_uniform \
        --deltas 0.90,0.99 --no-finite --out results/solver/_dp_shard_delta.json
 python code/ha_dp_merge.py results/solver/_dp_shard_*.json
-python code/ha_dp_policy_probe.py --seeds 70000,70002 --delta 0.95
+python code/ha_dp_policy_probe.py --seeds 70000,70002,70005 --merchants 3 --delta 0.95
 
-# the solver-free rungs, and the same certificate out of sample
+# the solver-free rungs, and the same certificates out of sample
 python offline_tests/recompute_dynamic_dp.py --seeds 70000-70059
-python offline_tests/recompute_dynamic_dp.py --only population_certificate \
+python offline_tests/recompute_dynamic_dp.py --only population_certificate cash_in_shape \
        --seeds 71000-71029 --out results/validation/recompute_dynamic_dp_heldout.json
 ```
 

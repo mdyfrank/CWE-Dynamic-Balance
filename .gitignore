@@ -20,5 +20,13 @@ results/logs/*.log
 # Patterned rather than by directory, so the directory itself stays in the tree.
 results/cache/*.npy
 results/cache/*.tmp
+
+# --- DP shards: checkpoints, not results ---
+# The 31^4 sweep runs five seeds at a time so a crash costs one block rather than the run; the
+# shards exist only so it can be resumed. `ha_dp_merge.py` folds them into
+# results/solver/ha_dynamic_equilibrium.json, which IS tracked. Committing both would ship the
+# same numbers twice and invite them to disagree.
+results/solver/_dp_shard_*.json
+
 __pycache__/
 *.pyc
