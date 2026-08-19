@@ -74,12 +74,74 @@ Nothing in `evaluator_only` may reach a prompt. This is tested, not asserted
 
 ---
 
-## 2. The stationary restriction, stated before it is used
+## 2. Three games, kept apart on purpose
+
+Most of the confusion available in this subject comes from using one symbol for three different
+objects. This section defines all three before anything is computed, so that every later claim can
+name the game it is a claim about.
+
+| | \(\Gamma_{80}\) | \(\Gamma_\delta\) | \(\mathcal G(\theta,\kappa,\tau)\) |
+|---|---|---|---|
+| horizon | 80 rounds, hard stop | infinite, discount \(\delta\) | one shot |
+| strategies | history-dependent | stationary Markov | one constant \(f_i\) |
+| reputation | realised path from \(r_{i0}=0.5\) | realised path | replaced by \(\bar r(f_i)\) |
+| what it is | the game the experiment **runs** | the game the merchants are **told** they are in | the game the frozen corpus **solves** |
+
+### 2.1 \(\Gamma_{80}\) — the game the experiment actually runs
+
+- **Players.** \(N=\{1,\dots,m\}\), \(m=4\). The platform is *not* a player: it commits to
+  \((\kappa,\tau,\kappa_a,\tau_a)\) before \(t=1\), publishes it, and never moves again.
+- **Horizon.** \(T=80\) rounds (40 in tier `B_reduced`), with no continuation value and no scrap value
+  after \(T\).
+- **Types.** \(\theta_i=(q_i,b_i)\) drawn once at \(t=0\) and fixed. Private to \(i\) throughout.
+- **State.** \(x_t=(r_{1t},\dots,r_{mt})\in R^m\), \(|R|=31\), so \(|R^m|=31^4=923{,}521\).
+  \(r_{i0}=0.5\) for all \(i\) (grid index 15).
+- **Actions.** \(f_{it}\in F\), \(|F|=21\), chosen simultaneously, never observed by anyone else.
+- **Merchant-private.** \(q_i,b_i\); own action history \(f_{i,<t}\); own realised profit history;
+  own signal history \((d,\rho,c)_{i,<t}\).
+- **Platform-observable.** \(p_k\) and \(r_{kt}\) for **every** \(k\) (both are published), own
+  \((y,d,\rho,c,P)\), the round index, the lagged traffic index \(Q_{t-1}\), and \((\kappa,\tau,\kappa_a,\tau_a)\).
+- **Evaluator-only.** Any merchant's true \(f\); rivals' \(q,b\); \(\theta_i=b_i+c_sf_i\); the
+  displayed payoff table of the old interfaces, its argmax, and displayed regret.
+- **Information set.** \(I_{it}=\bigl(q_i,b_i,\ \{f_{is},y_{is},\pi_{is},d_{is},\rho_{is},c_{is},P_{is}\}_{s<t},\ \{x_s\}_{s\le t},\ p,\ (\kappa,\tau,\kappa_a,\tau_a)\bigr)\).
+- **Stage payoff.** \(\pi_{it}=\text{margin}\cdot p_i\,Q_t s_{it}\) with \(u,s,Q\) as in §1 evaluated at
+  the *realised* \(r_{it}\), never at \(\bar r\). Platform \(\text{GMV}_t=Q_t\sum_k p_k s_{kt}\).
+- **Signals and transition.** Exactly steps 3–4 of §1: \(d_{it}\sim\text{Bin}(N_{\text{obs}},\theta_i)\),
+  \(\rho\mid d\sim\text{Bin}(d,\phi)\), \(c_{it}\sim\text{Bin}(N_a,\psi_i)\), then
+  \(r_{i,t+1}=\text{clip}(r_{it}+\eta_r(1-r_{it})-P_{it},0,1)\). Conditional on the action profile the
+  \(m\) signal draws are independent across merchants, so the kernel factorises:
+  \(K(x'\mid x,f)=\prod_k K_k(r_k'\mid r_k,f_k)\).
+- **Discounting.** None. The objective put to the merchants is total profit.
+
+> **A rival's reputation is a censored signal of that rival's action.** Because
+> \(r'=\text{clip}(r+\eta_r(1-r)-P,0,1)\) is invertible off the clip, a merchant observing
+> \(r_{k,t}\) and \(r_{k,t+1}\) recovers \(P_{kt}\) exactly whenever neither bound binds, and hence a
+> noisy signal of \(f_{kt}\) through \(d_{kt}\). Rivals' actions are unobserved but they are **not**
+> uninformed-about: the published reputation vector leaks them, censored at the clip. §3's Definition
+> 1 says beliefs are Bayesian "wherever possible", and this is what makes that clause non-empty.
+
+### 2.2 \(\Gamma_\delta\) — the game the merchants are told they are in
+
+Identical primitives, but the horizon is infinite and payoffs are discounted by \(\delta\in(0,1)\).
+This is not an alternative modelling choice; it is what the prompt says. Gate **G-H4** forbids any
+prompt from disclosing the horizon, and the rules block states that the market "continues for an
+unknown number of further rounds (no final round is announced)" and asks for "total profit across the
+ongoing market".
+
+> **This gap is deliberate and it has to be reported.** The experiment truncates at 80 rounds a game
+> its subjects believe has no announced end. Backward induction from a known last round is therefore
+> the wrong model of the *subjects'* problem, and \(\Gamma_\delta\) is the right one; but \(\Gamma_{80}\)
+> is what generates the data. Where the two disagree, both numbers are reported and the disagreement
+> is the finding. \(\delta\) is not identified by the design — it is a free parameter of the analysis,
+> so anything computed from \(\Gamma_\delta\) is reported over a range of \(\delta\), never at one
+> flattering value.
+
+### 2.3 \(\mathcal G(\theta,\kappa,\tau)\) — the restricted stationary surrogate
 
 Holding a merchant's action fixed at \(f\), its reputation follows a Markov chain on the 31-point
 grid with kernel induced by the signal distribution. Write \(\bar r(f;b,\kappa,\tau)\) for the
-stationary mean of that chain, and define the **restricted stationary game**
-\(\mathcal G(\theta,\kappa,\tau)\): players \(1..m\), actions \(F\), payoffs
+stationary mean of that chain, and define the **restricted stationary game**: players \(1..m\),
+actions \(F\), payoffs
 
 \[
 V_i(f) = \text{margin}\cdot p_i\cdot Q_0 e^{-\lambda\bar f}\cdot s_i(f),
@@ -87,11 +149,51 @@ V_i(f) = \text{margin}\cdot p_i\cdot Q_0 e^{-\lambda\bar f}\cdot s_i(f),
 u_k = \alpha\bigl(q_k+(1-q_k)f_k\bigr) + \beta\,\bar r(f_k;b_k) - \gamma p_k .
 \]
 
-> **Boundary.** \(\mathcal G\) restricts merchants to constant actions and evaluates them at the
-> stationary distribution of their own reputation chain. It is *not* the full dynamic game. It is the
-> object the frozen corpus computed, so keeping it makes the old and new results commensurable, and
-> every benchmark below is a benchmark *of \(\mathcal G\)*. Claims about the full game are confined to
-> Proposition 1 and are correspondingly weaker.
+\(\mathcal G\) is obtained from \(\Gamma_\delta\) by **three** restrictions, which are logically
+independent and are worth separating because they fail for different reasons:
+
+| | restriction | what would break it |
+|---|---|---|
+| **R1** | strategies are constant in \(t\) and in the state | build-then-exploit deviations |
+| **R2** | payoffs are evaluated at the *stationary* reputation, not the transient path | slow mixing; 80 rounds too short |
+| **R3** | \(u_k\) uses \(\bar r=\mathbb E[r]\) rather than \(\mathbb E[u_k(r)]\) — a plug-in, not an expectation | Jensen curvature of the logit share in \(r\) |
+
+R3 is an inequality of known sign nowhere: \(s_i\) is convex in \(r_i\) below its inflection and
+concave above, so \(\text{GMV}(\bar r)\) is neither an upper nor a lower bound on
+\(\mathbb E[\text{GMV}(r)]\) a priori. R1 is the restriction Proposition 1 does not cover and §10
+tests. R2 is quantified in §9.
+
+> **Boundary.** \(\mathcal G\) is *not* the full dynamic game. It is the object the frozen corpus
+> computed, so keeping it makes the old and new results commensurable, and every benchmark in §6 is a
+> benchmark *of \(\mathcal G\)*. Claims about \(\Gamma_{80}\) or \(\Gamma_\delta\) are confined to
+> Proposition 1 and to §§9–11, and are correspondingly weaker.
+
+### 2.4 What is the sufficient state? — stated, not assumed
+
+The reduction from \(\Gamma_\delta\) to \(\mathcal G\) is usually written as though merchant \(i\)'s
+problem were a Markov decision process on its own reputation \(r_i\), 31 states. **It is not.** The
+share
+
+\[
+s_i=\frac{e^{u_i(r_i,f_i)}}{e^{w_0}+\sum_k e^{u_k(r_k,f_k)}}
+\]
+
+has every rival's reputation in the denominator, so \(i\)'s stage payoff depends on the whole vector
+\(x=(r_1,\dots,r_m)\) and the payoff-relevant state is \(R^m\), \(923{,}521\) points, not \(31\).
+Two facts pull in opposite directions and both are needed:
+
+1. \(i\)'s **transition** does not depend on \(x_{-i}\): \(d_i\) is drawn from \(b_i+c_sf_i\) alone.
+   So \(x_{-i}\) is an exogenous, uncontrolled process from \(i\)'s point of view.
+2. \(i\)'s **reward** is not separable in \((r_i,x_{-i})\), because they meet in the denominator.
+
+Consequence, and it is the reason §10 is expensive rather than cheap: if rivals play *state-independent*
+actions then \(x_{-i}\) is independent of \(r_i\), the expected-reward MDP on \(r_i\) alone reproduces
+the correct **value** of any \(r_i\)-measurable strategy — but the supremum over \(r_i\)-measurable
+strategies is only a **lower bound** on the supremum over \(x\)-measurable ones. A lower bound on the
+deviation gain is worthless for certifying equilibrium: it can be zero when a profitable deviation
+exists. §10 therefore solves the deviation problem on the full \(31^4\) state space, and the 31-state
+reduction is retained only as a cross-check whose gap to the full solution measures how much
+conditioning on rivals is worth.
 
 ---
 
@@ -410,6 +512,12 @@ no benchmark rests on a heuristic search. Feasibility was **measured**, not assu
 | \(G^{\mathrm{SB}}_{\mathcal P,\text{unif}}\) | best IC outcome, **one** policy for all markets | nothing unobservable | **0.6326** (70.5%) |
 | \(G^{\mathrm{NP}}\) | equilibrium with no penalty | — | **0.3491** (38.9%) |
 
+All four are computed from a table of stationary reputations whose solver turns out to depend on its
+own initial guess (§9.1). The dependence is worth \(-3.2\times10^{-4}\) on \(G^{\mathrm{FB}}\),
+\(-3.8\times10^{-5}\) on \(G^{\mathrm{NP}}\) and **nothing at all** on
+\(G^{\mathrm{SB}}_{\mathcal P,\text{unif}}\); the ratio below rises from 70.458% to 70.484% when it is
+fixed. §9.2 gives the full table. The figures here are the published ones.
+
 **\(G^{\mathrm{SB}}_{\mathcal P,\text{unif}}\) is the honest denominator.** The per-seed second best
 silently grants the platform the ability to read \(q\) and \(b\) and choose the penalty that suits
 them: across 60 seeds the per-seed optimum takes **25 distinct** \((\kappa,\tau)\) values. The gap
@@ -531,10 +639,15 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
    **policy-class second best** over \(\{\kappa\}\times\{\tau\}\) (64, or 640 with the audit channel).
    No statement here is a theorem about all mechanisms. Transfers, menus, message-contingent contracts,
    bonding and entry fees are all outside the class and could do better.
-2. **The stationary restriction** (§2) confines merchants to constant actions evaluated at the
-   stationary reputation distribution. Non-stationary strategies — build reputation, then cash it in —
-   are not in the strategy space and are not evaluated. This is a real gap between Proposition 1 and
-   Propositions 2–12.
+2. **The stationary restriction** (§2.3) confines merchants to constant actions evaluated at the
+   stationary reputation distribution. It is three restrictions, not one, and they are now measured
+   rather than flagged. **R2** (stationary rather than transient payoffs) costs 0.24% of GMV and is a
+   start-up effect that is over by round 20 (§9.4). **R3** (plug-in \(\bar r\) rather than
+   \(\mathbb E[u(r)]\)) costs \(1.7\times10^{-4}\) of GMV, but it changes an incentive conclusion:
+   the profile Proposition 1′ calls the unique pure Nash equilibrium is **not** a Nash equilibrium of
+   the expected-payoff stationary game on 12 of 60 seeds, with gains up to 0.22% of profit (§9.5).
+   **R1** (constant, state-independent actions) is the one that excludes build-then-exploit, and is
+   tested in §10. Until §10, the gap between Proposition 1 and Propositions 2–12 is real.
 3. **Uniqueness is computational, not proved** (Proposition 1′). It holds in 38,400 pairs tested and
    may fail elsewhere.
 4. **Robust implementation is nearly vacuous** (Proposition 6): guaranteed against the whole type
@@ -566,10 +679,270 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
 | "Policy changes GMV, so the mechanism works" | GMV moves 0.0199 across policies even when signals are provably uninformative | Prop 7 |
 | "Better detection closes the gap to first best" | 92% of the gap is incentive, and the floor has no signal parameter | §6.1, Prop 10 |
 | "A share-free rule can certify honesty" | no downward share-free condition exists | Prop 5 |
+| "The stationary solver has a well-defined answer" | 315 kernels have **three** recurrent classes; the reported \(\bar r\) is chosen by the initial guess | §9.1 |
+| "Slow mixing invalidates the stationary payoffs" | worst TV to \(\pi\) at 80 rounds is 0.968, yet the mean is right to \(3.2\times10^{-3}\) | §9.2 |
+| "\(f^*\) is *the* unique pure Nash equilibrium" | it is one of \(\mathcal G\); under expectations it is only a 0.22%-equilibrium, failing on 12/60 seeds | §9.5 |
 
 ---
 
-## 9. Traceability
+## 9. What the stationary surrogate costs: R2 and R3, measured **[computational]**
+
+§2.3 listed three restrictions separating \(\mathcal G\) from \(\Gamma_\delta\). This section
+measures two of them — R2 (stationary rather than transient evaluation) and R3 (plug-in \(\bar r\)
+rather than \(\mathbb E[u(r)]\)) — and the ergodicity precondition that both silently require. R1 is
+§10. Everything here is exact linear algebra on the model's own kernels; no simulation, no LLM.
+
+The object under test is a single function. `ha_model._stationary_mean` builds the \(31\times31\)
+reputation kernel, runs 300 power iterations from the **uniform** distribution, returns
+\(\pi^\top r\), and discards the kernel. It never checks that the limit exists, that it is unique,
+that 300 steps reach it, or that the uniform start is the right one. Each of those is a claim, and
+each is now tested. `code/ha_dynamics_audit.py` rebuilds the identical kernel — same
+\(r'=\text{clip}(r+\eta_r(1-r)-P,0,1)\), same `np.round` snap to the grid — and audits it.
+
+### 9.1 The ergodicity audit: three of four assumptions fail somewhere
+
+Over all \(57\times15\times21=17{,}955\) kernels the class of policies can produce:
+
+| Property `_stationary_mean` assumes | Holds in |
+|---|---|
+| a unique stationary distribution | **17,640 / 17,955** |
+| irreducibility on the 31-point grid | **0 / 17,955** |
+| aperiodicity | 17,955 / 17,955 |
+| 300 power iterations suffice (TV \(\le10^{-9}\)) | **15,222 / 17,955** |
+
+Irreducibility fails everywhere and harmlessly: reputation drifts up by \(\eta_r(1-r)\) every round,
+so low-\(r\) states are transient by construction (up to 28 of the 31 states are transient). That is
+a property of the model, not an error.
+
+The other two failures are real. **The 315 kernels with \(\kappa=0\) have three recurrent classes,
+not one.** With no penalty the map \(r\mapsto\text{clip}(r+0.2(1-r))\) composed with the `np.round`
+snap has three absorbing fixed points, at grid indices 28, 29, 30 — \(r\in\{0.9333,0.9667,1\}\) —
+and which one the chain lands in is decided entirely by where it starts. The model's uniform start
+splits mass \(\{28\!:\!0.9355,\ 29\!:\!0.0323,\ 30\!:\!0.0323\}\) and reports \(\bar r=0.936559\).
+The experiment's own initial condition \(r_0=0.5\) follows the deterministic orbit
+\(15\to18\to20\to22\to24\to25\to26\to27\to28\) and absorbs at \(\bar r=0.933333\). **These are
+different numbers for the same object, and the model reports the one that does not correspond to its
+own runner.**
+
+Convergence at 300 iterations fails for 2,733 kernels. The diagnostics look alarming: the largest
+non-degenerate second eigenvalue modulus implies a relaxation time of \(9.15\times10^{11}\) rounds;
+the Dobrushin ergodic coefficient reaches 1.0, so it certifies no contraction anywhere in the class;
+and the worst total-variation distance to \(\pi\) after 80 rounds is 0.968 — visually, no mixing at
+all. (467 kernels have SLEM within \(10^{-9}\) of 1, making the unit eigenspace numerically
+degenerate; `np.linalg.eig` returns an arbitrary vector from it, so those are excluded from the
+eigenvector cross-check rather than allowed to produce a nonsense statistic.)
+
+### 9.2 Why none of that propagates: the containment bound
+
+Total variation is payoff-blind, and here that is the whole story. The slowly-mixing directions are
+transitions among **adjacent near-absorbing states at the top of the grid**, and the payoff
+functional is Lipschitz in \(r\). The bound that contains the entire §9.1 pathology, over every one
+of the 17,955 kernels:
+
+\[
+\max\bigl|\bar r(\text{uniform start})-\bar r(r_0=0.5)\bigr| \;=\; 0.003226
+\]
+
+— one tenth of a single grid spacing \(1/30=0.0333\), attained at the worst \(\kappa=0\) kernel
+described above. A chain can be arbitrarily far from \(\pi\) in TV and still give the right mean when
+the mass it has not yet moved sits on states that differ in \(r\) by \(1/30\).
+
+Restricting to the kernels that actually carry a result tightens this further:
+
+| Kernel set (per policy) | unique \(\pi\) | converged in 300 | \(\max\|\bar r\) gap\(\|\) |
+|---|---|---|---|
+| all \((b,f)\), \(P_{\mathrm{GMV}}\) | 315/315 | 270/315 | 0.003226 |
+| all \((b,f)\), \(P_{\mathrm{robust}}\) | 315/315 | 240/315 | 0.003226 |
+| all \((b,f)\), \(P^{\mathrm{SB}}_{\text{unif}}\) | 315/315 | 240/315 | 0.003226 |
+| **on the equilibrium path**, \(P_{\mathrm{GMV}}\) | 240/240 | 240/240 | **0** |
+| **on the equilibrium path**, \(P_{\mathrm{robust}}\) | 240/240 | 116/240 | \(9.0\times10^{-6}\) |
+| **on the equilibrium path**, \(P^{\mathrm{SB}}_{\text{unif}}\) | 240/240 | 230/240 | **0** |
+
+Multiple recurrent classes occur **only** at \(\kappa=0\), which is not any named policy: at all three
+named policies the stationary distribution is unique on every one of the 315 kernels, so the one
+failure that is qualitative rather than quantitative never touches a reported number.
+
+Non-convergence, by contrast, is common even on the equilibrium path — at \(P_{\mathrm{robust}}\)
+**less than half** the equilibrium-path kernels have converged when `_stationary_mean` stops
+(116/240), with SLEM up to 0.980. And it still does not matter: the resulting error in \(\bar r\) is
+\(9.0\times10^{-6}\) there and exactly 0 at the other two policies. The 300-iteration cutoff is not
+justified by the code, and happens to be enough.
+
+**Verdict on the precondition: the assumption is false as stated and the error it causes is bounded
+by a tenth of a grid point** — \(3.2\times10^{-3}\) anywhere in the class, \(9.0\times10^{-6}\) on
+any equilibrium path.
+
+#### What it costs the published benchmarks
+
+The fix is free: start the power iteration at the runner's own \(r_0=0.5\) instead of at uniform.
+Doing that and rebuilding §6 from scratch — all 64 policies, all 60 seeds, \(21^4\) profiles
+enumerated per pair, twice:
+
+| | published (uniform start) | corrected (\(r_0=0.5\)) | shift |
+|---|---|---|---|
+| \(G^{\mathrm{FB}}\) | 0.897803 | 0.897481 | \(-3.22\times10^{-4}\) |
+| \(G^{\mathrm{NP}}\) | 0.349071 | 0.349033 | \(-3.78\times10^{-5}\) |
+| \(G^{\mathrm{SB}}_{\mathcal P,\text{unif}}\) | 0.6325777 | 0.6325777 | \(-2.5\times10^{-13}\) |
+| \(G^{\mathrm{SB}}/G^{\mathrm{FB}}\) | 70.458% | 70.484% | \(+0.025\) pp |
+| implementation power | 0.51666 | 0.51699 | \(+3.4\times10^{-4}\) |
+| argmax policy | \((2.0,0.30)\) | \((2.0,0.30)\) | unchanged |
+
+The pattern is exactly what §9.1 predicts, which is the point of reporting it. The only benchmark
+that moves at all is the one whose maximisation ranges over \(\kappa=0\) — the first best — and it
+moves **down**, because the uniform start over-weights the two highest absorbing states and so
+reports a reputation that is too generous by \(0.0032\) precisely where the penalty is switched off.
+\(G^{\mathrm{SB}}_{\mathcal P,\text{unif}}\) is attained at \(\kappa=2.0\), where \(\pi\) is unique,
+and does not move in thirteen digits.
+
+**So the headline 70.5% was, if anything, a shade pessimistic**: correcting the defect raises it by
+0.025 percentage points, and nothing else in §6 changes. The published numbers are retained, with
+this table as the statement of what the initialisation is worth. `offline_tests/recompute_dynamics_audit.py`
+checks not only the magnitudes but the **sign**, against the mechanism: a shift of the wrong sign, or
+any movement in the second best, would mean the diagnosis was wrong even if the arithmetic
+reproduced.
+
+### 9.3 R3 — the plug-in is not an expectation, and the sign is not what one would guess
+
+\(\text{GMV}(\bar r)\) versus \(\mathbb E[\text{GMV}(r)]\) under the **joint** stationary law, 60
+seeds, exact:
+
+| | \(P_{\mathrm{GMV}}\) | \(P_{\mathrm{robust}}\) | \(P^{\mathrm{SB}}_{\text{unif}}\) |
+|---|---|---|---|
+| \(\text{GMV}(\bar r)\) | 0.614007 | 0.615401 | **0.632578** |
+| \(\mathbb E[\text{GMV}(r)]\) | 0.614053 | 0.615541 | 0.632684 |
+| mean relative error | \(-0.0073\%\) | \(-0.0227\%\) | \(-0.0169\%\) |
+| worst \(\|\)relative error\(\|\) | 0.0217% | 0.0724% | 0.0783% |
+| seeds where plug-in *understates* | 56/60 | 53/60 | 51/60 |
+
+The plug-in error is one part in \(10^4\) and, contrary to §2.3's warning that the sign is
+indeterminate a priori, it is **negative on 51–56 of 60 seeds**: the equilibrium reputations sit in
+the region where the logit share is convex in \(r\), so Jensen runs one way in practice even though
+it need not. The direction is conservative — the paper's headline understates true expected GMV —
+but the magnitude is too small to matter either way.
+
+The joint stationary law is a product measure to machine precision: the residual
+\(\|\Pi-\bigotimes_k\Pi_k\|_1\) is \(\le6.7\times10^{-11}\) on every seed and policy. That is not a
+finding, it is a check on the code: the kernel factorises across merchants because complaint draws
+are independent given actions, so independence here is a theorem, and the residual confirms the
+implementation matches it.
+
+**Consistency check.** The plug-in mean at \((\kappa,\tau)=(2.0,0.30)\) is 0.6325777, reproducing the
+published \(G^{\mathrm{SB}}_{\mathcal P,\text{unif}}=0.632578\) of §6 to seven digits by an
+independent code path.
+
+### 9.4 R2 — the transient is a start-up effect, and it is over by round 20
+
+The 80-round path from the runner's own \(r_0=0.5\), compared with the stationary value the paper
+reports. Mean relative gap across 60 seeds, by round:
+
+| round | 1 | 5 | 10 | 20 | 40 | 80 |
+|---|---|---|---|---|---|---|
+| \(P_{\mathrm{GMV}}\) | \(-4.35\%\) | \(-1.74\%\) | \(-0.52\%\) | \(-0.031\%\) | \(-0.000\%\) | \(-0.000\%\) |
+| \(P_{\mathrm{robust}}\) | \(-4.25\%\) | \(-1.53\%\) | \(-0.11\%\) | \(-0.000\%\) | 0 | 0 |
+| \(P^{\mathrm{SB}}_{\text{unif}}\) | \(-4.99\%\) | \(-1.61\%\) | \(-0.21\%\) | \(-0.002\%\) | 0 | 0 |
+
+The worst single seed is \(-16.9\%\) at round 1 and \(-0.03\%\) by round 20. Averaged over all 80
+rounds the path lies **0.22–0.26% below** the stationary value (worst seed 0.88%), and that entire
+deficit is bought in the first ten rounds, while reputation climbs from 0.5 to its stationary level.
+
+So R2 costs about a quarter of one percent of GMV, it is a level shift from the initial condition and
+not a mixing failure, and §9.1's terrifying relaxation times never reach the payoff. **Reporting
+stationary rather than 80-round-average GMV overstates by 0.24%**; where that matters the path figure
+is now available.
+
+### 9.5 What does **not** survive: the enumerated equilibrium is not an equilibrium under expectations
+
+R3 is negligible for GMV *levels*. It is not negligible for *incentives*, and this is the finding
+that changes a claim.
+
+Proposition 1′ enumerates \(21^4\) profiles and reports a unique pure Nash equilibrium of
+\(\mathcal G\) — a game whose payoffs are the plug-in \(V_i(\bar r)\). Rescoring exploitability with
+\(\mathbb E_\Pi[\pi_i(r)]\) instead, moving the deviator's own stationary law with its deviation and
+holding rivals' laws fixed:
+
+| | \(P_{\mathrm{GMV}}\) | \(P_{\mathrm{robust}}\) | \(P^{\mathrm{SB}}_{\text{unif}}\) |
+|---|---|---|---|
+| still a Nash equilibrium under \(\mathbb E[\cdot]\) | 51/60 | 47/60 | **48/60** |
+| worst deviation gain (% of profit) | 0.103% | 0.477% | 0.217% |
+| mean gain among the failures | 0.029% | 0.205% | 0.109% |
+
+**On 12 of 60 seeds at the headline policy, the profile the paper calls "the unique pure Nash
+equilibrium" is not a Nash equilibrium of the expected-payoff stationary game.** The gains are small
+— at most a fifth of a percent of profit — but they are strictly positive, and "unique pure Nash
+equilibrium" is a statement that admits no exceptions. The correct statement is that \(f^*\) is the
+unique pure NE **of \(\mathcal G\)**, and is a \(0.22\%\)-equilibrium of the stationary game scored
+with expectations. Proposition 1′ is amended accordingly in §11.
+
+This is a strictly weaker failure than R1's: it says the plug-in mis-ranks deviations that are nearly
+tied, not that a fundamentally different strategy class wins. §10 tests the latter.
+
+---
+
+## 10. R1: what dropping constant strategies is worth **[computational]**
+
+R1 is the last and largest of the three restrictions. \(\mathcal G\) lets merchant \(i\) choose one
+number \(f_i\) and holds it for ever; \(\Gamma_\delta\) lets it choose a different action after every
+history. The gap between those is where "build a reputation, then cash it in" lives, and it is the
+one restriction Proposition 1 does not cover.
+
+### 10.1 Four questions, not one
+
+It is tempting to run the dynamic program, get a number, and call it *the* answer. That conflates two
+independent axes, and the frozen corpus differs from \(\Gamma_\delta\) along both:
+
+* the **scoring** — stationary plug-in \(V_i(\bar r)\), or the true discounted payoff from the actual
+  initial condition \(r_0=0.5\);
+* the **strategy class** — constant, or time-varying, or state-contingent.
+
+§9 moved the first axis with the class held fixed. §10 moves the second with the scoring held
+correct. That gives a nested ladder, and each rung is a strictly larger set of deviations, so the
+exploitability \(\varepsilon\) is non-decreasing along it:
+
+| | class of deviations available to \(i\) | scoring | isolates |
+|---|---|---|---|
+| \(\mathcal C_0\) | constant \(f_i\) | stationary, plug-in | the frozen corpus — \(\mathcal G\) |
+| \(\mathcal C_1\) | constant \(f_i\) | discounted from \(x_0\), exact | **R2 alone** |
+| \(\mathcal C_2\) | open-loop \(\{f_i^t\}_{t}\), state-independent | exact | + timing |
+| \(\mathcal C_3\) | closed-loop \(f_i^t(x)\), \(x\in R^m\) | exact | + state contingency = \(\Gamma_\delta\) |
+
+\(\mathcal C_0\) and \(\mathcal C_1\) share a strategy set and differ only in the payoff functional;
+\(\mathcal C_1\subset\mathcal C_2\subset\mathcal C_3\) are genuine enlargements. Reading the ladder
+upward is what makes the result interpretable: if \(\varepsilon\) is already large at
+\(\mathcal C_1\), the surrogate's failure has nothing to do with dynamic strategy at all and
+everything to do with how it scores; if \(\varepsilon\) only appears at \(\mathcal C_3\), the failure
+is exactly the build-then-exploit story R1 was written to flag.
+
+The methods are deliberately unrelated. \(\mathcal C_1\) and \(\mathcal C_2\) are pure forward
+simulations of a product law and are computed in `offline_tests/recompute_dynamic_dp.py`, which
+imports no solver code; \(\mathcal C_3\) needs backward induction on all \(31^4=923{,}521\) states
+(§2.4 explains why the 31-state reduction cannot be substituted) and is `code/ha_dynamic_dp.py`. So
+the two cheap rungs are also independent lower bounds on the expensive one, and §10.4 checks that the
+solver's \(\varepsilon\) is at least as large as the certificates that need no solver.
+
+Two facts make the cheap rungs exact rather than approximate. Merchant \(i\)'s action never enters a
+rival's kernel, so under any open-loop strategy the four reputations stay independent and the joint
+law is a product of marginals at every round; and \(i\)'s payoff depends on rivals only through the
+scalar \(Z=\sum_{k\ne i}e^{u_k}\), whose law is the exact convolution of three 31-atom laws — 29,791
+atoms, summed, not sampled. Once the rivals' law has settled, the tail of any constant-action value
+is the \(31\times31\) resolvent \((I-\delta T_i(a))^{-1}\), which removes the horizon from the
+calculation: \(\delta=0.999\) costs no more than \(\delta=0.9\).
+
+That last step carries the one assumption in §§10.2–10.3, and it is load-bearing exactly where the
+answer matters most. The transient is summed explicitly for \(T_0=250\) rounds and the resolvent
+handles the rest, so the tail's weight is \(\delta^{T_0}\): negligible at \(\delta=0.9\)
+(\(\sim10^{-11}\)), but **97.5% of the whole value at \(\delta=0.9999\)**. The patient limit is
+therefore almost entirely a statement about the rivals' settled law \(W_{T_0}\), and after §9.1 —
+where 2,733 kernels had not converged in 300 iterations — a one-step residual is not by itself
+adequate evidence that it has settled. It is reported
+(\(\lVert W_{T_0}-W_{T_0-1}\rVert_1\)), but the real check is §10.2's cross-validation: as
+\(\delta\to1\) the discounted criterion collapses onto the long-run average, which is precisely the
+stationary expected payoff §9.5 computed by power-iterating stationary laws and contracting them
+against the payoff tensor. Two unrelated routes to the same limit must name the same failing markets,
+and that is asserted as a check rather than hoped for.
+
+---
+
+## 12. Traceability
 
 | Claim | Artefact | Key |
 |---|---|---|
@@ -587,6 +960,10 @@ Stated as limits on what may be claimed, not as caveats to be skipped.
 | Four GMV benchmarks, tuning premium, gap decomposition | `results/solver/ha_benchmarks.json` | `aggregate.G_SB_uniform` |
 | Two-channel class | `results/solver/ha_benchmarks_extended.json.gz` | `aggregate` |
 | Informativeness, detector rates, calibration, monitoring continuum | `results/solver/ha_signal_analysis.json` | — |
+| Ergodicity / mixing audit of the stationary solver (§9.1–9.2) | `results/solver/ha_mixing_audit.json` | `part_A_kernel_audit` |
+| Jensen and transient costs, NE under expectations (§9.3–9.5) | same | `part_B_payoff_restrictions` |
+| Benchmark sensitivity to the solver's initial guess (§9.2) | same | `part_C_benchmark_sensitivity` |
+| Independent recomputation of all of §9 | `results/validation/recompute_dynamics_audit.json` | `all_pass` |
 
 Reproduce with:
 
@@ -595,6 +972,8 @@ python code/ha_benchmarks.py --seeds 70000-70059
 python code/ha_benchmarks.py --seeds 70000-70059 --extended
 python code/ha_theory_check.py
 python code/ha_signal_analysis.py
+python code/ha_dynamics_audit.py --part all --seeds 70000-70059
+python offline_tests/recompute_dynamics_audit.py
 ```
 
 No LLM API is involved in any of it.

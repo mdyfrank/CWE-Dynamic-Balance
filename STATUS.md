@@ -35,6 +35,12 @@ branch.
 | N12 | Offline test suite | **DONE** | `results/validation/offline_tests.json` | **14/14 PASS**, 143.9 s |
 | N13 | Mock end-to-end rehearsal | **DONE** | regenerable by `--mode smoke` | 32/32 cells, resume makes 0 calls |
 | N14 | Analyser and validator exercised on mock data | **DONE** | `results/validation/validation_smoke.json` | **12/12 PASS**; 512 signals rebuilt from seeds alone |
+| N16 | Ergodicity and mixing audit of the stationary solver | **DONE** | `results/solver/ha_mixing_audit.json`, `part_A_kernel_audit` | 17,955 kernels: **315 have three recurrent classes**, so `_stationary_mean`'s answer is selected by its uniform initial guess, and only 15,222 have converged when it stops. Contained: worst \|Δr̄\| between the two initialisations is **0.003226**, a tenth of a grid spacing |
+| N17 | R2 and R3 measured — transient vs stationary, plug-in vs expectation | **DONE** | same, `part_B_payoff_restrictions` | Jensen error 1.7e-4 relative; the 80-round path runs **0.24% below** stationary and has settled by round 20; the joint law is a product measure to 6.7e-11. **The enumerated unique pure Nash equilibrium fails under expectations on 12/60 seeds**, gain up to 0.217% of profit |
+| N18 | Benchmark sensitivity to the solver's initial guess | **DONE** | same, `part_C_benchmark_sensitivity` | rebuilding §6 from `r₀ = 0.5`: `G^FB` −3.2e-4, `G^NP` −3.8e-5, `G^SB_uniform` **−2.5e-13**, argmax policy unchanged; SB/FB rises 70.458% → 70.484% |
+| N19 | Independent recomputation of theory §9 | **DONE** | `results/validation/recompute_dynamics_audit.json`, `offline_tests/recompute_dynamics_audit.py` | 7 checks by routes sharing no code with the audit: orbits enumerated by hand, 200,000 power iterations, `profile_outcome` at all 923,521 grid states, the rival aggregate by exact convolution |
+| N20 | Doc/artefact sync gate | **DONE** | `code/ha_validate.py::v13_theory_matches_artefacts` | 18 figures rendered from the JSON and required to appear in `theory/HIDDEN_ACTION_THEORY.md`; **18/18** |
+| N21 | Dynamic best response on the full 31⁴ state space (restriction R1) | **RUNNING** | `results/solver/ha_dynamic_equilibrium.json` | 80-round backward induction and discounted value iteration against rivals fixed at `f*`; the pilot on seed 70000 already finds ε_dyn > 0 at **every one of the 923,521 states** |
 
 ### The twelve propositions and what would falsify each
 

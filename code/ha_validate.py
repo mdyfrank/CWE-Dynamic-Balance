@@ -30,6 +30,7 @@ The checks, and what a failure of each would mean:
   V10 counter separation    decisions, repairs, economic retries and transport attempts reconcile
   V11 prompt hygiene        no evaluator-only quantity appears in any retained prompt
   V12 claim traceability    every summary field is backed by cells that exist
+  V13 theory/artefact sync  every figure §9 of the theory document states is the one the solver wrote
 
 Exit code is non-zero if any check fails, so this can gate a delivery.
 """
@@ -412,6 +413,93 @@ def v12_claim_traceability(summary, metrics) -> dict:
             "violations": bad[:6]}
 
 
+def v13_theory_matches_artefacts(theory_text: str, audit: dict) -> dict:
+    """Every number §9 of the theory document states must be present in the artefact it cites.
+
+    The other twelve checks compare code against code. This one compares *prose* against code, which
+    is the failure mode nothing else catches: a solver is re-run, its output moves in the fourth
+    digit, the JSON is overwritten, and the paragraph quoting it is not. The direction matters --
+    the number is rendered from the JSON and then searched for in the document, so the artefact is
+    the authority and the document is what must conform.
+
+    A claim is listed here only if §9 states it as a figure. Anything the document only describes
+    qualitatively is out of scope, deliberately: pinning prose would make the check brittle without
+    making it stronger.
+    """
+    if not audit:
+        return {"check": "V13_theory_matches_artefacts", "pass": None, "why": "no mixing audit"}
+    if not theory_text:
+        return {"check": "V13_theory_matches_artefacts", "pass": None, "why": "no theory document"}
+    A = audit.get("part_A_kernel_audit", {}).get("summary", {})
+    B = audit.get("part_B_payoff_restrictions", {})
+    C = audit.get("part_C_benchmark_sensitivity", {})
+
+    def g(d, *ks):
+        for k in ks:
+            if d is None:
+                return None
+            d = d.get(k) if isinstance(d, dict) else None
+        return d
+
+    def com(v):                                   # 17955 -> "17,955", matching the prose
+        return f"{int(v):,}"
+
+    claims = []
+
+    def claim(label, value, fmt):
+        if value is None:
+            claims.append({"claim": label, "value": None, "rendered": None, "found": None})
+            return
+        s = fmt(value)
+        claims.append({"claim": label, "value": value, "rendered": s, "found": s in theory_text})
+
+    n = g(audit, "part_A_kernel_audit", "n_kernels")
+    claim("A: kernels audited", n, com)
+    claim("A: unique stationary distribution", A.get("unique_pi"),
+          lambda v: f"{com(v)} / {com(n)}")
+    claim("A: converged in 300 iterations", A.get("converged_in_300"),
+          lambda v: f"{com(v)} / {com(n)}")
+    claim("A: worst rbar gap between the two initial guesses", A.get("max_abs_rbar_init_gap"),
+          lambda v: f"{v:.6f}")
+    claim("A: rbar from the uniform start, worst kernel",
+          g(A, "worst_rbar_init_gap_at", "rbar_uniform_start"), lambda v: f"{v:.6f}")
+    claim("A: rbar from r_0 = 0.5, worst kernel",
+          g(A, "worst_rbar_init_gap_at", "rbar_r_init_start"), lambda v: f"{v:.6f}")
+    claim("A: worst TV to pi after 80 rounds", A.get("worst_tv_at_horizon_80"),
+          lambda v: f"{v:.3f}")
+
+    sb = B.get("P_SB_uniform", {})
+    claim("B: plug-in GMV at the uniform second best", sb.get("GMV_plugin_mean"),
+          lambda v: f"{v:.7f}")
+    claim("B: E[GMV] at the uniform second best", sb.get("GMV_stationary_mean"),
+          lambda v: f"{v:.6f}")
+    claim("B: seeds where f* survives as a Nash equilibrium under expectations",
+          sb.get("n_still_nash_under_expectation"), lambda v: f"{int(v)}/{sb.get('n_seeds')}")
+    claim("B: worst deviation gain under expectations", sb.get("eps_expectation_rel_max"),
+          lambda v: f"{100 * v:.3f}%")
+
+    claim("C: shift in G_FB from the solver's initial guess", g(C, "shift", "G_FB"),
+          lambda v: f"{abs(v):.2e}".replace("e-04", "\\times10^{-4}"))
+    claim("C: published G_FB", g(C, "published_uniform_start", "G_FB"), lambda v: f"{v:.6f}")
+    claim("C: corrected G_FB", g(C, "r_init_start", "G_FB"), lambda v: f"{v:.6f}")
+    claim("C: published G_NP", g(C, "published_uniform_start", "G_NP"), lambda v: f"{v:.6f}")
+    claim("C: corrected G_NP", g(C, "r_init_start", "G_NP"), lambda v: f"{v:.6f}")
+    claim("C: SB/FB ratio, published", g(C, "published_uniform_start", "ratio_SB_over_FB"),
+          lambda v: f"{100 * v:.3f}%")
+    claim("C: SB/FB ratio, corrected", g(C, "r_init_start", "ratio_SB_over_FB"),
+          lambda v: f"{100 * v:.3f}%")
+
+    missing = [c for c in claims if c["found"] is False]
+    unchecked = [c for c in claims if c["found"] is None]
+    return {"check": "V13_theory_matches_artefacts", "pass": not missing,
+            "n_claims": len(claims), "n_matched": sum(1 for c in claims if c["found"]),
+            "n_unavailable": len(unchecked),
+            "not_found_in_theory_document": [{"claim": c["claim"], "expected": c["rendered"]}
+                                             for c in missing],
+            "note": "the artefact is the authority; a failure means the document quotes a number "
+                    "the solver no longer produces"}
+
+
 # ==================================================================================================
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
@@ -419,6 +507,8 @@ def main(argv=None) -> int:
     ap.add_argument("--summaries", default=str(SUMM))
     ap.add_argument("--benchmarks", default=str(SOLVER / "ha_benchmarks.json"))
     ap.add_argument("--manifest", default=str(PKG / "manifests" / "ha_manifest_HA-M1.json"))
+    ap.add_argument("--audit", default=str(SOLVER / "ha_mixing_audit.json"))
+    ap.add_argument("--theory", default=str(PKG / "theory" / "HIDDEN_ACTION_THEORY.md"))
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
 
@@ -470,6 +560,11 @@ def main(argv=None) -> int:
         checks.append(v12_claim_traceability(summary, metrics))
     else:
         checks.append({"check": "V12_claim_traceability", "pass": None, "why": "no summary"})
+    ap_ = Path(a.audit)
+    tp_ = Path(a.theory)
+    checks.append(v13_theory_matches_artefacts(
+        tp_.read_text(encoding="utf-8") if tp_.exists() else "",
+        json.loads(ap_.read_text(encoding="utf-8")) if ap_.exists() else {}))
 
     checks.sort(key=lambda c: int(c["check"].split("_")[0][1:]))
     print()

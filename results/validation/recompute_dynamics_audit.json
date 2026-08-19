@@ -1,0 +1,218 @@
+{
+  "schema_version": "ha-recompute-dynamics-1",
+  "utc": "2026-08-19T10:00:22Z",
+  "source": "results\\solver\\ha_mixing_audit.json",
+  "n_checks": 8,
+  "n_pass": 8,
+  "all_pass": true,
+  "seconds": 650.2,
+  "results": [
+    {
+      "pass": true,
+      "fixed_points_grid_index": [
+        28,
+        29,
+        30
+      ],
+      "fixed_points_r": [
+        0.933333,
+        0.966667,
+        1.0
+      ],
+      "orbit_from_r_init_0.5": [
+        15,
+        18,
+        20,
+        22,
+        24,
+        25,
+        26,
+        27,
+        28
+      ],
+      "distinct_limits_over_all_31_starts": [
+        28,
+        29,
+        30
+      ],
+      "n_recurrent_reported_by_audit": 3,
+      "note": "three absorbing states, so the stationary distribution is not unique and `_stationary_mean` returns whatever its uniform start happens to select",
+      "check": "absorbing_states",
+      "seconds": 0.0
+    },
+    {
+      "pass": true,
+      "kernel": {
+        "kappa": 0.0,
+        "tau": 0.0,
+        "b_index": 2,
+        "f_index": 0
+      },
+      "rbar_uniform_start_200k": 0.9365591397849461,
+      "rbar_r_init_start_200k": 0.9333333333333333,
+      "audit_uniform": 0.9365591397808439,
+      "audit_r_init": 0.93333333332923,
+      "gap": 0.003225806451612745,
+      "audit_max_gap": 0.003225806451613966,
+      "gap_in_grid_spacings": 0.09677419354838235,
+      "delta_uniform": 4.102163053687491e-12,
+      "delta_r_init": 4.1033842990145786e-12,
+      "check": "rbar_two_starts",
+      "seconds": 1.92
+    },
+    {
+      "pass": true,
+      "n_distinct_penalty_vectors": 57,
+      "n_kernels": 17955,
+      "max_abs_gap_vs_published_rbar_grid": 0.003225806449745461,
+      "audit_max_abs_rbar_init_gap": 0.003225806451613966,
+      "grid_spacing": 0.03333333333333333,
+      "gap_in_grid_spacings": 0.09677419349236382,
+      "worst_at": {
+        "kappa": 16.0,
+        "tau": 0.3,
+        "b_index": 0,
+        "f_index": 0,
+        "published": 0.9365591397830786,
+        "from_r_init": 0.9333333333333331
+      },
+      "check": "rbar_table_gap",
+      "seconds": 526.13
+    },
+    {
+      "pass": true,
+      "policy": "P_SB_uniform",
+      "per_seed": [
+        {
+          "seed": 70000,
+          "states_evaluated": 677005,
+          "probability_mass_retained": 0.9999999999999091,
+          "GMV_plugin_here": 0.586907096431562,
+          "GMV_plugin_audit": 0.5869070964313104,
+          "E_GMV_here": 0.5869494504646513,
+          "E_GMV_audit": 0.5869494504530534,
+          "delta_plugin": 2.5157653738006047e-13,
+          "delta_expectation": 1.1597944826746698e-11,
+          "jensen_rel_here": -7.2159592373324e-05,
+          "jensen_rel_audit": -7.215957304366728e-05
+        }
+      ],
+      "note": "the plug-in and the expectation differ by ~1e-4 relative; both are reproduced here to 1e-9 through an independent code path",
+      "check": "jensen_by_profile_outcome",
+      "seconds": 28.11
+    },
+    {
+      "pass": true,
+      "audit_plugin_mean": 0.6325776980909608,
+      "published_G_SB_uniform": 0.6325776980909609,
+      "delta": 1.1102230246251565e-16,
+      "audit_policy": [
+        2.0,
+        0.3
+      ],
+      "published_policy": [
+        2.0,
+        0.3
+      ],
+      "part_C_G_SB_uniform_shift_from_initial_guess": 2.544631172440859e-13,
+      "note": "two independent scripts, the same seven digits; and part C shows the headline second best does not move at all when the solver is started at r_0 = 0.5",
+      "check": "benchmark_consistency",
+      "seconds": 0.02
+    },
+    {
+      "pass": true,
+      "kappa0_kernels_where_uniform_start_reports_higher_rbar": "315/315",
+      "shift_G_FB": -0.0003224032751240058,
+      "shift_G_NP": -3.7822333663561913e-05,
+      "shift_G_SB_uniform": -2.544631172440859e-13,
+      "shift_implementation_power": 0.00033704847573479135,
+      "same_SB_policy": true,
+      "note": "published G_FB is biased upward by 3.2e-4, exactly as an over-weighting of the top absorbing states at kappa = 0 predicts; the second best, attained at kappa = 2.0 where pi is unique, does not move",
+      "check": "part_c_direction",
+      "seconds": 5.29
+    },
+    {
+      "pass": "True",
+      "policy": "P_SB_uniform",
+      "seed": 70043,
+      "f_star": [
+        6,
+        7,
+        6,
+        5
+      ],
+      "best_relative_gain_here": 0.0021746248081664296,
+      "audit_eps_expectation_rel_max": 0.0021746248079668054,
+      "deviation": {
+        "merchant": 0,
+        "f_index_from": 6,
+        "f_index_to": 7
+      },
+      "per_merchant": [
+        {
+          "merchant": 0,
+          "E_profit_at_f_star": 0.0724760389739885,
+          "best_relative_gain": 0.0021746248081664296,
+          "best_deviation_f_index": 7
+        },
+        {
+          "merchant": 1,
+          "E_profit_at_f_star": 0.08341288070904918,
+          "best_relative_gain": 0.0,
+          "best_deviation_f_index": null
+        },
+        {
+          "merchant": 2,
+          "E_profit_at_f_star": 0.07637544473602177,
+          "best_relative_gain": 0.0,
+          "best_deviation_f_index": null
+        },
+        {
+          "merchant": 3,
+          "E_profit_at_f_star": 0.1271499770251665,
+          "best_relative_gain": 0.0,
+          "best_deviation_f_index": null
+        }
+      ],
+      "n_seeds_still_nash": 48,
+      "n_seeds": 60,
+      "note": "a strictly positive gain means the enumerated pure Nash equilibrium of the plug-in game G is not a Nash equilibrium of the expected-payoff game",
+      "check": "nash_under_expectation",
+      "seconds": 88.58
+    },
+    {
+      "pass": "True",
+      "seed": 70000,
+      "rounds": [
+        1,
+        5,
+        10,
+        20,
+        40,
+        80
+      ],
+      "GMV_by_round_here": [
+        0.5584133419956272,
+        0.5783225066589129,
+        0.585880160643825,
+        0.5869614760244591,
+        0.586949524374012,
+        0.5869494504619049
+      ],
+      "GMV_by_round_audit": [
+        0.5584133419956272,
+        0.5783225066589129,
+        0.5858801606438251,
+        0.5869614760244592,
+        0.5869495243740122,
+        0.5869494504619049
+      ],
+      "max_delta": 1.1102230246251565e-16,
+      "stationary": 0.5869494504530534,
+      "relative_gap_at_round_20": 2.0488257372931125e-05,
+      "note": "settled to <0.1% by round 20, so the 80-round mean is a start-up effect and not a truncation artefact",
+      "check": "transient_is_a_startup_effect",
+      "seconds": 0.13
+    }
+  ]
+}
