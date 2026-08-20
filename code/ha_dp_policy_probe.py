@@ -49,22 +49,35 @@ def _argmax_policy(case: Case, delta: float, tol: float = VI_TOL, cap: int = VI_
     Identical recursion to `Case.discounted`; the only difference is that the candidate array is
     argmaxed before it is dropped. `eps` is returned as well, so the probe can assert it reproduces
     the number the solver already published rather than quietly disagreeing with it.
+
+    "Identical" has to include the stopping rule, and for a while it did not. Both loops stopped on
+    `eps = V - P` alone, which is the right test for the numerator and no test at all for the
+    denominator: V and P share the 1/(1-delta) level term that converges at rate delta, so their
+    difference can be stationary to 1e-11 while P is still tens of percent below its fixed point.
+    See `Case.discounted`, which carries the full account. The level condition below is the
+    contraction bound delta/(1-delta) * ||P_n - P_{n-1}||.
+
+    It happens that the three instances this probe has published are non-corner cases, where `eps`
+    is the slow object and the level condition was already implied -- their numbers do not move. The
+    rule is corrected anyway: a probe that agrees with the solver by accident is not a check.
     """
     V = np.zeros(case.shape)
     P = np.zeros(case.shape)
     eps_prev, n, resid, arg = None, 0, float("inf"), None
+    lvl, fac = float("inf"), delta / (1.0 - delta) if delta < 1.0 else float("inf")
     for n in range(1, cap + 1):
         V, C = case._sweep(V, delta)                                          # noqa: SLF001
         arg = np.argmax(C, axis=0).reshape(case.shape)
         del C
-        P = case._eval(P, delta)                                              # noqa: SLF001
+        P_prev, P = P, case._eval(P, delta)                                   # noqa: SLF001
         eps = V - P
         if eps_prev is not None:
             resid = float(np.abs(eps - eps_prev).max())
-            if resid < tol:
+            lvl = float(np.abs(P - P_prev).max()) * fac
+            if resid < tol and lvl < tol:
                 break
         eps_prev = eps
-    return arg, V - P, P, n, resid
+    return arg, V - P, P, n, resid, lvl
 
 
 def _describe(case: Case, arg: np.ndarray, eps: np.ndarray, P: np.ndarray) -> dict:
@@ -135,10 +148,10 @@ def main(argv=None) -> int:
         rec = {"seed": seed, "f_star": [int(v) for v in fstar], "merchants": []}
         for i in ms:
             c = Case(cfg, mkt, i, fstar, kappa, tau)
-            arg, eps, P, n, resid = _argmax_policy(c, a.delta)
+            arg, eps, P, n, resid, lvl = _argmax_policy(c, a.delta)
             d = _describe(c, arg, eps, P)
-            d.update(merchant=i, iterations=n, eps_residual=resid,
-                     converged=bool(resid < VI_TOL))
+            d.update(merchant=i, iterations=n, eps_residual=resid, level_residual=lvl,
+                     converged=bool(resid < VI_TOL and lvl < VI_TOL))
             rec["merchants"].append(d)
             print(f"  seed {seed} m{i}  f*={c.astar}  a(x0)={d['action_at_x0']}  "
                   f"slope={d['cash_in_slope']:+.3f}  distinct={d['n_distinct_actions_over_reachable_states']}  "
@@ -165,6 +178,8 @@ def main(argv=None) -> int:
                 min((m["first_deviation_state"]["l1_grid_distance_from_x0"] for m in allm
                      if m["first_deviation_state"]), default=None),
             "all_converged": bool(all(m["converged"] for m in allm)),
+            "max_eps_residual": float(max((m["eps_residual"] for m in allm), default=0.0)),
+            "max_level_residual": float(max((m["level_residual"] for m in allm), default=0.0)),
         },
         "per_seed": rows,
         "seconds": round(time.time() - t0, 1),

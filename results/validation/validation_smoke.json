@@ -1,14 +1,14 @@
 {
   "schema_version": "ha-validation-1",
-  "generated_utc": "2026-08-14T18:03:18Z",
-  "raw_dir": "..\\results\\raw_smoke",
-  "summaries_dir": "..\\results\\summaries\\smoke",
+  "generated_utc": "2026-08-20T03:47:21Z",
+  "raw_dir": "results\\raw_smoke",
+  "summaries_dir": "D:\\CWE\\cwe-dynamic-balance\\results\\summaries",
   "n_cells": 32,
-  "n_metric_records": 32,
-  "n_checks_run": 12,
-  "n_pass": 12,
+  "n_metric_records": 0,
+  "n_checks_run": 11,
+  "n_pass": 11,
   "all_pass": true,
-  "seconds": 0.2,
+  "seconds": 0.3,
   "checks": [
     {
       "check": "V1_cell_integrity",
@@ -49,16 +49,13 @@
     },
     {
       "check": "V7_metric_recomputation",
-      "pass": true,
-      "n_cells_recomputed": 32,
-      "n_violations": 0,
-      "violations": []
+      "pass": null,
+      "why": "no metric records"
     },
     {
       "check": "V8_benchmark_alignment",
-      "pass": true,
-      "n_violations": 0,
-      "violations": []
+      "pass": null,
+      "why": "no metric records"
     },
     {
       "check": "V9_manifest_conformance",
@@ -87,9 +84,26 @@
     },
     {
       "check": "V12_claim_traceability",
+      "pass": null,
+      "why": "no summary"
+    },
+    {
+      "check": "V13_theory_matches_artefacts",
       "pass": true,
-      "n_violations": 0,
-      "violations": []
+      "n_claims": 18,
+      "n_matched": 18,
+      "n_unavailable": 0,
+      "not_found_in_theory_document": [],
+      "note": "the artefact is the authority; a failure means the document quotes a number the solver no longer produces"
+    },
+    {
+      "check": "V14_theory_section10_matches_artefacts",
+      "pass": true,
+      "n_claims": 91,
+      "n_matched": 91,
+      "n_unavailable": 0,
+      "not_found_in_theory_document": [],
+      "note": "\u00a710 overturns a published claim, so a stale figure here is the most expensive kind; the artefacts are the authority and the prose must conform. The last entry is not a string match but the ladder inequality itself"
     }
   ]
 }

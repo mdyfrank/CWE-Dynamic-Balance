@@ -1,6 +1,6 @@
 {
   "schema_version": "ha-dp-policy-probe-1",
-  "generated": "2026-08-19T12:21:05Z",
+  "generated": "2026-08-20T03:46:40Z",
   "script": "code/ha_dp_policy_probe.py",
   "policy": "P_SB_uniform",
   "kappa": 2.0,
@@ -22,7 +22,9 @@
     "n_with_a_different_action_at_x0": 2,
     "max_distinct_actions_over_reachable_states": 4,
     "min_l1_distance_from_x0_to_a_deviating_state": 0,
-    "all_converged": true
+    "all_converged": true,
+    "max_eps_residual": 6.17284001691587e-14,
+    "max_level_residual": 9.724443472691736e-12
   },
   "per_seed": [
     {
@@ -56,7 +58,7 @@
             "l1_grid_distance_from_x0": 2,
             "action_there": 20,
             "f_star_i": 8,
-            "eps_there": 0.007872282865742486
+            "eps_there": 0.007872282682374498
           },
           "action_map_slice_own_reputation": [
             20,
@@ -126,12 +128,13 @@
           "cash_in": false,
           "action_at_lowest_reachable_own_reputation": 20,
           "action_at_highest_reachable_own_reputation": 9,
-          "eps_at_x0": 0.0018299460328512485,
-          "V_at_x0": 1.026754567154117,
-          "rel_at_x0": 0.001782262374467307,
+          "eps_at_x0": 0.0018299459089836656,
+          "V_at_x0": 1.026754568702152,
+          "rel_at_x0": 0.0017822622511402808,
           "merchant": 3,
-          "iterations": 396,
-          "eps_residual": 9.71311919784057e-12,
+          "iterations": 495,
+          "eps_residual": 6.17284001691587e-14,
+          "level_residual": 9.724443472691736e-12,
           "converged": true
         }
       ]
@@ -167,7 +170,7 @@
             "l1_grid_distance_from_x0": 0,
             "action_there": 20,
             "f_star_i": 8,
-            "eps_there": 0.15054166250085266
+            "eps_there": 0.15054166232054844
           },
           "action_map_slice_own_reputation": [
             20,
@@ -237,12 +240,13 @@
           "cash_in": false,
           "action_at_lowest_reachable_own_reputation": 20,
           "action_at_highest_reachable_own_reputation": 20,
-          "eps_at_x0": 0.15054166250085266,
-          "V_at_x0": 1.1177737762211388,
-          "rel_at_x0": 0.13467990187584228,
+          "eps_at_x0": 0.15054166232054844,
+          "V_at_x0": 1.1177737853979766,
+          "rel_at_x0": 0.13467990060882398,
           "merchant": 3,
-          "iterations": 363,
-          "eps_residual": 9.501399667044552e-12,
+          "iterations": 497,
+          "eps_residual": 1.1546319456101628e-14,
+          "level_residual": 9.526157640493683e-12,
           "converged": true
         }
       ]
@@ -278,7 +282,7 @@
             "l1_grid_distance_from_x0": 0,
             "action_there": 5,
             "f_star_i": 6,
-            "eps_there": 0.0006488700849351936
+            "eps_there": 0.0006488699019315813
           },
           "action_map_slice_own_reputation": [
             5,
@@ -348,16 +352,17 @@
           "cash_in": true,
           "action_at_lowest_reachable_own_reputation": 5,
           "action_at_highest_reachable_own_reputation": 6,
-          "eps_at_x0": 0.0006488700849351936,
-          "V_at_x0": 1.981667236991692,
-          "rel_at_x0": 0.0003274364498856142,
+          "eps_at_x0": 0.0006488699019315813,
+          "V_at_x0": 1.981667247180148,
+          "rel_at_x0": 0.00032743635585384147,
           "merchant": 3,
-          "iterations": 373,
-          "eps_residual": 9.64606172715321e-12,
+          "iterations": 509,
+          "eps_residual": 1.3322676295501878e-14,
+          "level_residual": 9.585221505403742e-12,
           "converged": true
         }
       ]
     }
   ],
-  "seconds": 392.4
+  "seconds": 298.2
 }

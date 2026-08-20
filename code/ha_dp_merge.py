@@ -57,20 +57,47 @@ def _agg(recs: list) -> dict:
     if any("converged" in r for r in recs):
         out["all_converged"] = bool(all(r.get("converged", True) for r in recs))
         out["max_residual"] = float(max(r.get("eps_residual", 0.0) for r in recs))
+    # `level_residual` postdates most of this artefact: the records solved before the eps-only
+    # stopping rule was corrected do not carry it. A max over only the records that HAVE it would be
+    # a residual for the whole block computed from a fraction of it -- the exact denominator-swap
+    # this merge exists to prevent -- so the count travels with the number and the flag says whether
+    # the block is covered. A reader who needs a converged denominator on the uncovered records
+    # should use the two-route agreement check in ha_validate.py, which covers all of them.
+    lv = [r["level_residual"] for r in recs if "level_residual" in r]
+    if lv:
+        out["max_level_residual"] = float(max(lv))
+        out["n_with_level_residual"] = len(lv)
+        out["level_residual_covers_the_block"] = bool(len(lv) == len(recs))
     return out
 
 
-def merge(paths: list, out_path: Path) -> dict:
+def merge(paths: list, out_path: Path, supersede: list = None) -> dict:
+    """`supersede` names shards allowed to WIN a conflict instead of causing the merge to refuse.
+
+    Refusing on conflict is the right default and it has one legitimate exception: a bug in the
+    solver is fixed and the instances it touched are re-solved. The old values are then not stale by
+    accident, they are wrong on purpose, and the merge must be able to say so. Every field a
+    superseding shard replaces is recorded in `superseded` with both values, so the artefact carries
+    the correction rather than quietly presenting the new number as if it had always been there.
+    """
+    supersede = set(supersede or [])
     shards, res = [], {"schema_version": "ha-dynamic-equilibrium-merged-1",
                        "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                        "script": "code/ha_dp_merge.py", "policies": {}}
     pols: dict = {}
-    conflicts = []
-    for p in paths:
+    conflicts, replaced = [], []
+    # superseding shards are folded in last, so the record they replace is already present and the
+    # `superseded` entry can quote the value that was there rather than only the one that won
+    for p in sorted(paths, key=lambda q: Path(q).name in supersede):
         d = json.loads(Path(p).read_text(encoding="utf-8"))
+        wins = Path(p).name in supersede
         shards.append({"file": str(Path(p).name), "generated": d.get("generated"),
                        "deltas": d.get("deltas"),
                        "policies": sorted(d.get("policies", {})),
+                       # a repair shard is a partial seed record by construction, so its provenance
+                       # has to travel with it: which instances it covers, and whether it was given
+                       # the authority to overwrite what was already there
+                       "repair": d.get("repair"), "supersedes": bool(wins),
                        "n_seeds": {k: v.get("n_seeds") for k, v in d.get("policies", {}).items()}})
         for key in ("horizon", "r_init", "state_space", "spec"):
             if key in d:
@@ -85,9 +112,22 @@ def merge(paths: list, out_path: Path) -> dict:
                     continue
                 if row.get("skipped") or cur.get("skipped"):
                     continue
-                for a, b in zip(cur["merchants"], row["merchants"]):
+                # paired by merchant INDEX, not by position: a repair shard carries only the
+                # instances that were re-solved, so `zip` over two lists of different lengths would
+                # write merchant 2's corrected values on top of merchant 0's record
+                byidx = {a["merchant"]: a for a in cur["merchants"]}
+                for b in row["merchants"]:
+                    a = byidx.get(b["merchant"])
+                    if a is None:
+                        cur["merchants"].append(json.loads(json.dumps(b)))
+                        cur["merchants"].sort(key=lambda r: r["merchant"])
+                        continue
                     for k, v in b.items():
                         if k not in a:
+                            a[k] = v
+                        elif a[k] != v and wins:
+                            replaced.append({"seed": s, "merchant": b.get("merchant"), "field": k,
+                                             "by": Path(p).name, "was": a[k], "now": v})
                             a[k] = v
                         elif a[k] != v:
                             conflicts.append({"seed": s, "merchant": b.get("merchant"), "field": k})
@@ -110,6 +150,7 @@ def merge(paths: list, out_path: Path) -> dict:
 
     res["shards"] = shards
     res["merge_conflicts"] = conflicts
+    res["superseded"] = replaced
     res["note"] = ("every gamma_* block carries its own n_seeds: the 80-round block and the delta "
                    "blocks do NOT cover the same seeds, and "
                    "`coverage_by_block.complete_over_the_seed_block` is the flag to read before "
@@ -126,8 +167,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("shards", nargs="+")
     ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--supersede", default="", help="comma-separated shard FILENAMES that win a "
+                                                    "conflict instead of causing a refusal")
     a = ap.parse_args(argv)
-    res = merge(a.shards, Path(a.out))
+    res = merge(a.shards, Path(a.out), [v for v in a.supersede.split(",") if v])
+    if res["superseded"]:
+        by = {r["by"] for r in res["superseded"]}
+        print(f"superseded {len(res['superseded'])} fields from {sorted(by)}")
     for pname, blk in res["policies"].items():
         print(f"{pname}: {blk['n_seeds']} seeds, {blk['n_skipped']} skipped")
         for b, c in blk["coverage_by_block"].items():

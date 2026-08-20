@@ -727,11 +727,55 @@ def v14_theory_section10_matches_artefacts(theory_text: str, rec: dict, held: di
     #     an own-reputation with a rival configuration outside that mask. Measured against
     #     `eps_max_reachable` the inequality fails on 5 of the first 20 instances -- correctly, it
     #     is simply not the implied inequality. Against `eps_max` over all 923,521 states it holds.
+    #
+    # A third, found only once the delta neighbours were merged into the solver artefact: the two
+    # sides must be AT THE SAME DISCOUNT FACTOR. This used to take the first `gamma_delta_*` key it
+    # found, which was the only one there was; the merged artefact carries 0.90, 0.95 and 0.99, dict
+    # order put 0.90 first, and the check silently began comparing a delta=0.95 certificate against
+    # a delta=0.90 solve. That is a comparison between two different games, the inequality has no
+    # reason to hold across it, and it did not -- 9 / 20 and 12 / 20. The block is now chosen by
+    # agreement rather than by position, and the agreement is *measured*: V^{f*} at the certificate's
+    # r_0 and the solver's `V_at_x0` are the same number when the deltas match (max relative
+    # discrepancy 1.4e-08 over 223 instances) and differ by 51% at 0.90 and 405% at 0.99 when they
+    # do not. If nothing matches, the ladder is reported unavailable rather than asserted -- a
+    # cross-delta verdict, in either direction, is worse than no verdict.
+    def _level_gaps(key):
+        """Per-instance |V_solver(x_0) - V_reduced(r_0)| / V_reduced(r_0), for one gamma_delta block.
+
+        The two are the same number when the deltas match: i's reputation chain and each rival's are
+        independent, so integrating the rivals' law into the stage reward is exact, and the reduced
+        backward induction ends at t=0 with the rivals at the same point mass on 0.5 that x_0 is.
+        The MEDIAN selects the block, not the max, because a handful of instances can be wrong for
+        reasons that have nothing to do with delta -- which is not hypothetical, it is how the
+        eps-only stopping rule was caught -- and a max would then match nothing and silently
+        downgrade the ladder to unavailable.
+        """
+        seen = []
+        for s in (g(pc, "per_seed") or []):
+            for m in s.get("merchants", []):
+                lo = m.get("reduced_state_gamma_delta")
+                hi = ((solver_all.get(key) or {}).get((s["seed"], m["merchant"])) or {})
+                v0, v1 = (lo or {}).get("V_f_star_at_r0"), hi.get("V_at_x0")
+                if v0 and v1:
+                    seen.append(abs(v1 - v0) / v0)
+        return sorted(seen)
+
     if ag:
-        dd = next((k for k in ag if k.startswith("gamma_delta_")), None)
-        solver = {(s["seed"], m["merchant"]): m[dd]
-                  for s in (g(dyn, "policies", "P_SB_uniform", "per_seed") or [])
-                  for m in s["merchants"] if dd and dd in m}
+        solver_all = {k: {(s["seed"], m["merchant"]): m[k]
+                          for s in (g(dyn, "policies", "P_SB_uniform", "per_seed") or [])
+                          for m in s["merchants"] if k in m}
+                      for k in ag if k.startswith("gamma_delta_")}
+        gaps = {k: _level_gaps(k) for k in solver_all}
+        matched = [(k, v[len(v) // 2]) for k, v in gaps.items() if v and v[len(v) // 2] < 1e-6]
+        dd = min(matched, key=lambda t: t[1])[0] if matched else None
+        solver = solver_all.get(dd) or {}
+        # Having established which block is at the certificate's delta, the per-instance agreement
+        # of the two routes is itself a claim, and one the document must carry: it is the only check
+        # in the package that would have caught a solver whose eps is right and whose denominator is
+        # not. Rendered as a count so a regression shows up as a changed figure rather than as prose.
+        if dd:
+            claim("10.4: instances where the solver and the reduced route disagree on V^{f*}",
+                  sum(1 for v in gaps[dd] if v > 1e-6), lambda v: over(v, len(gaps[dd])))
         pairs = []
         for s in (g(pc, "per_seed") or []):
             for m in s.get("merchants", []):
@@ -739,6 +783,11 @@ def v14_theory_section10_matches_artefacts(theory_text: str, rec: dict, held: di
                 if lo and hi:
                     pairs.append((hi["eps_at_x0"] >= lo["eps_at_r0"] - 1e-9,
                                   hi["eps_max"] >= lo["eps_max_over_own_reputation"] - 1e-9))
+        if not pairs:
+            for lbl in ("ladder: eps_3 >= eps_2.5 at x_0, per instance, in value units",
+                        "ladder: max eps_3 >= max eps_2.5 over all states, per instance"):
+                claims.append({"claim": lbl + " [no solver block at the certificate's delta]",
+                               "rendered": None, "found": None})
         if pairs:
             n0 = sum(1 for a, _ in pairs if a)
             n1 = sum(1 for _, b in pairs if b)

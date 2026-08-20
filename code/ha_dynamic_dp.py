@@ -157,21 +157,42 @@ class Case:
         that converges at rate delta. Their DIFFERENCE converges at the chain's mixing rate instead,
         so the stopping rule is applied to eps = V - P and the residual is reported rather than
         assumed negligible.
+
+        That is necessary and it is not sufficient, which cost this artefact seventeen instances.
+        `eps` is the numerator of everything reported; `P` is the DENOMINATOR of everything reported
+        as a percentage, and it converges at rate delta, not at the mixing rate. Stopping on `eps`
+        alone leaves `P` short of its fixed point by O(delta^n / (1 - delta)) -- invisible in `eps`,
+        because both sides carry the same missing level, and fatal in `eps / P`.
+
+        The failure is not uniform, which is why it survived a residual of 1e-11 and a 60-seed run.
+        It bites exactly where `eps` settles FASTEST: the seventeen merchant-cases whose f*_i is
+        already the corner have eps = 0 at x_0 and a small eps elsewhere, `eps` stopped moving after
+        7 to 39 sweeps against 353 to 407 for the other 223, and P was still 20-60% below its level
+        when the loop broke. Against a third route -- forward accumulation over the marginals, which
+        is exact here because T_i and T_riv are independent -- seed 70005's merchant 2 has
+        V^{f*}(x_0) = 1.133984382, and the eps-only rule returned 0.9059.
+
+        So both conditions are now required, and both residuals are reported. The level test is the
+        standard contraction bound delta/(1-delta) * ||P_n - P_{n-1}||, which is an upper bound on
+        ||P_n - P*|| rather than an extrapolation from it.
         """
         V = np.zeros(self.shape)
         P = np.zeros(self.shape)
         eps_prev, n, resid = None, 0, float("inf")
+        lvl, fac = float("inf"), delta / (1.0 - delta) if delta < 1.0 else float("inf")
         for n in range(1, cap + 1):
             V, C = self._sweep(V, delta)
             del C
-            P = self._eval(P, delta)
+            P_prev, P = P, self._eval(P, delta)
             eps = V - P
             if eps_prev is not None:
                 resid = float(np.abs(eps - eps_prev).max())
-                if resid < tol:
+                lvl = float(np.abs(P - P_prev).max()) * fac
+                if resid < tol and lvl < tol:
                     break
             eps_prev = eps
-        return dict(V=V, P=P, iterations=n, eps_residual=resid, converged=bool(resid < tol))
+        return dict(V=V, P=P, iterations=n, eps_residual=resid, level_residual=lvl,
+                    converged=bool(resid < tol and lvl < tol))
 
     # ------------------------------------------------------------------------------------------
     def stationary_law(self) -> np.ndarray:
@@ -225,7 +246,14 @@ def _report(case: Case, V: np.ndarray, P: np.ndarray, w: np.ndarray, mask: np.nd
 
 
 def solve_seed(cfg: M.Config, seed: int, kappa: float, tau: float, rg: np.ndarray,
-               deltas: tuple, do_finite: bool, verbose: bool) -> dict:
+               deltas: tuple, do_finite: bool, verbose: bool, only: set = None) -> dict:
+    """`only` restricts the merchants solved. It exists for targeted REPAIR, not for sampling.
+
+    A shard built with it is a partial seed record and the merge pairs merchants by index rather
+    than by position for exactly that reason. Using it to solve, say, merchant 0 of every seed would
+    produce an aggregate over a biased slice of the population with nothing in the artefact saying
+    so, which is why the seed record keeps `merchants_solved` alongside the list itself.
+    """
     mkt = M.draw_market(cfg, seed)
     rbar_m = rg[mkt.bidx, :]
     eqs = M.pure_nash(cfg, mkt, rbar_m)
@@ -236,7 +264,10 @@ def solve_seed(cfg: M.Config, seed: int, kappa: float, tau: float, rg: np.ndarra
                f_star_levels=[float(cfg.fgrid[v]) for v in fstar],
                eps_static_max=float(M.exploitability(cfg, mkt, rbar_m, fstar).max()),
                merchants=[])
-    for i in range(mkt.m):
+    todo = [i for i in range(mkt.m) if only is None or i in only]
+    if only is not None:
+        out["merchants_solved"] = todo
+    for i in todo:
         c = Case(cfg, mkt, i, fstar, kappa, tau)
         w, mask = c.stationary_law(), c.reach_mask()
         rec = dict(merchant=i, q=float(mkt.q[i]), p=float(mkt.p[i]), b=float(mkt.b[i]),
@@ -258,6 +289,7 @@ def solve_seed(cfg: M.Config, seed: int, kappa: float, tau: float, rg: np.ndarra
             rec[f"gamma_delta_{d}"] = dict(**_report(c, r["V"], r["P"], w, mask),
                                            iterations=r["iterations"],
                                            eps_residual=r["eps_residual"],
+                                           level_residual=r["level_residual"],
                                            converged=r["converged"])
             del r
         out["merchants"].append(rec)
@@ -278,6 +310,9 @@ def main() -> int:
     ap.add_argument("--deltas", default="0.90,0.95,0.99")
     ap.add_argument("--no-finite", action="store_true")
     ap.add_argument("--out", default=None, help="shard path; parallel runs must not share one")
+    ap.add_argument("--repair", default=None,
+                    help="seed:merchant,... -- solve only these instances. Overrides --seeds. For "
+                         "re-solving instances a fixed bug touched, at a fraction of the block cost")
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
     # resolved, because the closing log line reports the path relative to the package and a shard
@@ -285,8 +320,15 @@ def main() -> int:
     # AFTER a two-hour block had already been written to disk, so the run looked like a failure and
     # the driver aborted the remaining blocks over a cosmetic string.
     out = (Path(args.out).resolve() if args.out else OUT)
-    lo, hi = (args.seeds.split("-") + [None])[:2]
-    seeds = list(range(int(lo), int(hi) + 1)) if hi else [int(lo)]
+    only: dict = {}
+    if args.repair:
+        for tok in args.repair.split(","):
+            s, i = tok.split(":")
+            only.setdefault(int(s), set()).add(int(i))
+        seeds = sorted(only)
+    else:
+        lo, hi = (args.seeds.split("-") + [None])[:2]
+        seeds = list(range(int(lo), int(hi) + 1)) if hi else [int(lo)]
     deltas = tuple(float(v) for v in args.deltas.split(",") if v)
     pols = [p for p in args.policies.split(",") if p]
     cfg, verbose = M.Config(), not args.quiet
@@ -296,7 +338,8 @@ def main() -> int:
                question="does the stationary profile survive as an equilibrium of the dynamic game?",
                state_space=dict(joint=cfg.R ** cfg.m, per_merchant=cfg.R, note="full joint state; the "
                                 "31-state reduction in r_i alone would only lower-bound eps_dyn"),
-               horizon=T_HORIZON, r_init=R_INIT, deltas=list(deltas), spec=M.spec_dict(cfg))
+               horizon=T_HORIZON, r_init=R_INIT, deltas=list(deltas), spec=M.spec_dict(cfg),
+               repair=args.repair)
     res.setdefault("policies", {})
 
     t0 = time.time()
@@ -305,7 +348,8 @@ def main() -> int:
         if verbose:
             print(f"  policy {pname} (kappa={kappa}, tau={tau})")
         rg = M.rbar_grid(cfg, kappa, tau)
-        rows = [solve_seed(cfg, s, kappa, tau, rg, deltas, not args.no_finite, verbose)
+        rows = [solve_seed(cfg, s, kappa, tau, rg, deltas, not args.no_finite, verbose,
+                           only.get(s) if only else None)
                 for s in seeds]
         good = [r for r in rows if not r.get("skipped")]
         agg = {}
@@ -332,6 +376,8 @@ def main() -> int:
             else:
                 agg[key]["all_converged"] = bool(all(a["converged"] for a in allm))
                 agg[key]["max_residual"] = float(max(a["eps_residual"] for a in allm))
+                agg[key]["max_level_residual"] = float(
+                    max(a.get("level_residual", float("nan")) for a in allm))
         res["policies"][pname] = dict(policy=[kappa, tau], n_seeds=len(good),
                                       n_skipped=len(rows) - len(good), aggregate=agg,
                                       per_seed=rows)

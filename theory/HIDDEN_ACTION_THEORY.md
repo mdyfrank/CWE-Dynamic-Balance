@@ -1271,11 +1271,118 @@ watching only its own stock cannot, by construction, run a strategy that waits f
 stumble.
 
 Answering either means solving the unreduced program: \(31^4=923{,}521\) states, 21 actions, value
-iteration with the stopping rule applied to \(\varepsilon=V-P\) rather than to \(V\) (§10.3's
-stopping-rule trap — the two share the level \(c/(1-\delta)\) and only their difference converges at
-the mixing rate), per merchant, per seed. `code/ha_dynamic_dp.py` does this; it is the only computation in this
-package that is measured in hours rather than seconds, and it is the reason the verdict was
-constructed so as not to depend on it.
+iteration run in lockstep for \(V^{\mathrm{BR}}\) and \(V^{f^*}=:P\), per merchant, per seed.
+`code/ha_dynamic_dp.py` does this; it is the only computation in this package that is measured in
+hours rather than seconds, and it is the reason the verdict was constructed so as not to depend on
+it.
+
+The stopping rule takes **two** conditions, and the reason it takes two is worth stating before the
+numbers rather than after. §10.3's trap is that \(V^{\mathrm{BR}}\) and \(P\) share the level
+\(c/(1-\delta)\), which converges at rate \(\delta\), while their difference converges at the much
+faster mixing rate; a rule applied to \(V\) therefore stops far later than it needs to and reports a
+residual that says nothing about \(\varepsilon\). That is true and it is only half the problem.
+\(\varepsilon\) is the numerator of everything reported here; \(P\) is the **denominator** of
+everything reported as a percentage, and \(P\) converges at rate \(\delta\) like the level it
+contains. Stopping on \(\varepsilon\) alone leaves \(P\) short of its fixed point by
+\(O(\delta^n/(1-\delta))\) — invisible in \(\varepsilon\), because both sides carry the same missing
+level, and fatal in \(\varepsilon/P\). So the loop requires \(\|\varepsilon_n-\varepsilon_{n-1}\|\)
+below tolerance *and* the contraction bound \(\tfrac{\delta}{1-\delta}\|P_n-P_{n-1}\|\) below
+tolerance, and reports both residuals. The first published version of this artefact required only
+the first, and *The denominator, and the seventeen instances it was wrong on* below records what
+that cost.
+
+#### The sweep: what the extra conditioning is worth
+
+Every merchant of every seed is solved against the enumerated profile with the other three pinned
+there. The gain is reported at \(x_0\) and maximised over the *reachable* set — the product of the
+per-merchant index sets the joint chain can enter from \(x_0\), a strict subset of the 923,521 — so
+the maximum is not taken at a configuration the market never visits. It is divided by the value of
+\(f^*\) at the same state, so a percentage is always of the merchant's own value under the profile.
+
+| block | seeds | merchant-cases | gain somewhere reachable | gain at \(x_0\) | max rel at \(x_0\) | max rel, reachable | median rel, reachable |
+|---|---|---|---|---|---|---|---|
+| \(\Gamma_{80}\) | 60, 70000–70059 | 240 | 240 / 240 | 223 / 240 | 3.24% | 5.91% | 1.35% |
+| \(\Gamma_\delta,\ \delta=0.95\) | 60, 70000–70059 | 240 | 240 / 240 | 223 / 240 | 13.47% | 25.54% | 0.70% |
+| \(\Gamma_\delta,\ \delta=0.90\) | 5, 70000–70004 | 20 | 20 / 20 | 20 / 20 | 26.47% | 47.01% | 6.25% |
+| \(\Gamma_\delta,\ \delta=0.99\) | 5, 70000–70004 | 20 | 20 / 20 | 20 / 20 | 1.41% | 4.12% | 0.36% |
+
+**The four rows do not rest on one sample and must not be read as if they did.** The two 60-seed rows
+are the sweep; the two 5-seed rows are a deliberately narrower \(\delta\)-sensitivity run
+(`--no-finite`, seeds 70000–70004), because solving the full grid at three discount factors would
+have tripled a computation already measured in hours. A maximum over 20 cases and a maximum over 240
+are not comparable quantities, and nothing below compares them. All three \(\Gamma_\delta\) blocks
+converged with a maximum residual of \(1.0\times10^{-11}\) on \(\varepsilon=V-P\);
+\(\Gamma_{80}\) is exact backward induction and has no residual to report. The **level** residual
+\(\tfrac{\delta}{1-\delta}\|P_n-P_{n-1}\|\) is recorded on the 17 records re-solved after the
+stopping rule was corrected and not on the other 223, which predate the field; the artefact says so
+in `level_residual_covers_the_block` rather than reporting a block residual computed from 7% of the
+block. What does cover all 240 is the two-route agreement below, which tests the denominator itself
+rather than the increments of the iteration that produced it.
+
+The first line of the table is the answer to §10's question and it has no exceptions. On all 240
+merchant-cases, in both the truncated and the indefinite-horizon game, a strictly profitable
+deviation exists somewhere the market can actually reach. The one-shot-deviation condition therefore
+fails for the enumerated profile on the full sufficient state space, which is the standard this
+document set for itself in §1 and the only standard under which the word *equilibrium* would have
+been available.
+
+Three things in the table are worth separating from that verdict, because each could be misread.
+
+*The finite horizon is not what produces the deviation.* A known terminal date is the first thing to
+suspect in an unravelling result, and here the suspicion points the wrong way: the counts are
+identical in \(\Gamma_{80}\) and \(\Gamma_\delta\) — 240 / 240 and 223 / 240, the same 17 cases in
+both — while the indefinite-horizon game reports the *larger* gain, 13.47% against 3.24% at \(x_0\).
+The two percentages are ratios of different value objects (an 80-round total and a discounted
+infinite one), so this is a comparison of magnitudes and not an inequality between one statistic; the
+counts, which share no denominator problem, are the part that is strict.
+
+*Gaining at \(x_0\) and deviating in the first round are different events.* The round-1 action at
+\(x_0\) differs from \(f^*_i\) in 150 of the 240 \(\Gamma_{80}\) cases, against 223 that gain at
+\(x_0\). In the remaining 73 the merchant opens exactly as the profile prescribes and the entire
+profit is in the continuation. A check that inspected only the first move would have cleared them.
+
+*R1 is refuted directly, not only by its consequences.* R1 restricts each merchant to one action for
+all time. Within a single round of the worst instance, the unrestricted optimal policy takes **13**
+distinct values across states, out of 21 available. That is not a claim that a merchant would in fact
+visit all thirteen — it is the statement that the object R1 replaces with a scalar is not, even
+approximately, a scalar.
+
+#### What patience does, and what it does not do
+
+The \(\delta\) neighbours are the same twenty merchant-cases solved three times, so they can be read
+against each other directly. Restricting the \(\delta=0.95\) row to those same twenty cases:
+
+| \(\delta\) | max rel at \(x_0\) | max rel, reachable | median rel, reachable | min rel, reachable | smallest gain anywhere reachable, value units |
+|---|---|---|---|---|---|
+| 0.90 | 26.47% | 47.01% | 6.25% | 0.2242% | 0.001723 |
+| 0.95 | 13.47% | 25.54% | 0.67% | 0.2422% | 0.003768 |
+| 0.99 | 1.41% | 4.12% | 0.36% | 0.0759% | 0.007821 |
+
+(The 0.67% here and the 0.70% in the sweep table are the same statistic on 20 and on 240 cases.)
+
+The worst case falls steeply as the market becomes patient, and that is the direction the reduction's
+own logic predicts: R2 evaluates the merchant at its stationary law, which discards the start-up
+transient, and the transient's weight in the discounted sum vanishes as \(\delta\to1\). The surrogate
+\(\mathcal G\) is in that sense the limit the sweep is approaching.
+
+It does not arrive. Two facts stop the pattern from being read as convergence.
+
+First, the decline is a property of the *maximum*, not of the instances. Only 11 of the 20 cases are
+monotone in \(\delta\) at \(x_0\), and 16 of 20 on the reachable set; nine of them move the other
+way. The identity of the maximiser also changes — seed 70002's merchant 3 at \(\delta=0.90\) and
+\(0.95\), seed 70001's merchant 0 at \(0.99\) — so part of the fall from 13.47% to 1.41% is one
+instance ceasing to be the worst rather than every instance improving. On twenty cases that is what
+can be said and no more.
+
+Second, and against the reading in the plainest possible way: the *floor* rises. The smallest
+deviation gain found anywhere reachable, over all twenty instances, is 0.001723 at \(\delta=0.90\),
+0.003768 at \(0.95\) and 0.007821 at \(0.99\) — monotonically **increasing** in value units. At every
+\(\delta\) tested, including the most patient one, all 20 of 20 have a strictly profitable deviation
+both at \(x_0\) and on the reachable set. The relative column does not inherit that monotonicity
+because its denominator is a value that grows like \(1/(1-\delta)\) — §10.3's stopping-rule trap in
+its reporting form: a shrinking percentage of a level that is itself diverging is not a shrinking
+gain. What patience buys is a smaller worst case measured against a larger value, not an instance
+anywhere near indifference.
 
 #### The shape, where the reduction could not see it
 
@@ -1325,7 +1432,7 @@ establish a frequency. The frequencies in §10.3 are from all 240, and out of sa
 #### One flag in the solver's output that must not be read as agreement
 
 `ha_dynamic_dp.py`'s per-merchant record carries a field named `build_then_exploit`, inside its
-`gamma_80` block, and it reads **true almost everywhere**. It does *not* corroborate anything above,
+`gamma_80` block, and it reads **true in 223 of the 240 instances**. It does *not* corroborate anything above,
 and the collision of names is unfortunate enough to state plainly. The flag is
 `action_at_x0_round_T > action_at_x0_round_1` over `actions_at_x0_by_round`: the action **at the
 fixed state \(x_0\)** as the round index runs to the terminal date. It measures movement in *time*
@@ -1334,12 +1441,91 @@ under a known end, not movement across *reputations*, and only the second bears 
 What the flag is picking up is the \(\Gamma_{80}\) end-game §7 warned about. Seed 70000's merchant 3
 has the path \(7\) for 66 rounds, then \(8\) for 4, then \(20\) for the last 10 — the entire "rise"
 is the terminal unravelling, and for 66 of the 80 rounds the merchant fabricates *less* than
-\(f^*_i=8\). Across the first
-completed block of 20 instances the flag is true 20 times, every path ends at the corner, and the
-window in which the action exceeds \(f^*_i\) has median length 4 rounds; 19 of the 20 never exceed
-\(f^*_i\) at any point in the first 40 rounds. Reading that flag as build-then-exploit would
+\(f^*_i=8\). Over all 240 instances the flag is true 223 times, **every** path ends at the corner
+(240 / 240), the window in which the action exceeds \(f^*_i\) has median length 4 rounds, and 235 of
+the 240 never exceed \(f^*_i\) at any point in the first 40 rounds.
+
+The 17 instances where the flag is *false* are not a residue. They are exactly the 17 whose
+\(f^*_i\) is already 20 — the same 17, case for case, that gain nothing at \(x_0\) — and a merchant
+starting at the corner has nowhere to rise from. So the flag decomposes with nothing left over: every
+path ends at the corner, and the flag reports only whether the merchant began below it. That is a
+statement about the terminal date, and it is exhausted by one. Reading it as build-then-exploit would
 reintroduce, as a finite-horizon artefact of a horizon §2 already declared unidentified, exactly the
 mechanism the state-indexed argmax says does not occur.
+
+#### The denominator, and the seventeen instances it was wrong on
+
+The first published version of `ha_dynamic_equilibrium.json` reported the relative gain wrongly on
+seventeen of its 240 merchant-cases, and the fault is a mirror image of a trap this document had
+already described. §10.3 warns that stopping value iteration on \(V\) is the wrong test because the
+level \(c/(1-\delta)\) swamps the object of interest; the solver duly stopped on
+\(\varepsilon=V-P\). That protects the numerator and leaves the denominator with no test at all.
+\(P=V^{f^*}\) *is* mostly that level, so \(\varepsilon\) can be stationary to \(10^{-11}\) while
+\(P\) is still tens of percent below its fixed point — both value functions carry the same missing
+level, and it cancels exactly in the quantity being monitored.
+
+The failure was not uniform, which is why a residual of \(10^{-11}\) and a 60-seed run did not
+expose it. It bites precisely where \(\varepsilon\) settles *fastest*: the seventeen cases whose
+\(f^*_i\) is already the corner have \(\varepsilon=0\) at \(x_0\) and a small \(\varepsilon\)
+elsewhere, so the loop broke after 7 to 39 sweeps against 353 to 407 for the other 223 — a
+separation with no overlap, visible in the artefact's own `iterations` field, which nobody had
+reason to read.
+
+It was caught by a check added for an unrelated reason. `ha_validate.py`'s \(\mathcal C_{2.5}\)
+ladder comparison had been selecting the wrong \(\Gamma_\delta\) block — the first in dictionary
+order, \(\delta=0.90\), against a certificate computed at \(\delta=0.95\) — and the repair was to
+select the block by measured agreement on \(V^{f^*}\) instead of by position. That measurement is
+what refused to come out clean: at \(\delta=0.95\) the solver and the reduction agreed to
+\(1.4\times10^{-8}\) on 223 instances and disagreed by up to 62% on seventeen. Two routes cannot
+arbitrate between themselves, so a third was written — forward accumulation of the policy value over
+the marginals, exact here because \(T_i\) and \(T_{\mathrm{riv}}\) are independent
+(`ha_dynamic_dp.py:75-78`) — and it sided with the reduction: seed 70005's merchant 2 has
+\(V^{f^*}(x_0)=1.133984382\), where the solver had published \(0.9059\).
+
+**What moves and what does not.** \(\varepsilon\) is bit-identical before and after — seed 70005's
+merchant 2 keeps \(\varepsilon_{\max}^{\text{reach}}=0.020588\) — because the missing level cancelled
+in it, which is the same fact that hid the error. So every count, every extremum, and the entire
+\(\mathcal C_{2.5}\to\mathcal C_3\) ladder are untouched: the 240 / 240 verdict, the 223 / 240 at
+\(x_0\), the identity of the seventeen, and the maxima, which are attained at non-corner instances
+(70002's merchant 3 and 70013's merchant 2) that were never affected. What moves is `rel_*` on the
+seventeen, and it moves **down**, because the denominator was too small: 70005's merchant 2 falls
+from 1.921% to 1.584%. Exactly one published figure moves with them — the median reachable relative
+gain at \(\delta=0.95\), from 0.72% to 0.70% — and the table above carries the corrected value.
+
+The correction also puts the seventeen back where the rest of the evidence says they belong. Sorted
+by reachable relative gain, they occupied ranks 107–165 of 240 under the inflated ratio, scattered
+around the middle of the population; corrected, they move to 68–162, and in \(\Gamma_{80}\), which
+never had the defect, they sit at 0–113 with eight of them the eight smallest gains in the whole
+sample. A merchant already at the corner has the least to gain from deviating, in every block that
+measured it correctly.
+
+Three blocks were checked and only one was wrong. \(\Gamma_{80}\) is exact backward induction with no
+stopping rule to get wrong. \(\delta=0.90\) and \(\delta=0.99\) ran 177–204 and 1577–1858 sweeps
+respectively — far past the point where the level condition binds — and agree with the third route to
+\(3\times10^{-9}\) and \(9.8\times10^{-8}\) relative. Those two blocks are also disjoint from the
+fault by construction: they cover seeds 70000–70004, and none of the seventeen lies there, so the
+\(\delta\)-comparison table above is untouched in every cell. The seventeen were re-solved under the
+corrected rule and merged with `--supersede`, so the artefact carries a `superseded` list quoting
+the old and the new value of every record replaced, rather than presenting the corrected numbers as
+though they had always been there. After the repair the two routes disagree on \(V^{f^*}\) at
+**0 / 240** instances, and `ha_validate.py` now asserts that count on every run: it is the only check
+in the package that would have caught a solver whose \(\varepsilon\) is right and whose denominator
+is not, and it was absent when it was needed.
+
+`ha_dp_policy_probe.py` held a second copy of the same defective rule and was corrected with it. Its
+three instances are all non-corner, so the level condition bound only after \(\varepsilon\) had long
+settled and none of the figures in the shape table above moved — every one of them reproduces
+exactly, at 495 to 509 sweeps against the 367 to 373 the old rule took. The agreement with the
+\(\mathcal C_{2.5}\) certificate did tighten where it was measurable: \(V^{f^*}\) at seed 70002's
+merchant 3 now matches the certificate to \(8.5\times10^{-12}\) relative rather than to
+\(\sim10^{-7}\). A probe that agrees with the solver because both were stopped by the same wrong
+rule is not a check, and the point of correcting it was to stop the agreement being an accident.
+
+The general lesson is narrower than "check convergence" and worth stating as the narrow thing it is.
+A stopping rule certifies the quantity it is applied to and nothing else. This package reported a
+ratio, monitored the numerator, and inherited an untested denominator; the ratio was then wrong in
+exactly the regime where the monitored quantity behaved best. Anything reported as a percentage needs
+its denominator converged on its own terms.
 
 ### 10.5 What it costs the marketplace
 
@@ -1573,6 +1759,7 @@ Stated so that a disagreement can be settled by computation rather than argument
 | Independent recomputation of all of §9 | `results/validation/recompute_dynamics_audit.json` | `all_pass` |
 | R1 dropped: the full \(31^4\) dynamic program, both horizons (§10.4) | `results/solver/ha_dynamic_equilibrium.json` | `policies.P_SB_uniform.aggregate` |
 | Per-block seed coverage of that artefact — **read before quoting any aggregate** | same | `policies.*.coverage_by_block` |
+| Every record the stopping-rule repair replaced, with both the old and the new value | same | `superseded` |
 | Rungs \(\mathcal C_1\), \(\mathcal C_2\), \(\mathcal C_{2.5}\), and the sandwich (§10.2–10.3) | `results/validation/recompute_dynamic_dp.json` | `results[].population_certificate` |
 | GMV consequence of dropping R1 (§10.5) | same | `results[].gmv_consequence` |
 | \(b\)-discretisation: \(f^*\) solves a game the runner never plays (§8) | same | `results[].population_certificate.b_discretisation_sensitivity` |
@@ -1602,7 +1789,17 @@ for lo in 70000 70005 70010 ... 70055; do
 done
 python code/ha_dynamic_dp.py --seeds 70000-70004 --policies P_SB_uniform \
        --deltas 0.90,0.99 --no-finite --out results/solver/_dp_shard_delta.json
-python code/ha_dp_merge.py results/solver/_dp_shard_*.json
+
+# the seventeen corner instances, re-solved under the corrected stopping rule. --repair
+# names (seed:merchant) pairs, so this costs 17 solves rather than 240; --supersede lets
+# that shard WIN the merge conflict it necessarily creates and records both values under
+# `superseded`, instead of the merge refusing (its correct default) or silently picking.
+python code/ha_dynamic_dp.py --deltas 0.95 --no-finite --policies P_SB_uniform \
+       --repair 70005:2,70014:0,70015:0,70017:2,70017:3,70020:3,70024:0,70025:1,\
+70027:0,70030:0,70031:2,70035:1,70038:2,70041:1,70042:3,70054:3,70056:3 \
+       --out results/solver/_dp_shard_fix095.json
+python code/ha_dp_merge.py results/solver/_dp_shard_*.json \
+       --supersede _dp_shard_fix095.json
 python code/ha_dp_policy_probe.py --seeds 70000,70002,70005 --merchants 3 --delta 0.95
 
 # the solver-free rungs, and the same certificates out of sample
